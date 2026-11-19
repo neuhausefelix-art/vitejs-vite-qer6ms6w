@@ -31,5 +31,9 @@ contextBridge.exposeInMainWorld("lapbridge", {
   forzaList: () => ipcRenderer.invoke("forza:list"),
   forzaDeleteRoute: (game, id) => ipcRenderer.invoke("forza:deleteRoute", game, id),
   forzaLoopback: () => ipcRenderer.invoke("forza:loopback"),
+  forzaMark: () => ipcRenderer.invoke("forza:mark"),
+  forzaCancel: () => ipcRenderer.invoke("forza:cancel"),
+  forzaNameSegment: (game, id, name) => ipcRenderer.invoke("forza:nameSegment", game, id, name),
+  onForzaMark: cb => ipcRenderer.on("forza:mark", (e, r) => cb(r)),
   onOpenUpdate: cb => ipcRenderer.on("update:open", (e, file) => cb(file)),
 });

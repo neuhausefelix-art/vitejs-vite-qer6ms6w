@@ -138,13 +138,19 @@
     <p class="ls" style="margin:0">Microsoft Store / Game Pass version? Windows blocks the data until you allow it once: <button class="b ghost" data-live="loop">Allow Forza</button> (Steam: not needed)</p>`;
   }
   function fzLive_() {
-    const f = st.fz, r = f.lastRoute, here = f.near;
+    const f = st.fz, r = f.lastRoute, seg = f.lastSegment, here = f.near;
     const askCar = f.ordinal !== null && f.ordinal !== undefined && !f.carKnown;
-    const askRoute = r && /^Unnamed route/.test(r.name);
-    const where = f.inRace ? (here ? here.name : r ? r.name : "Race") : "Free roam";
-    return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(f.game)}</span>${openBtn(f.game, here ? here.name : r ? r.name : "")}</div>
+    const askRoute = f.raceLaps && r && /^Unnamed route/.test(r.name);
+    const askSeg = seg && /^Unnamed (time trial|drag)/.test(seg.name);
+    const where = f.recording ? (f.recording.standing && !f.recording.launched ? "Recording a drag run: launch when you are ready" : "Recording a time trial…") : f.run ? f.run.name : f.inRace && f.raceLaps ? (here ? here.name : r ? r.name : "Race") : "Driving";
+    const trialHelp = f.recording
+      ? `<p class="warn2" style="margin:0">Drive to your finish point and press <b>Ctrl+Shift+T</b> there. <button class="b ghost" data-live="fzcancel">Cancel</button></p>`
+      : `<div class="lh"><span class="ls">${f.segments ? `${f.segments} time trial${f.segments === 1 ? "" : "s"} recorded, they are timed by themselves.` : "No time trials recorded yet."} New one: press <b>Ctrl+Shift+T</b> at the start, drive, press it again at the finish. Standing still at the start = drag run.</span><button class="b ghost" data-live="fzmark">Start here</button></div>`;
+    return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(f.game)}</span>${openBtn(f.game, seg ? seg.name : here ? here.name : r ? r.name : "")}</div>
       <div class="lh"><span><b>${esc(where)}</b><br><span class="ls">${esc([f.car, f.carClass].filter(Boolean).join(" · "))}</span></span>${lapBox(f.game)}</div>
+      ${trialHelp}
       ${askCar ? `<div class="nm2"><span class="warn2">Which car is this (Forza car #${esc(f.ordinal)})?</span><input id="fzcar" placeholder="for example Porsche 911 GT3 RS" maxlength="80"><button class="b pri" data-live="fzcar" data-id="${esc(f.ordinal)}">Save name</button></div>` : ""}
+      ${askSeg ? `<div class="nm2"><span class="warn2">Name this ${seg.kind === "drag" ? "drag run" : "time trial"} (${esc(seg.name)}):</span><input id="fzseg" placeholder="${seg.kind === "drag" ? "for example Festival Drag Strip" : "for example Mount Fuji Trailblazer"}" maxlength="80"><button class="b pri" data-live="fzseg" data-id="${esc(seg.id)}">Save name</button></div>` : ""}
       ${askRoute ? `<div class="nm2"><span class="warn2">Name this race (${esc(r.name)}):</span><input id="fzroute" placeholder="for example Goliath" maxlength="80"><button class="b pri" data-live="fzroute" data-id="${esc(r.id)}">Save name</button></div>` : ""}
       ${f.unsupported ? `<p class="warn2" style="margin:0">Forza sends packets of ${esc(f.unsupported)} bytes, which Lapbook does not know yet. Tell Claude this number.</p>` : ""}</div>`;
   }
@@ -162,7 +168,7 @@
       ? `<ol class="steps"><li class="${st.fz.listening ? "done" : ""}"><i>${st.fz.listening ? "✓" : "1"}</i><span>Lapbook is ready for Forza on port ${esc(st.fz.port || 5300)}</span></li>
          <li class="${fzWas ? "done" : ""}"><i>${fzWas ? "✓" : "2"}</i><span>Turn on Data Out in Forza with these settings:</span></li></ol>
          ${fzRows()}
-         <ol class="steps"><li class="${addedFz() ? "done" : ""}"><i>${addedFz() ? "✓" : "3"}</i><span>Drive a race with laps. After the first lap Lapbook asks once for the car and the race name.</span></li></ol>
+         <ol class="steps"><li class="${addedFz() ? "done" : ""}"><i>${addedFz() ? "✓" : "3"}</i><span>Record your first time trial: at the start press <b>Ctrl+Shift+T</b>, drive the run, press <b>Ctrl+Shift+T</b> at the finish. Standing still at the start makes it a drag run, timed from the launch. After that every run through the same start is timed by itself.</span></li></ol>
          ${st.fz.movedFrom ? `<p class="warn2" style="margin:0">Port ${st.fz.movedFrom} is used by another program, so Lapbook uses <b>${esc(st.fz.port)}</b>. Set that port in Forza.</p>` : ""}`
       : tab === AC
       ? `<ol class="steps"><li class="done"><i>✓</i><span>Lapbook is ready for Assetto Corsa</span></li>
@@ -210,7 +216,7 @@
     if (S.v !== "home") { if (old) old.remove(); return; }
     const html = liveCard();
     if (old && placeCard.last === html) return;
-    if (old && old.contains(document.activeElement) && /^(cname|fzcar|fzroute)$/.test(document.activeElement.id)) return; // typing a name
+    if (old && old.contains(document.activeElement) && /^(cname|fzcar|fzroute|fzseg)$/.test(document.activeElement.id)) return; // typing a name
     placeCard.last = html;
     if (old) { old.outerHTML = html; return; }
     const host = document.querySelector("#app .wd > .c2") || document.querySelector("#app .top");
@@ -280,6 +286,17 @@
       if (r.ok) { for (const g of Object.keys(D.tracks).filter(isFz)) renameCar(g, r.old, r.name); save(); }
       placeCard.last = ""; refresh(); toast("Car name saved");
     }
+    if (k === "fzmark") { const r = await B.forzaMark(); markToast(r); return; }
+    if (k === "fzcancel") { await B.forzaCancel(); toast("Recording cancelled"); return; }
+    if (k === "fzseg") {
+      const v = ($("#fzseg") || {}).value || "";
+      if (!v.trim()) return toast("Type a name first");
+      const r = await B.forzaNameSegment(st.fz.game, t.dataset.id, v.trim());
+      if (!r.ok) return toast(r.error || "That did not work");
+      renameTrack(st.fz.game, r.old, r.name); save();
+      placeCard.last = ""; refresh(); toast("Name saved");
+      return;
+    }
     if (k === "fzroute") {
       const v = ($("#fzroute") || {}).value || "";
       if (!v.trim()) return toast("Type the race's name first");
@@ -304,6 +321,7 @@
     const own = Object.entries(s.carNames || {});
     const fl = await B.forzaList().catch(() => ({ cars: {}, routes: {} }));
     const fzl = Object.entries(fl.cars || {}).map(([id, n]) => `<span>Car ${esc(id)}</span><input data-fzcar="${esc(id)}" value="${esc(n)}">`).join("")
+      + Object.entries(fl.segments || {}).flatMap(([g, rs]) => rs.map(r => `<span>${r.kind === "drag" ? "Drag" : "Trial"}</span><input data-fzseg="${esc(r.id)}" data-g="${esc(g)}" value="${esc(r.name)}" title="Empty = delete">`)).join("")
       + Object.entries(fl.routes || {}).flatMap(([g, rs]) => rs.map(r => `<span>${esc(g.replace("Forza Horizon", "FH"))}</span><input data-fzroute="${esc(r.id)}" data-g="${esc(g)}" value="${esc(r.name)}">`)).join("");
     $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Live tracking settings</h3>
       <h4>F1 25</h4>
@@ -317,6 +335,7 @@
       <p class="ls" style="margin:0;color:var(--mu)">Folder: ${st.ac.folder ? esc(st.ac.folder) : "not found"} <button class="b ghost" id="acpick" type="button">Choose folder</button></p>
       <h4>Forza Horizon</h4>
       <div class="two"><label>Live tracking<select id="fzon"><option value="1" ${s.forzaOn !== false ? "selected" : ""}>On</option><option value="0" ${s.forzaOn === false ? "selected" : ""}>Off</option></select></label><label>Data Out port<input id="fzport" inputmode="numeric" value="${esc(s.forzaPort || 5300)}"></label></div>
+      <label>Normal races<select id="fzrl"><option value="0" ${s.forzaRaceLaps ? "" : "selected"}>Do not save their laps</option><option value="1" ${s.forzaRaceLaps ? "selected" : ""}>Save every lap of every race</option></select></label>
       <label>Game<select id="fzgame">${[["auto", "Find out by itself"], ["Forza Horizon 6", "Forza Horizon 6"], ["Forza Horizon 5", "Forza Horizon 5"]].map(([v, n]) => `<option value="${v}" ${(s.forzaGame || "auto") === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
       <div class="cn" id="fzl">${fzl}</div>
       <h4>In-game overlay</h4>
@@ -332,7 +351,8 @@
     $("#tsave").onclick = async () => {
       let n0 = 0;
       st.settings = await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1" });
-      await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1", forzaOn: $("#fzon").value === "1", forzaPort: Number($("#fzport").value), forzaGame: $("#fzgame").value });
+      await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1", forzaOn: $("#fzon").value === "1", forzaPort: Number($("#fzport").value), forzaGame: $("#fzgame").value, forzaRaceLaps: $("#fzrl").value === "1" });
+      for (const i of document.querySelectorAll("#fzl [data-fzseg]")) { const r = await B.forzaNameSegment(i.dataset.g, i.dataset.fzseg, i.value); if (r.ok && !r.deleted) n0 += renameTrack(i.dataset.g, r.old, r.name); }
       for (const i of document.querySelectorAll("#fzl [data-fzcar]")) { const r = await B.forzaNameCar(i.dataset.fzcar, i.value); if (r.ok) for (const g of Object.keys(D.tracks).filter(isFz)) n0 += renameCar(g, r.old, r.name); }
       for (const i of document.querySelectorAll("#fzl [data-fzroute]")) { const r = await B.forzaNameRoute(i.dataset.g, i.dataset.fzroute, i.value); if (r.ok) n0 += renameTrack(i.dataset.g, r.old, r.name); }
       if (n0) save();
@@ -353,6 +373,15 @@
     };
     $("#tfold").onclick = () => B.openBackups();
   }
+
+  function markToast(r) {
+    if (!r) return;
+    if (r.state === "recording") toast(r.standing ? "Drag run: launch when ready, press Ctrl+Shift+T at the finish" : "Recording: press Ctrl+Shift+T at the finish");
+    else if (r.state === "saved") toast(`${r.segment.kind === "drag" ? "Drag run" : "Time trial"} saved. Give it a name in Lapbook.`);
+    else if (r.state === "tooShort") toast("Too short, nothing saved (at least 2 s and 50 m)");
+    else if (r.state === "nodata") toast("No data from Forza yet");
+  }
+  B.onForzaMark(r => markToast(r));
 
   // ---------- session recap ----------
   const sessions = {}; // game -> { key, track, car, laps: [], valid: [], pbBefore, start, last }
@@ -466,7 +495,7 @@
   function overlayFeed() {
     const g = f1Live() ? F1 : acLive() ? AC : fzLive() ? st.fz.game : lastGame;
     if (!g) return B.overlayData({});
-    const fzTrack = st.fz.near ? st.fz.near.name : st.fz.lastRoute ? st.fz.lastRoute.name : "";
+    const fzTrack = st.fz.run ? st.fz.run.name : st.fz.recording ? "Recording time trial" : st.fz.lastSegment ? st.fz.lastSegment.name : st.fz.near ? st.fz.near.name : st.fz.lastRoute ? st.fz.lastRoute.name : "";
     const track = g === F1 ? (st.info || {}).track : isFz(g) ? fzTrack : st.ac.track, car = g === F1 ? (st.info || {}).car : isFz(g) ? st.fz.car : st.ac.car;
     if (!track) return B.overlayData({ game: g, live: f1Live() || acLive() });
     const all = D.lapTimes.filter(l => l.game === g && l.track === track), mine = all.filter(l => l.car === car);
@@ -581,6 +610,7 @@
     sessionLap(G, lap, l.valid !== false);
     if (!D.tracks[G].includes(l.track)) D.tracks[G].push(l.track);
     if (!D.cars[G].includes(l.car)) D.cars[G].push(l.car);
+    if (l.trial) { D.trackTypes[G] = D.trackTypes[G] || {}; if (!D.trackTypes[G][l.track]) D.trackTypes[G][l.track] = l.trial === "drag" ? "drag" : "stage"; }
     LAST = { g: G, t: l.track };
     try { localStorage.setItem("lapbook.last", JSON.stringify(LAST)); } catch (e) {}
     added[G] = (added[G] || 0) + 1; lastLap[G] = ms; lastGame = G;

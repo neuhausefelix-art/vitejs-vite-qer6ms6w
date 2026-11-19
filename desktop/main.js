@@ -15,7 +15,7 @@ const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.88, bounds: null, v: 2 };
-const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {} };
+const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
 let sock = null;
@@ -49,10 +49,12 @@ function loadSettings() {
   if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
   settings.overlay = { ...OVERLAY, ...(settings.overlay || {}) };
   if (settings.overlay.v !== OVERLAY.v) settings.overlay = { ...settings.overlay, v: OVERLAY.v, bounds: settings.overlay.bounds ? { x: settings.overlay.bounds.x, y: settings.overlay.bounds.y } : null };
-  for (const k of ["forzaCars", "forzaRoutes"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
+  for (const k of ["forzaCars", "forzaRoutes", "forzaSegments"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
   settings.forzaPort = clampPort(settings.forzaPort || 5300);
   fz.cars = settings.forzaCars;
   fz.routes = settings.forzaRoutes;
+  fz.segments = settings.forzaSegments;
+  fz.raceLaps = !!settings.forzaRaceLaps;
   if (settings.forzaGame && settings.forzaGame !== "auto") fz.game = settings.forzaGame;
   f1.names = settings.carNames;
   acNames.setFolder(settings.acPath);
@@ -130,6 +132,14 @@ function listenForza(port = settings.forzaPort, tries = 0) {
     fz.handle(msg);
     const L = fz.live;
     if (!delta || !L || !fz.cur) return;
+    // a time trial is running: record it for the delta
+    if (fz.run) delta.sample(dkey(fz.game, fz.run.seg.name, fz.carName(fz.cur.ordinal)), fz.run.t0, fz.run.x, fz.run.t);
+    // the run that is being recorded becomes the first one to compare against
+    const R = fz.rec;
+    if (R && (!R.standing || R.launch)) {
+      const t0 = R.standing ? R.launch : R.ts0, d0 = R.standing ? R.launchDist : R.dist0;
+      delta.sample(`${fz.game}|~rec|${fz.cur.ordinal}`, t0, fz.cur.distance - d0, fz.cur.ts - t0);
+    }
     if (!L.inRace) { fzRace = { route: "", ordinal: null }; return; }
     if (fzRace.ordinal !== fz.cur.ordinal) fzRace = { route: "", ordinal: fz.cur.ordinal };
     delta.sample(`${fz.game}|~|${fz.cur.ordinal}`, L.lapNum, L.x, L.current);
@@ -157,13 +167,34 @@ function listenForza(port = settings.forzaPort, tries = 0) {
 }
 fz.on("lap", lap => {
   if (delta) {
-    delta.moveRun(`${fz.game}|~|${lap.ordinal}`, dkey(lap.game, lap.track, lap.car));
+    if (lap.segmentId) delta.moveRun(`${fz.game}|~rec|${lap.ordinal}`, dkey(lap.game, lap.track, lap.car));
+    if (!lap.segmentId) {
+      delta.moveRun(`${fz.game}|~|${lap.ordinal}`, dkey(lap.game, lap.track, lap.car));
+      fzRace.route = lap.track;
+    }
     lapDone(lap.game, lap);
-    fzRace.route = lap.track;
   }
   send("telemetry:lap", lap);
   pushStatus();
 });
+fz.on("segments", seg => {
+  settings.forzaSegments = seg;
+  saveSettings();
+  pushStatus();
+});
+fz.on("rec", () => pushStatus());
+fz.on("run", () => pushStatus());
+fz.bestOf = seg => {
+  const b = delta && fz.cur ? delta.load(dkey(fz.game, seg.name, fz.carName(fz.cur.ordinal))) : null;
+  return b ? b.ms : 0;
+};
+// Ctrl+Shift+T in the game: start / finish recording a time trial
+function markTrial() {
+  const r = fz.mark();
+  send("forza:mark", r);
+  pushStatus();
+  return r;
+}
 fz.on("routes", routes => {
   settings.forzaRoutes = routes;
   saveSettings();
@@ -304,7 +335,13 @@ function liveForOverlay() {
     });
     return out;
   }
-  if (fz.live && now - fz.live.at < 3000 && fz.live.inRace) {
+  if (fz.live && now - fz.live.at < 3000 && (fz.rec || fz.run)) {
+    const car = fz.cur ? fz.carName(fz.cur.ordinal) : "";
+    if (fz.rec) Object.assign(out, { game: fz.game, t: fz.rec.launch || !fz.rec.standing ? (fz.cur ? fz.cur.ts : 0) - (fz.rec.standing ? fz.rec.launch : fz.rec.ts0) : 0, rec: fz.rec.standing && !fz.rec.launch ? "drag" : "rec", trial: "Recording" });
+    else Object.assign(out, { game: fz.game, t: fz.run.t, trial: fz.run.seg.name, delta: delta && fz.run.x > 30 ? delta.delta(dkey(fz.game, fz.run.seg.name, car), fz.run.x, fz.run.t) : null });
+    return out;
+  }
+  if (fz.live && now - fz.live.at < 3000 && fz.live.inRace && fz.raceLaps) {
     const L = fz.live, car = fz.cur ? fz.carName(fz.cur.ordinal) : "", k = fzRace.route ? dkey(fz.game, fzRace.route, car) : "";
     Object.assign(out, { game: fz.game, t: L.current, delta: delta && k && L.x > 50 ? delta.delta(k, L.x, L.current) : null, position: L.racePos || 0 });
     return out;
@@ -430,7 +467,9 @@ ipcMain.handle("settings:set", (e, next) => {
     forzaOn: next && next.forzaOn !== undefined ? !!next.forzaOn : settings.forzaOn,
     forzaPort: next && next.forzaPort !== undefined ? clampPort(next.forzaPort) : settings.forzaPort,
     forzaGame: next && next.forzaGame ? String(next.forzaGame) : settings.forzaGame,
+    forzaRaceLaps: next && next.forzaRaceLaps !== undefined ? !!next.forzaRaceLaps : settings.forzaRaceLaps,
   };
+  fz.raceLaps = !!settings.forzaRaceLaps;
   if (settings.forzaGame !== "auto") fz.game = settings.forzaGame;
   saveSettings();
   if (before.port !== settings.port || before.network !== settings.network) listen();
@@ -467,7 +506,32 @@ ipcMain.handle("forza:nameRoute", (e, game, id, name) => {
   pushStatus();
   return { ok: true, old, name: n };
 });
-ipcMain.handle("forza:list", () => ({ cars: settings.forzaCars, routes: settings.forzaRoutes, game: fz.game }));
+ipcMain.handle("forza:list", () => ({ cars: settings.forzaCars, routes: settings.forzaRoutes, segments: settings.forzaSegments, game: fz.game }));
+ipcMain.handle("forza:mark", () => markTrial());
+ipcMain.handle("forza:cancel", () => { fz.cancelRecording(); pushStatus(); return { ok: true }; });
+ipcMain.handle("forza:nameSegment", (e, game, id, name) => {
+  const list = settings.forzaSegments[game] || [];
+  const r = list.find(x => x.id === id);
+  const n = String(name || "").trim().slice(0, 80);
+  if (!r) return { ok: false };
+  if (!n) {
+    settings.forzaSegments[game] = list.filter(x => x.id !== id);
+    fz.segments = settings.forzaSegments;
+    saveSettings();
+    pushStatus();
+    return { ok: true, deleted: true, old: r.name };
+  }
+  if (list.some(x => x !== r && x.name === n)) return { ok: false, error: "A time trial with that name exists already." };
+  const old = r.name;
+  r.name = n;
+  fz.segments = settings.forzaSegments;
+  const cars = [...Object.values(settings.forzaCars), ...Object.keys(settings.forzaCars).map(placeholderCar)];
+  if (fz.cur) cars.push(fz.carName(fz.cur.ordinal));
+  if (delta) for (const car of new Set(cars)) delta.rename(dkey(game, old, car), dkey(game, n, car));
+  saveSettings();
+  pushStatus();
+  return { ok: true, old, name: n, kind: r.kind };
+});
 ipcMain.handle("forza:deleteRoute", (e, game, id) => {
   settings.forzaRoutes[game] = (settings.forzaRoutes[game] || []).filter(x => x.id !== id);
   fz.routes = settings.forzaRoutes;
@@ -592,6 +656,7 @@ if (!app.requestSingleInstanceLock()) {
     if (ov().on) openOverlay();
     // Ctrl+Shift+O: overlay on/off, Ctrl+Shift+L: lock/unlock (to move it)
     globalShortcut.register("CommandOrControl+Shift+O", () => setOverlay({ on: !ov().on }));
+    globalShortcut.register("CommandOrControl+Shift+T", () => markTrial());
     globalShortcut.register("CommandOrControl+Shift+L", () => { if (ov().on) setOverlay({ locked: !ov().locked }); });
     offerUpdate(updateArg(process.argv));
     setInterval(pushStatus, 2000);

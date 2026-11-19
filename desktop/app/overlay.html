@@ -65,9 +65,9 @@ function draw() {
   const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
   const secs = Array.isArray(live.sectors) ? live.sectors : null;
   const name = i => (live.splits ? ["⅓", "⅔", "3/3"][i] : "S" + (i + 1));
-  o.innerHTML = `<div class="bar"><div class="tag">LAPBOOK</div><div class="trk"><span>${esc(d.track || g)}</span><small>${esc(d.car || "")}</small></div>${live.position ? `<div class="pos">P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}</div>` : ""}</div>
+  o.innerHTML = `<div class="bar"><div class="tag">LAPBOOK</div><div class="trk"><span>${esc(live.trial || d.track || g)}</span><small>${esc(d.car || "")}</small></div>${live.position ? `<div class="pos">P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}</div>` : ""}</div>
     <div class="main"><div class="cur ${live.invalid ? "inv" : ""}">${fmt(cur)}${approx && cur ? "<small>approx.</small>" : ""}${live.invalid ? "<small>invalid</small>" : ""}</div>
-      <div class="dl ${dl === null || dl === undefined ? "no" : dl < 0 ? "up" : "dn"}">${dl === null || dl === undefined ? "Δ –" : gap(dl)}</div></div>
+      ${live.rec ? `<div class="dl dn">${live.rec === "drag" ? "READY" : "● REC"}</div>` : `<div class="dl ${dl === null || dl === undefined ? "no" : dl < 0 ? "up" : "dn"}">${dl === null || dl === undefined ? "Δ –" : gap(dl)}</div>`}</div>
     ${secs ? `<div class="secs">${secs.map((s, i) => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><div><span>${name(i)}</span><b>${sfmt(s.t)}</b></div></div>`).join("")}</div>` : ""}
     <div class="foot"><span>LAST</span><b>${fmt(d.last)}${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</b><span>BEST</span><b class="pb">${fmt(d.best)}</b></div>${hint}`;
 }
