@@ -34,6 +34,12 @@ body.edit .hint{display:block}
 /* compact: lap time and delta only */
 body.compact #o{flex-direction:row;align-items:center;justify-content:space-between;padding:calc(8px*var(--k)) calc(16px*var(--k))}
 body.compact .cur{font-size:calc(38px*var(--k))}body.compact .dl{font-size:calc(26px*var(--k))}
+body.compact #o{flex-wrap:wrap;align-content:center}body.compact .dbar{flex-basis:100%}
+/* delta bar: centre line, faster grows left in green, slower grows right in red */
+.dbar{position:relative;height:calc(6px*var(--k));border-radius:3px;background:rgba(255,255,255,.08)}
+.dbar:after{content:"";position:absolute;left:50%;top:calc(-3px*var(--k));bottom:calc(-3px*var(--k));width:2px;margin-left:-1px;background:rgba(255,255,255,.35)}
+.dbar i{position:absolute;top:0;bottom:0;border-radius:3px}
+.pos2{font-size:calc(14px*var(--k));font-weight:700;color:var(--tx);align-self:center}.pos2 small{color:var(--mu)}
 </style></head><body>
 <div id="o"></div>
 <script>
@@ -44,14 +50,17 @@ const sfmt = ms => ms > 0 ? (ms >= 6e4 ? fmt(ms) : (ms / 1e3).toFixed(3)) : "–
 const gap = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1e3).toFixed(3);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const TEAM = [[/mclaren/i, "#ff8000"], [/ferrari/i, "#e8002d"], [/red bull racing/i, "#3671c6"], [/mercedes/i, "#27f4d2"], [/aston/i, "#229971"], [/alpine/i, "#0093cc"], [/williams/i, "#64c4ff"], [/racing bulls/i, "#6692ff"], [/haas/i, "#b6babd"], [/sauber/i, "#52e252"], [/audi/i, "#ff2d2d"], [/cadillac/i, "#c9a55c"], [/porsche/i, "#d5001c"], [/bmw/i, "#1c69d4"], [/lamborghini/i, "#ddb321"]];
-let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.86, layout: "clean" };
+let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.86, layout: "clean", show: { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false }, accent: "team" };
+const ACC = { red: "#ff3030", white: "#f5f5f7", none: "transparent" };
 
 function draw() {
   const R = document.documentElement.style;
   R.setProperty("--k", cfg.scale || 1);
   R.setProperty("--op", cfg.opacity ?? 0.86);
   const team = TEAM.find(([re]) => re.test(d.car || ""));
-  R.setProperty("--team", team ? team[1] : "#ff3030");
+  const ac = cfg.accent || "team";
+  R.setProperty("--team", ac === "team" ? (team ? team[1] : "#ff3030") : ACC[ac] || ac);
+  const sh = cfg.show || {};
   document.body.classList.toggle("edit", !cfg.locked);
   const compact = cfg.layout === "compact";
   document.body.classList.toggle("compact", compact);
@@ -61,15 +70,18 @@ function draw() {
   let cur = live.game ? live.t : 0, approx = false;
   if (!live.game && g === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
   const dl = live.game ? live.delta : null, has = dl !== null && dl !== undefined;
-  const deltaHtml = live.rec ? `<div class="dl rec">${live.rec === "drag" ? "READY" : "● REC"}</div>` : `<div class="dl ${has ? (dl < 0 ? "up" : "dn") : "no"}">${has ? gap(dl) : "±0.000"}</div>`;
+  const deltaHtml = !sh.delta && !live.rec ? "" : live.rec ? `<div class="dl rec">${live.rec === "drag" ? "READY" : "● REC"}</div>` : `<div class="dl ${has ? (dl < 0 ? "up" : "dn") : "no"}">${has ? gap(dl) : "±0.000"}</div>`;
+  const w = has ? Math.min(50, Math.abs(dl) / 1000 * 50) : 0; // full half-bar = 1 s
+  const barHtml = sh.delta && sh.deltaBar && !live.rec ? `<div class="dbar">${has ? `<i style="${dl < 0 ? `right:50%;background:var(--green)` : `left:50%;background:var(--red)`};width:${w.toFixed(1)}%"></i>` : ""}</div>` : "";
+  const posHtml = sh.position && live.position ? `P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}` : "";
   const timeHtml = `<div class="cur ${live.invalid ? "inv" : ""}">${fmt(cur)}${approx && cur ? "<small>approx.</small>" : ""}${live.invalid ? "<small>invalid</small>" : ""}</div>`;
-  if (compact) { o.innerHTML = timeHtml + deltaHtml + hint; return; }
+  if (compact) { o.innerHTML = timeHtml + deltaHtml + barHtml + hint; return; }
   const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
   const secs = Array.isArray(live.sectors) ? live.sectors : null;
-  o.innerHTML = `<div class="top"><b>${esc(live.trial || d.track || g)}</b><span>${esc(d.car || "")}</span>${live.position ? `<em>P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}</em>` : ""}</div>
-    <div class="row">${timeHtml}${deltaHtml}</div>
-    ${secs ? `<div class="secs">${secs.map(s => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><b>${sfmt(s.t)}</b></div>`).join("")}</div>` : ""}
-    <div class="foot"><span>Best<b class="pb">${fmt(d.best)}</b></span><span>Last<b>${fmt(d.last)}</b>${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</span></div>${hint}`;
+  o.innerHTML = `${sh.head ? `<div class="top"><b>${esc(live.trial || d.track || g)}</b><span>${esc(d.car || "")}</span>${posHtml ? `<em>${posHtml}</em>` : ""}</div>` : ""}
+    <div class="row">${timeHtml}${!sh.head && posHtml ? `<span class="pos2">${posHtml}</span>` : ""}${deltaHtml}</div>${barHtml}
+    ${secs && sh.sectors ? `<div class="secs">${secs.map(s => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><b>${sfmt(s.t)}</b></div>`).join("")}</div>` : ""}
+    ${sh.foot ? `<div class="foot"><span>Best<b class="pb">${fmt(d.best)}</b></span><span>Last<b>${fmt(d.last)}</b>${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</span></div>` : ""}${hint}`;
 }
 window.overlay.onData(x => { d = x || {}; draw(); });
 window.overlay.onLive(x => { live = x || {}; draw(); });

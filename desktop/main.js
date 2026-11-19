@@ -14,7 +14,9 @@ const { DeltaTracker } = require("./delta.js");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
-const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr" };
+// show: which parts of the overlay are visible; accent: colour of the side stripe
+const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false };
+const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team" };
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
@@ -48,6 +50,7 @@ function loadSettings() {
   settings.port = clampPort(settings.port);
   if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
   settings.overlay = { ...OVERLAY, ...(settings.overlay || {}) };
+  settings.overlay.show = { ...SHOW, ...(settings.overlay.show || {}) };
   if (settings.overlay.v !== OVERLAY.v) settings.overlay = { ...settings.overlay, v: OVERLAY.v, bounds: settings.overlay.bounds ? { x: settings.overlay.bounds.x, y: settings.overlay.bounds.y } : null };
   for (const k of ["forzaCars", "forzaRoutes", "forzaSegments"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
   settings.forzaPort = clampPort(settings.forzaPort || 5300);
@@ -255,8 +258,11 @@ ac.on("error", () => {});
 let overlay = null, overlayData = {}, overlayTimer = null, placingAt = 0;
 const ov = () => settings.overlay;
 function overlaySize() {
-  const k = Math.max(0.6, Math.min(2.5, Number(ov().scale) || 1));
-  return ov().layout === "compact" ? { width: Math.round(330 * k), height: Math.round(80 * k) } : { width: Math.round(380 * k), height: Math.round(196 * k) };
+  const o = ov(), k = Math.max(0.6, Math.min(2.5, Number(o.scale) || 1)), sh = { ...SHOW, ...(o.show || {}) };
+  if (o.layout === "compact") return { width: Math.round((sh.delta ? 330 : 230) * k), height: Math.round((sh.deltaBar && sh.delta ? 96 : 80) * k) };
+  // the window grows with the parts that are switched on
+  const h = 30 + (sh.head ? 24 : 0) + 50 + (sh.deltaBar && sh.delta ? 14 : 0) + (sh.sectors ? 36 : 0) + (sh.foot ? 26 : 0);
+  return { width: Math.round(380 * k), height: Math.round(h * k) };
 }
 const displays = () => screen.getAllDisplays();
 function displayOf(o) {
@@ -302,7 +308,7 @@ function pushOverlayConfig() {
   overlay.setFocusable(!ov().locked);
   overlay.setResizable(!ov().locked);
   nudgeShortcuts(!ov().locked);
-  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout });
+  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout, show: { ...SHOW, ...(ov().show || {}) }, accent: ov().accent || "team" });
 }
 function openOverlay() {
   if (overlay && !overlay.isDestroyed()) return pushOverlayConfig();
@@ -387,7 +393,9 @@ function closeOverlay() {
 }
 function setOverlay(next) {
   const o = ov();
-  const sizeChange = (next.scale !== undefined && Number(next.scale) !== o.scale) || (next.layout && next.layout !== o.layout);
+  const sizeChange = (next.scale !== undefined && Number(next.scale) !== o.scale) || (next.layout && next.layout !== o.layout) || !!next.show;
+  if (next.show && typeof next.show === "object") o.show = { ...SHOW, ...(o.show || {}), ...Object.fromEntries(Object.entries(next.show).filter(([k]) => k in SHOW).map(([k, v]) => [k, !!v])) };
+  if (next.accent && /^(team|red|white|none|#[0-9a-f]{6})$/i.test(next.accent)) o.accent = next.accent;
   Object.assign(o, {
     on: next.on !== undefined ? !!next.on : o.on,
     locked: next.locked !== undefined ? !!next.locked : o.locked,

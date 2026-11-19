@@ -1,4 +1,4 @@
-# Lapbook für Windows – Anleitung (Version 1.8.0)
+# Lapbook für Windows – Anleitung (Version 1.9.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
@@ -12,9 +12,9 @@ Die App liest nur die offizielle Telemetrie, die F1 25, Assetto Corsa und Forza 
 
 ---
 
-## 0. Update auf 1.8.0
+## 0. Update auf 1.9.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.8.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.9.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -32,7 +32,7 @@ Links steht die **Seitenleiste**. Von dort erreichst du alles mit einem Klick:
 | **Overlay** | Overlay ein- und ausschalten, Stil, Größe und Position |
 | **Games** | deine Spiele mit Rundenzahl. Darunter liegen Strecken, Autos, Rennen und Meisterschaften. Weitere Spiele klappst du mit „… more games“ auf. |
 | **Analyse** | **Progress** (Verbesserung über die Zeit), **Duel** (Auto gegen Auto), **Strategy** (Boxenstopp-Rechner) |
-| **Career** | **Driver & races** (Fahrerwertung, Rennen), **Achievements** (Erfolge und Ränge) |
+| **Career** | **Driver & races** (Fahrerwertung, Rennen), **Achievements** (Meilensteine und Rang, siehe 2g) |
 | **Data & backup** | Sicherung herunterladen, Sicherung laden, Backup-Ordner öffnen, als Text kopieren, Rückgängig |
 | **Update** | Update-Datei installieren oder zur vorherigen Version zurück |
 
@@ -173,6 +173,9 @@ Best 1:21.000                   Last 1:21.150 +0.150
 Klicke in der Seitenleiste auf **„Overlay“**. Es öffnet sich ein Fenster mit:
 - **Turn on / Turn off** (oder **Strg+Umschalt+O**, auch im Spiel)
 - **Style:** Clean oder Compact
+- **Show:** welche Teile zu sehen sind: Strecke und Auto, Rennposition, Delta, Sektoren, Best und Last. Das Fenster passt seine Höhe automatisch an.
+- **Delta:** als Zahl oder als Zahl mit Balken (Mitte = gleich schnell, grün nach links = schneller, rot nach rechts = langsamer, voller Ausschlag = 1 Sekunde)
+- **Accent:** Farbe des Strichs am linken Rand: Teamfarbe, Lapbook-Rot, Weiß oder keine
 - **Size:** S, M, L, XL
 - **Background:** See-through, Normal, Solid
 - **Position:** Klicke auf eines der 9 Felder, z. B. unten Mitte oder oben links. Mit den **Pfeilen** daneben verschiebst du es in 20-px-Schritten. Bei mehreren Monitoren wählst du den **Bildschirm**.
@@ -205,6 +208,29 @@ Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht
 - beste Sektoren und theoretische Bestzeit
 
 Alle Rückblicke findest du auf der Seite **„Live tracking“** unten unter **„Session recaps“**.
+
+---
+
+## 2g. Achievements und Fahrerwertung
+
+**Achievements** sind **13 Meilensteine**, die mit deinem Fahren zu tun haben. Jeder hat vier Stufen: **Bronze, Silber, Gold, Platin**.
+
+| Bereich | Meilenstein | Was zählt |
+|---|---|---|
+| Pace | Personal bests | wie oft du deine eigene Bestzeit auf einer Strecke verbessert hast |
+| Pace | Found time | Strecken, auf denen du mindestens 1 % schneller bist als bei deiner ersten Runde |
+| Pace | Perfect lap | Strecken, auf denen deine Bestzeit höchstens 0,1 s über deiner theoretischen Bestzeit liegt |
+| Consistency | Metronome | Sessions mit 5+ Runden, deren Zeiten weniger als 0,4 % streuen |
+| Racing | Wins / Podiums | Siege und Top-3-Plätze |
+| Racing | Overtaker | gutgemachte Plätze vom Start aus, über alle Rennen |
+| Dedication | Laps / Driving days / On a roll | Runden, Tage mit Runden, längste Serie an Tagen hintereinander |
+| Explorer | Circuits / Garage / Multi-sim | verschiedene Strecken, Autos und Spiele |
+
+- Aus allen erreichten Stufen ergibt sich dein **Rang**: Rookie → Club racer → Semi-pro → Pro → Elite → Legend.
+- **„Up next“** zeigt die drei Meilensteine, die du als Nächstes am ehesten schaffst.
+- Alles wird aus deinen gespeicherten Runden und Rennen berechnet, also auch aus älteren.
+
+**Fahrerwertung (Driver & races):** Sie funktioniert wie eine Elo-Wertung. Jedes Rennen vergleicht dein Ergebnis mit dem Feld. Siege, Podien und gutgemachte Plätze bringen Punkte, ein Ausfall kostet Punkte. F1-25-Rennen werden automatisch eingetragen, andere Rennen trägst du im Spiel unter „Races“ selbst ein.
 
 ---
 
@@ -266,7 +292,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-1.8.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-1.9.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.

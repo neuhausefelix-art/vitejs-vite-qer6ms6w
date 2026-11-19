@@ -49,6 +49,7 @@
   .rcp .new{color:var(--pu)}
   .secg{display:grid;grid-template-columns:auto repeat(3,1fr) auto;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:15px;align-items:baseline}
   .secg span{color:var(--mu);font-size:12px}.secg b{font-weight:600}.secg .pu{color:var(--pu)}
+  #ovp{max-width:1080px}.ovcols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 36px}@media(max-width:900px){.ovcols{grid-template-columns:1fr}}
   .ovgrid{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,34px);gap:4px;padding:6px;border:1px solid var(--ln);border-radius:var(--r);background:var(--sf2)}
   .ovgrid button{border:1px solid var(--ln);border-radius:6px;background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center}
   .ovgrid button i{width:18px;height:8px;border-radius:2px;background:var(--mu);opacity:.5}
@@ -103,6 +104,16 @@
   .cc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;background:var(--sf2);border:1px solid transparent;border-radius:10px;color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}
   .cc:hover{border-color:var(--ln)}.cc b{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}.cc small{color:var(--mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}.cc .tm{font-size:20px;text-align:left;min-width:0;margin:2px 0}
   .kpi span{white-space:nowrap}
+  .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+  .mst{background:var(--sf2);border-radius:10px;padding:12px 14px;opacity:.8}.mst.got{opacity:1}
+  .mh{display:flex;justify-content:space-between;align-items:center;gap:8px}.mh b{font-size:16px}
+  .mt{font-size:11px;font-weight:700;border:1px solid var(--c);color:var(--c);border-radius:999px;padding:0 8px}
+  .mst p{margin:4px 0 10px;font-size:13px;color:var(--mu);min-height:34px}
+  .mbar{display:block;height:6px;border-radius:3px;background:var(--ln);overflow:hidden}.mbar i{display:block;height:100%;border-radius:3px}
+  .mf{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:12px;color:var(--mu)}
+  .pips2{display:flex;gap:4px}.pips2 i{width:16px;height:5px;border-radius:3px}
+  .rlad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}.rlad span{background:var(--sf2);border-radius:8px;padding:6px 8px;opacity:.5}.rlad span.on{opacity:1;box-shadow:inset 0 0 0 1px var(--rd)}.rlad b{display:block;font-size:13px}.rlad small{font-size:11px;color:var(--mu)}
+  .nx{display:grid;grid-template-columns:1fr auto;gap:4px 10px;padding:10px 0;border-top:1px solid var(--ln)}.nx:first-of-type{border-top:0;padding-top:0}.nx b{display:block;font-size:15px}.nx small{display:block;font-size:12px;color:var(--mu)}.nx>span{font-size:12px;color:var(--mu);white-space:nowrap}.nx .mbar{grid-column:1/-1}
   #app .add.addnew{max-width:720px;opacity:.85}#app .add.addnew input{min-width:220px}
   body.desk #app[data-v=track] .b.wide[data-act=addtoggle]{width:auto;display:inline-block;padding:9px 22px;margin:0 0 6px !important}
   body.desk #app[data-v=game] .list>.row{min-height:64px}
@@ -324,7 +335,7 @@
           <section class="card"><div class="kpi">
             <div><b>${D.lapTimes.length}</b><span>laps</span></div><div><b>${nTr}</b><span>circuits</span></div><div><b>${nCar}</b><span>cars</span></div>
             <button data-act="driver"><b>${Math.round(h.R)}</b><span>rating ›</span></button></div>
-            <button class="rank" data-act="ach"><span><b>${esc(a.rank)}</b> · ${a.pts} points</span>${rankBar(a)}</button></section>
+            ${(() => { const M = milestones(); return `<button class="rank" data-act="ach"><span><b>${M.rank}</b> · ${M.tiers} of ${M.total} achievement tiers ›</span>${tierBar(M.next ? (M.tiers - M.base) / (M.next[1] - M.base) : 1, "var(--rd)")}</button>`; })()}</section>
           <section class="card"><div class="ch"><h2>Recent laps</h2><button class="b ghost sm" data-act="tool" data-v="prog">Progress ›</button></div>
             ${L ? `<button class="rrow cont" data-act="resume"><span><b>Continue: ${esc(L.t)}</b><small>${esc(L.g)} · log your next lap</small></span><span class="mu">+ Lap</span></button>` : ""}
             ${recent.map(l => { const rec = recBest[l.game + "|" + l.track] === l.timeInMs; return `<button class="rrow" data-act="gotrack" data-g="${esc(l.game)}" data-v="${esc(l.track)}"><span><b>${esc(l.track)}</b><small>${esc(l.car)}</small></span><span class="tm ${rec ? "pb" : ""}">${fmt(l.timeInMs)}<small>${rec ? "record · " : ""}${esc(shortDate(l.date))}</small></span></button>`; }).join("") || `<p class="mu" style="margin:0">No laps yet. Start a game with live tracking, or open a game and add a lap.</p>`}
@@ -335,6 +346,98 @@
   }
   home = deskHome;
   const shortDate = d => { if (!d) return ""; if (d === today()) return "today"; const t = Date.parse(d); return isFinite(t) ? new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : d; };
+  // ---------- milestones: achievements that are about driving ----------
+  const TIER = [["Bronze", "#cd7f32"], ["Silver", "#c3cad5"], ["Gold", "#ffd23f"], ["Platinum", "#7fe3ff"]];
+  const RANKS2 = [["Rookie", 0], ["Club racer", 4], ["Semi-pro", 10], ["Pro", 18], ["Elite", 28], ["Legend", 40]];
+  function milestoneStats() {
+    const L = D.lapTimes, by = {};
+    L.map((l, i) => [l, i]).sort((a, b) => (a[0].date || "").localeCompare(b[0].date || "") || a[1] - b[1]).forEach(([l]) => (by[l.game + "|" + l.track] = by[l.game + "|" + l.track] || []).push(l));
+    let pbs = 0, gained = 0, nearTheo = 0;
+    for (const a of Object.values(by)) {
+      let b = Infinity;
+      a.forEach((l, i) => { if (l.timeInMs < b) { if (i) pbs++; b = l.timeInMs; } });
+      if (a.length > 1 && (a[0].timeInMs - b) / a[0].timeInMs >= 0.01) gained++;
+      const ws = a.filter(l => Array.isArray(l.sectors) && l.sectors.length === 3);
+      if (ws.length >= 3) {
+        const theo = [0, 1, 2].reduce((t, i) => t + Math.min(...ws.map(l => l.sectors[i])), 0), bl = Math.min(...ws.map(l => l.timeInMs));
+        if (bl - theo <= 100) nearTheo++;
+      }
+    }
+    // consistent sessions: one day, one circuit, one car, 5+ laps, spread under 0.4 % of the best
+    const ses = {};
+    L.forEach(l => (ses[l.date + "|" + l.game + "|" + l.track + "|" + l.car] = ses[l.date + "|" + l.game + "|" + l.track + "|" + l.car] || []).push(l.timeInMs));
+    let steady = 0;
+    for (const t of Object.values(ses)) {
+      if (t.length < 5) continue;
+      const b = Math.min(...t), c = t.filter(x => x <= b * 1.07);
+      if (c.length < 5) continue;
+      const m = c.reduce((a, x) => a + x, 0) / c.length, sd = Math.sqrt(c.reduce((a, x) => a + (x - m) ** 2, 0) / (c.length - 1));
+      if (sd <= b * 0.004) steady++;
+    }
+    const days = [...new Set(L.map(l => l.date).filter(Boolean))].sort();
+    let streak = 0, run = 0, prev = null;
+    days.forEach(d => { const t = Date.parse(d); run = prev !== null && Math.round((t - prev) / 864e5) === 1 ? run + 1 : 1; prev = t; streak = Math.max(streak, run); });
+    const R = D.races.filter(r => !r.dnf);
+    return {
+      pbs, gained, nearTheo, steady,
+      wins: R.filter(r => r.finish == 1).length, podiums: R.filter(r => r.finish <= 3).length,
+      places: R.reduce((a, r) => a + Math.max(0, (r.start || 0) - (r.finish || 0)), 0),
+      laps: L.length, days: days.length, streak,
+      circuits: Object.keys(by).length, cars: new Set(L.map(l => l.game + "|" + l.car)).size, games: new Set(L.map(l => l.game)).size,
+    };
+  }
+  const MILESTONES = [
+    ["Pace", "Personal bests", "Times you beat your own best lap on a circuit", [5, 25, 100, 250], s => s.pbs],
+    ["Pace", "Found time", "Circuits where you got at least 1 % faster than your first lap", [1, 5, 15, 30], s => s.gained],
+    ["Pace", "Perfect lap", "Circuits where your best lap is within 0.1 s of your theoretical best", [1, 3, 8, 15], s => s.nearTheo],
+    ["Consistency", "Metronome", "Sessions of 5+ laps where your laps spread less than 0.4 %", [1, 5, 15, 40], s => s.steady],
+    ["Racing", "Wins", "Races you won", [1, 5, 20, 50], s => s.wins],
+    ["Racing", "Podiums", "Races you finished in the top 3", [1, 10, 30, 100], s => s.podiums],
+    ["Racing", "Overtaker", "Places gained from the start, all races together", [10, 50, 150, 400], s => s.places],
+    ["Dedication", "Laps", "Laps driven", [50, 250, 1000, 5000], s => s.laps],
+    ["Dedication", "Driving days", "Days with at least one lap", [5, 20, 60, 150], s => s.days],
+    ["Dedication", "On a roll", "Longest run of days in a row with a lap", [3, 7, 14, 30], s => s.streak],
+    ["Explorer", "Circuits", "Different circuits driven", [3, 10, 25, 50], s => s.circuits],
+    ["Explorer", "Garage", "Different cars driven", [3, 10, 25, 60], s => s.cars],
+    ["Explorer", "Multi-sim", "Different games with laps", [1, 2, 3, 4], s => s.games],
+  ];
+  function milestones() {
+    const s = milestoneStats();
+    const list = MILESTONES.map(([cat, name, desc, t, f]) => { const v = f(s); let tier = 0; t.forEach((x, i) => { if (v >= x) tier = i + 1; }); return { cat, name, desc, t, v, tier }; });
+    const tiers = list.reduce((a, m) => a + m.tier, 0);
+    let ri = 0;
+    RANKS2.forEach((r, i) => { if (tiers >= r[1]) ri = i; });
+    const next = list.filter(m => m.tier < 4).map(m => { const lo = m.tier ? m.t[m.tier - 1] : 0, hi = m.t[m.tier]; return { ...m, frac: (m.v - lo) / (hi - lo), need: hi - m.v }; }).sort((a, b) => b.frac - a.frac).slice(0, 3);
+    return { list, tiers, total: list.length * 4, rank: RANKS2[ri][0], next: RANKS2[ri + 1] || null, base: RANKS2[ri][1], up: next };
+  }
+  const tierBar = (frac, col) => `<span class="mbar"><i style="width:${Math.max(0, Math.min(100, frac * 100)).toFixed(0)}%;background:${col || "var(--pu)"}"></i></span>`;
+  function deskAch() {
+    const M = milestones();
+    const toNext = M.next ? M.next[1] - M.tiers : 0;
+    const card = m => {
+      const lo = m.tier ? m.t[m.tier - 1] : 0, hi = m.t[Math.min(m.tier, 3)], frac = m.tier >= 4 ? 1 : (m.v - lo) / (hi - lo);
+      return `<div class="mst ${m.tier ? "got" : ""}"><div class="mh"><b>${esc(m.name)}</b>${m.tier ? `<span class="mt" style="--c:${TIER[m.tier - 1][1]}">${TIER[m.tier - 1][0]}</span>` : ""}</div>
+        <p>${esc(m.desc)}</p>${tierBar(frac, m.tier ? TIER[Math.min(m.tier, 3)][1] : "var(--mu)")}
+        <div class="mf"><span>${m.tier >= 4 ? `${m.v} · all tiers done` : `${m.v} / ${hi} for ${TIER[m.tier][0]}`}</span><span class="pips2">${m.t.map((x, i) => `<i title="${TIER[i][0]}: ${x}" style="background:${m.tier > i ? TIER[i][1] : "var(--ln)"}"></i>`).join("")}</span></div></div>`;
+    };
+    const cats = [...new Set(MILESTONES.map(m => m[0]))];
+    return `<div class="ph"><h1>Achievements</h1><span class="mu">Milestones for how you drive: pace, consistency, racing, dedication and variety.</span></div>
+      <div class="hg">
+        <div class="hcol">${cats.map(c => `<section class="card"><div class="ch"><h2>${c}</h2></div><div class="mgrid">${M.list.filter(m => m.cat === c).map(card).join("")}</div></section>`).join("")}</div>
+        <div class="hcol">
+          <section class="card"><span class="mu" style="font-size:13px">Your rank</span><div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px"><b style="font-size:30px">${M.rank}</b><span class="mu">${M.tiers} of ${M.total} tiers</span></div>
+            ${tierBar(M.next ? (M.tiers - M.base) / (M.next[1] - M.base) : 1, "var(--rd)")}
+            <p class="mu" style="margin:8px 0 0;font-size:14px">${M.next ? `${toNext} more tier${toNext === 1 ? "" : "s"} to <b style="color:var(--tx)">${M.next[0]}</b>.` : "Top rank reached."} Every tier of every milestone counts.</p>
+            <div class="rlad">${RANKS2.map(r => `<span class="${M.tiers >= r[1] ? "on" : ""}"><b>${r[0]}</b><small>${r[1]} tiers</small></span>`).join("")}</div></section>
+          <section class="card"><div class="ch"><h2>Up next</h2></div>${M.up.map(m => `<div class="nx"><div><b>${esc(m.name)}</b><small>${esc(m.desc)}</small></div><span>${m.need} to go for ${TIER[m.tier][0]}</span>${tierBar(m.frac, TIER[m.tier][1])}</div>`).join("") || `<p class="mu" style="margin:0">Everything done. Impressive.</p>`}</section>
+        </div>
+      </div>`;
+  }
+  achPage = deskAch;
+  // the old achievement messages ("… Bronze unlocked") belong to the old system
+  const baseToast = toast;
+  toast = function (m, u) { return baseToast(typeof m === "string" ? m.replace(/ \| [^|]+: (Bronze|Silver|Gold|Platinum) unlocked$/, "") : m, u); };
+
   // small layout fixes on Lapbook's own pages
   function tidy() {
     const app = document.getElementById("app");
@@ -687,13 +790,19 @@
     header();
     const chip = (attr, v, label, on) => `<button class="chip ${on ? "on" : ""}" data-ov="${attr}" data-v="${v}">${label}</button>`;
     const grid = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
+    const sh = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, ...(o.show || {}) };
     const at = o.bounds ? "" : o.anchor;
     $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp"><h3>In-game overlay</h3>
       <div class="lh" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px"><span class="ls" style="color:var(--mu)">Shows over the game in <b style="color:var(--tx)">borderless / windowed fullscreen</b>. Shortcut: Ctrl+Shift+O.</span>
         <button class="b ${o.on ? "" : "pri"}" data-ov="on" data-v="${o.on ? 0 : 1}">${o.on ? "Turn off" : "Turn on"}</button></div>
+      <div class="ovcols"><div>
       <h4>Style</h4><div class="chips wrapc">${chip("layout", "clean", "Clean: time, delta, sectors, best and last", o.layout !== "compact")}${chip("layout", "compact", "Compact: time and delta only", o.layout === "compact")}</div>
+      ${o.layout !== "compact" ? `<h4>Show</h4><div class="chips wrapc">${[["head", "Circuit and car"], ["position", "Race position"], ["delta", "Delta"], ["sectors", "Sectors"], ["foot", "Best and last lap"]].map(([k2, n]) => chip("show", k2, (sh[k2] ? "✓ " : "") + n, sh[k2])).join("")}</div>` : `<h4>Show</h4><div class="chips wrapc">${chip("show", "delta", (sh.delta ? "✓ " : "") + "Delta", sh.delta)}</div>`}
+      <h4>Delta</h4><div class="chips wrapc">${chip("dstyle", "num", "Number", !sh.deltaBar)}${chip("dstyle", "bar", "Number and bar", sh.deltaBar)}</div>
+      <h4>Accent</h4><div class="chips wrapc">${[["team", "Team colour"], ["red", "Lapbook red"], ["white", "White"], ["none", "None"]].map(([v, n]) => chip("accent", v, n, (o.accent || "team") === v)).join("")}</div>
       <h4>Size</h4><div class="chips wrapc">${[[0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"]].map(([v, n]) => chip("scale", v, n, Math.abs((o.scale || 1) - v) < 0.01)).join("")}</div>
       <h4>Background</h4><div class="chips wrapc">${[[0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]].map(([v, n]) => chip("opacity", v, n, Math.abs((o.opacity || 0.86) - v) < 0.01)).join("")}</div>
+      </div><div>
       <h4>Position</h4>
       <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
         <div class="ovgrid">${grid.map(g => `<button class="${at === g ? "on" : ""}" data-ov="anchor" data-v="${g}" title="${g}"><i></i></button>`).join("")}</div>
@@ -705,6 +814,7 @@
       ${o.displays && o.displays.length > 1 ? `<label style="margin-top:10px">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label>` : ""}
       <div class="panel" style="margin:12px 0 0"><b>Move it while you drive</b><p class="ls" style="margin:6px 0 0;color:var(--mu)">Press <b style="color:var(--tx)">Ctrl+Shift+L</b> in the game. The overlay gets a red frame. Drag it with the mouse or press <b style="color:var(--tx)">Ctrl+Shift+arrow keys</b>. Press <b style="color:var(--tx)">Ctrl+Shift+L</b> again to lock it, then clicks go to the game again.</p>
         <button class="b" data-ov="locked" data-v="${o.locked ? 0 : 1}" style="margin-top:8px">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
+      </div></div>
       <div class="acts" style="margin-top:12px"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
     const dsel = $("#ovdisp");
     if (dsel) dsel.onchange = async () => { await B.setOverlay({ on: true, display: Number(dsel.value) }); openOverlayPanel(); };
@@ -719,6 +829,9 @@
     else if (k === "layout") next.layout = v;
     else if (k === "scale" || k === "opacity") next[k] = Number(v);
     else if (k === "anchor") next.anchor = v;
+    else if (k === "show") { const cur = (st.settings.overlay && st.settings.overlay.show) || {}; next.show = { [v]: cur[v] === false }; }
+    else if (k === "dstyle") next.show = { deltaBar: v === "bar" };
+    else if (k === "accent") next.accent = v;
     else if (k === "nudge") next.nudge = v.split(",").map(Number);
     if (k !== "on") next.on = true; // changing it shows it
     st.settings.overlay = await B.setOverlay(next);
