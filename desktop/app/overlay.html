@@ -83,8 +83,20 @@ function draw() {
     ${secs && sh.sectors ? `<div class="secs">${secs.map(s => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><b>${sfmt(s.t)}</b></div>`).join("")}</div>` : ""}
     ${sh.foot ? `<div class="foot"><span>Best<b class="pb">${fmt(d.best)}</b></span><span>Last<b>${fmt(d.last)}</b>${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</span></div>` : ""}${hint}`;
 }
-window.overlay.onData(x => { d = x || {}; draw(); });
-window.overlay.onLive(x => { live = x || {}; draw(); });
-window.overlay.onConfig(x => { cfg = { ...cfg, ...x }; draw(); });
+if (window.overlay) {
+  window.overlay.onData(x => { d = x || {}; draw(); });
+  window.overlay.onLive(x => { live = x || {}; draw(); });
+  window.overlay.onConfig(x => { cfg = { ...cfg, ...x }; draw(); });
+} else {
+  // preview inside Lapbook's overlay settings: the page sends example data
+  window.addEventListener("message", e => {
+    if (e.source !== window.parent) return;
+    const m = e.data || {};
+    if (m.cfg) cfg = { ...cfg, ...m.cfg, locked: true };
+    if (m.d) d = m.d;
+    if (m.live) live = m.live;
+    draw();
+  });
+}
 draw();
 </script></body></html>

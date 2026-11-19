@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld("lapbridge", {
   nameCar: (teamId, name) => ipcRenderer.invoke("cars:name", teamId, name),
   setACFolder: dir => ipcRenderer.invoke("ac:folder", dir),
   pickACFolder: () => ipcRenderer.invoke("ac:pick"),
+  accEnable: () => ipcRenderer.invoke("acc:enable"),
   setOverlay: o => ipcRenderer.invoke("overlay:set", o),
   getOverlay: () => ipcRenderer.invoke("overlay:get"),
   overlayData: d => ipcRenderer.send("overlay:data", d),

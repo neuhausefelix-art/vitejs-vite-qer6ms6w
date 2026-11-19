@@ -6,10 +6,14 @@
   const B = window.lapbridge;
   if (!B) return;
   const F1 = "F1 25", AC = "Assetto Corsa", FZ = "Forza";
+  const ACC = "Assetto Corsa Competizione", LMU = "Le Mans Ultimate", PC2 = "Project CARS 2";
+  const SIMG = [ACC, LMU, PC2]; // games with their own reader in the desktop app
+  const LIVE_GAMES = [F1, AC, ACC, LMU, PC2, FZ];
   const isFz = g => /^Forza/.test(g || "");
+  const abbr = g => ({ "F1 25": "F1", "Assetto Corsa": "AC", "Assetto Corsa Competizione": "ACC", "Le Mans Ultimate": "LMU", "Forza Horizon 5": "FH5", "Forza Horizon 6": "FH6", "Project CARS 2": "PC2", Forza: "FH" }[g] || String(g).slice(0, 3).toUpperCase());
   let st = { listening: false, port: 20777, error: "", movedFrom: 0, lastPacket: 0, info: {}, lastLap: null, settings: { port: 20777, saveInvalid: false, network: false, acOn: true, carNames: {} }, ac: { connected: false, on: true, folder: "" }, fz: { live: false, on: true, port: 5300, game: "Forza Horizon 6" } };
   let info = { version: "", overlay: false, canRollback: false, previous: "" };
-  const added = { [F1]: 0, [AC]: 0 }, lastLap = {};
+  const added = { [F1]: 0, [AC]: 0, [ACC]: 0, [LMU]: 0, [PC2]: 0 }, lastLap = {}, simWas = {};
   const addedFz = () => Object.entries(added).filter(([g]) => isFz(g)).reduce((n, [, v]) => n + v, 0);
   let fzWas = false;
   let skipped = 0, wasLive = false, acWas = false, showHow = false, tab = F1;
@@ -134,12 +138,41 @@
    .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
    .md{max-width:760px}
   }
+  /* overlay on/off switch */
+  .sw{position:relative;flex:none;width:34px;height:20px;border-radius:999px;background:var(--ln);cursor:pointer;transition:background .15s;display:inline-block;vertical-align:middle}
+  .sw:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+  .sw.on{background:var(--gr)}.sw.on:after{transform:translateX(14px)}
+  .ni .sw{margin-left:auto}
+  .swb{display:inline-flex;align-items:center;gap:10px}
+  /* game strip on the live tracking page */
+  .gstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 20px}
+  .gs.live{display:inline-flex;flex-direction:row;gap:7px;margin:0}
+  .gtile{position:relative;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:2px;height:118px;padding:14px 16px;border:1px solid var(--ln);border-radius:12px;color:#fff;font:inherit;text-align:left;cursor:pointer;background-size:cover;overflow:hidden}
+  .gtile:hover{border-color:#fff6}.gtile.sel{border-color:var(--rd);box-shadow:0 0 0 1px var(--rd)}
+  .gtile b{font-size:26px;font-weight:800;line-height:1;letter-spacing:.02em;text-shadow:0 1px 8px #0008}.gtile span{font-size:12.5px;opacity:.85;text-shadow:0 1px 6px #000a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .gtile em{position:absolute;top:10px;right:10px;display:inline-flex;align-items:center;gap:6px;font-style:normal;font-size:11.5px;font-weight:600;background:#000a;border-radius:999px;padding:3px 9px}
+  .gtile em i{width:7px;height:7px;border-radius:50%;background:#888}.gtile.ready em i{background:var(--pu)}.gtile.seen em i{background:#ffd23f}.gtile.live em i{background:var(--gr);box-shadow:0 0 0 3px color-mix(in srgb,var(--gr) 35%,transparent)}.gtile.setup em i{background:var(--dn)}
+  .gtile.off{filter:grayscale(.85) brightness(.7)}
+  /* what each game delivers */
+  .rmx{width:100%;border-collapse:collapse;font-size:14px}.rmx th,.rmx td{padding:7px 8px;text-align:center;border-top:1px solid var(--ln)}.rmx th{font-size:12px;color:var(--mu);font-weight:600;border-top:0}
+  .rmx td:first-child,.rmx th:first-child{text-align:left;color:var(--tx)}.rmx td:first-child small{display:block;color:var(--mu);font-size:12px}
+  .rmx .y,.rmx .p,.rmx .n,.rmk i{display:inline-block;width:12px;height:12px;border-radius:50%}.rmx .y,.rmk .y{background:var(--gr)}.rmx .p,.rmk .p{background:conic-gradient(#ffd23f 0 50%,var(--ln) 0)}.rmx .n,.rmk .n{background:none;border:1.5px solid var(--ln)}
+  .rmk{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--mu);margin-top:10px}.rmk span{display:inline-flex;align-items:center;gap:6px}
+  /* where the best lap loses time */
+  .sl{display:grid;grid-template-columns:34px 1fr 74px;gap:6px 10px;align-items:center;margin-top:12px;font-size:13px;font-variant-numeric:tabular-nums}
+  .sl>span{color:var(--mu)}.sl>b{text-align:right;font-weight:600}.sl .bar{height:10px;border-radius:5px;background:var(--sf2);overflow:hidden}.sl .bar i{display:block;height:100%;border-radius:5px;background:var(--dn)}
+  .sl .bar i.z{background:var(--pu)}
+  /* overlay preview */
+  .ovprev{display:flex;align-items:center;justify-content:center;min-height:170px;margin:4px 0 14px;border-radius:12px;padding:16px;background:linear-gradient(180deg,#5b7da8 0%,#9db6cf 42%,#3d4a33 43%,#2b3326 70%,#1b1f19 100%);overflow:hidden}
+  .ovprev iframe{border:0;background:transparent;display:block;max-width:100%}
   @media (min-width:2200px){.wd{grid-template-columns:minmax(0,1fr) minmax(420px,26%)}#app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(560px,1fr))}#app .list>.gcov{height:180px;font-size:34px}}`;
   document.head.appendChild(css);
 
   const f1Live = () => st.listening && Date.now() - st.lastPacket < 5000;
   const acLive = () => st.ac && st.ac.on && st.ac.connected;
   const fzLive = () => st.fz && st.fz.on && st.fz.live;
+  const sim = g => (st.sims && st.sims[g]) || {};
+  const simLive = g => !!(sim(g).on && sim(g).live);
   const port = () => st.port || st.settings.port;
   const ovOn = () => !!(st.settings.overlay && st.settings.overlay.on);
 
@@ -158,7 +191,7 @@
     update: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19h14"/>',
   };
   const nic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NI[k]}</svg>`;
-  const MAIN_GAMES = [F1, AC, "Forza Horizon 6"];
+  const MAIN_GAMES = [F1, AC, ACC, LMU, "Forza Horizon 5", "Forza Horizon 6", PC2];
   let moreGames = false;
   function sidebar() {
     let sb = document.getElementById("sb");
@@ -170,15 +203,15 @@
     }
     const v = S.v, inGame = ["game", "track", "champ"].includes(v);
     const item = (attrs, icon, label, on, extra = "") => `<button class="ni ${on ? "on" : ""}" ${attrs} title="${label}">${nic(icon)}<span>${label}</span>${extra}</button>`;
-    const liveOn = f1Live() || acLive() || fzLive();
+    const liveOn = f1Live() || acLive() || fzLive() || SIMG.some(simLive);
     const gs = gl(), main = gs.filter(g => MAIN_GAMES.includes(g) || laps(g).length), rest = gs.filter(g => !main.includes(g));
-    const ab = g => ({ "F1 25": "F1", "Assetto Corsa": "AC", "Assetto Corsa Competizione": "ACC", "Le Mans Ultimate": "LMU", "Forza Horizon 5": "FH5", "Forza Horizon 6": "FH6", "Project CARS 2": "PC2" }[g] || g.slice(0, 3).toUpperCase());
+    const ab = abbr;
     const gameItem = g => `<button class="ni ${inGame && S.g === g ? "on" : ""}" data-act="game" data-v="${esc(g)}" title="${esc(g)}"><i class="ab">${esc(ab(g))}</i><span>${esc(g)}</span>${laps(g).length ? `<small>${laps(g).length}</small>` : ""}</button>`;
     const html = `<div class="sbl"><b>LAPBOOK</b><i></i></div>
       <nav>
         ${item('data-act="home"', "home", "Overview", v === "home")}
         ${item('data-desk="live"', "live", "Live tracking", v === "live", `<em class="sdot ${st.error ? "err" : liveOn ? "on" : ""}"></em>`)}
-        ${item('data-desk="overlay"', "overlay", "Overlay", false, ovOn() ? '<em class="sdot on"></em>' : "")}
+        ${item('data-desk="overlay"', "overlay", "Overlay", false, ovSwitch())}
         <h6>Games</h6>
         ${main.map(gameItem).join("")}
         ${rest.length ? (moreGames ? rest.map(gameItem).join("") + `<button class="ni more" data-desk="less"><span>Fewer games</span></button>` : `<button class="ni more" data-desk="more"><span>${rest.length} more games</span></button>`) : ""}
@@ -198,6 +231,13 @@
     if (sidebar.last !== html) { sb.innerHTML = html; sidebar.last = html; }
   }
   const header = sidebar; // status updates redraw the sidebar
+  // one click turns the overlay on or off (also Ctrl+Shift+O, in the game too)
+  const ovSwitch = () => `<span class="sw ${ovOn() ? "on" : ""}" data-desk="ovtoggle" role="switch" aria-checked="${ovOn()}" title="Overlay ${ovOn() ? "on" : "off"} (Ctrl+Shift+O)"></span>`;
+  async function toggleOverlay() {
+    st.settings.overlay = await B.setOverlay({ on: !ovOn() });
+    sidebar(); placeCard.last = ""; placeCard();
+    toast(ovOn() ? "Overlay on. Ctrl+Shift+O switches it in the game too." : "Overlay off");
+  }
 
   document.addEventListener("click", async e => {
     const t = e.target.closest("[data-desk]");
@@ -205,6 +245,7 @@
     const k = t.dataset.desk;
     if (k === "live") { S.v = "live"; render(); scrollTo(0, 0); }
     if (k === "overlay") openOverlayPanel();
+    if (k === "ovtoggle") { e.stopPropagation(); toggleOverlay(); }
     if (k === "update") openUpdate("");
     if (k === "data") openDataPanel();
     if (k === "more" || k === "less") { moreGames = k === "more"; sidebar(); }
@@ -269,7 +310,36 @@
       ${askRoute ? `<div class="nm2"><span class="warn2">Name this race (${esc(r.name)}):</span><input id="fzroute" placeholder="for example Goliath" maxlength="80"><button class="b pri" data-live="fzroute" data-id="${esc(r.id)}">Save name</button></div>` : ""}
       ${f.unsupported ? `<p class="warn2" style="margin:0">Forza sends packets of ${esc(f.unsupported)} bytes, which Lapbook does not know yet. Tell Claude this number.</p>` : ""}</div>`;
   }
+  // ACC, LMU, PC2: same card for all three
+  function simLive_(g) {
+    const s = sim(g);
+    return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(g)}</span>${openBtn(g, s.track)}</div>
+      <div class="lh"><span><b>${esc(s.track || "Waiting for track")}</b><br><span class="ls">${esc(s.car || "")}</span></span>${lapBox(g)}</div></div>`;
+  }
+  const stepI = (done, n) => `<i>${done ? "✓" : n}</i>`;
+  function simSetup(g) {
+    const s = sim(g), seen = !!s.connected || !!simWas[g], lap = !!added[g];
+    if (!s.on) return `<p class="ls" style="margin:0">Live tracking for ${esc(g)} is off. Switch it on in <button class="b ghost" data-live="set">Settings</button>.</p>`;
+    if (g === ACC) return `<ol class="steps">
+        <li class="${s.needsSetup ? "" : "done"}">${stepI(!s.needsSetup, 1)}<span>${s.needsSetup
+          ? `ACC's broadcasting interface is off${s.configFound ? "" : " (start ACC once so it creates its settings)"}. Lapbook can switch it on for you: <button class="b pri" data-live="accon">Switch on</button><br><small style="color:var(--mu)">This writes port 9000 into Documents\\Assetto Corsa Competizione\\Config\\broadcasting.json (a copy of the old file is kept). Restart ACC afterwards.</small>`
+          : `ACC broadcasting is on (port ${esc(s.port)}). This is ACC's official interface for TV overlays.`}</span></li>
+        <li class="${seen ? "done" : ""}">${stepI(seen, 2)}<span>Start ACC and drive out of the pits. Lapbook connects by itself.</span></li>
+        <li class="${lap ? "done" : ""}">${stepI(lap, 3)}<span>Drive one full lap. It is saved with car, circuit and sectors.</span></li></ol>
+        ${s.error ? `<p class="warn2" style="margin:0;color:var(--dn)">${esc(s.error)}</p>` : ""}`;
+    if (g === LMU) return `<ol class="steps">
+        <li class="done">${stepI(true, 1)}<span>Nothing to set up: Lapbook reads LMU's own local interface (the one its menus use, port ${esc(s.port || 6397)}).</span></li>
+        <li class="${seen ? "done" : ""}">${stepI(seen, 2)}<span>Start Le Mans Ultimate and drive onto the track.</span></li>
+        <li class="${lap ? "done" : ""}">${stepI(lap, 3)}<span>Drive one full lap. It is saved with car, circuit and sectors.</span></li></ol>`;
+    return `<ol class="steps">
+        <li class="${s.listening ? "done" : ""}">${stepI(s.listening, 1)}<span>Lapbook is ready for Project CARS 2 on port ${esc(s.port || 5606)}. If Windows asks about the firewall, allow it for private networks.</span></li>
+        <li class="${seen ? "done" : ""}">${stepI(seen, 2)}<span>In Project CARS 2: Options → System:</span></li></ol>
+        <div class="gset"><span>UDP Frequency</span><b>1 (fastest) to 4</b><span>UDP Protocol Version</span><b>Project CARS 2</b></div>
+        <ol class="steps"><li class="${lap ? "done" : ""}">${stepI(lap, 3)}<span>Drive one full lap. It is saved with car, circuit and sectors.</span></li></ol>
+        ${s.error ? `<p class="warn2" style="margin:0;color:var(--dn)">${esc(s.error)}</p>` : ""}`;
+  }
   function setupBody(g) {
+    if (SIMG.includes(g)) return simSetup(g);
     return g === FZ
       ? `<ol class="steps"><li class="${st.fz.listening ? "done" : ""}"><i>${st.fz.listening ? "✓" : "1"}</i><span>Lapbook is ready for Forza on port ${esc(st.fz.port || 5300)}</span></li>
          <li class="${fzWas ? "done" : ""}"><i>${fzWas ? "✓" : "2"}</i><span>Turn on Data Out in Forza with these settings:</span></li></ol>
@@ -285,29 +355,66 @@
          ${f1Rows()}
          <ol class="steps"><li class="${added[F1] ? "done" : ""}"><i>${added[F1] ? "✓" : "3"}</i><span>Drive one full lap. It is saved by itself.</span></li></ol>${moved()}`;
   }
-  const gameLive = g => (g === F1 ? f1Live() : g === AC ? acLive() : fzLive());
-  const gameState = g => (gameLive(g) ? "live" : g === F1 ? (st.listening ? "ready" : "off") : g === AC ? (st.ac.on ? "ready" : "off") : st.fz.on && st.fz.listening ? "ready" : "off");
+  const gameLive = g => (g === F1 ? f1Live() : g === AC ? acLive() : SIMG.includes(g) ? simLive(g) : fzLive());
+  // live: laps are coming in · seen: the game is running · ready: waiting for it · setup: needs one step · off
+  function gameState(g) {
+    if (gameLive(g)) return "live";
+    if (SIMG.includes(g)) { const s = sim(g); return !s.on ? "off" : g === ACC && s.needsSetup ? "setup" : s.connected ? "seen" : g === PC2 && !s.listening ? "off" : "ready"; }
+    if (g === F1) return st.listening ? "ready" : "off";
+    if (g === AC) return st.ac.on ? (st.ac.connected ? "seen" : "ready") : "off";
+    return st.fz.on && st.fz.listening ? "ready" : "off";
+  }
+  const STATE_TXT = { live: "live", seen: "game found", ready: "waiting for the game", setup: "1 step to do", off: "off" };
+  const liveBody = g => (g === F1 ? f1Live_() : g === AC ? acLive_() : SIMG.includes(g) ? simLive_(g) : fzLive_());
   // the live card on the overview: what is going on right now, nothing more
   function liveCard() {
     if (st.error) {
       return `<section class="card live err" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking needs attention</span><button class="b" data-live="set">Settings</button></div><p class="ls" style="margin:0;color:var(--dn)">${esc(st.error)}</p></section>`;
     }
-    const a = f1Live(), c = acLive(), z = fzLive();
-    if (a || c || z) return `<section class="card live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}${z ? fzLive_() : ""}</section>`;
-    const chips = [F1, AC, FZ].map(g => `<span class="gs ${gameState(g)}"><i></i>${g === FZ ? "Forza Horizon 6" : g}</span>`).join("");
+    const ovRow = `<div class="lh" style="border-top:1px solid var(--ln);padding-top:10px"><span class="ls">In-game overlay · <b style="color:var(--tx)">${ovOn() ? "on" : "off"}</b> · Ctrl+Shift+O</span><span class="swb"><button class="b ghost sm" data-desk="overlay">Customise</button>${ovSwitch()}</span></div>`;
+    const on = LIVE_GAMES.filter(gameLive);
+    if (on.length) return `<section class="card live on" id="livecard">${on.map(liveBody).join("")}${ovRow}</section>`;
+    const chips = LIVE_GAMES.map(g => { const x = gameState(g); return `<span class="gs ${x === "seen" ? "live" : x === "setup" ? "" : x}"><i></i>${g === FZ ? "Forza Horizon" : g === F1 ? g : abbr(g)}</span>`; }).join("");
     return `<section class="card live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>${ok ? "Live tracking is ready" : "Live tracking"}</span><button class="b ${ok ? "ghost" : "pri"}" data-desk="live">${ok ? "Details" : "Set up (2 min)"}</button></div>
       <p class="ls" style="margin:0">${ok ? "Start a game and drive. Every finished lap is saved by itself." : "Lapbook can save your laps by itself while you drive. Set it up once per game."}</p>
-      <div class="gsl">${chips}</div>${moved()}${lastRecapRow()}</section>`;
+      <div class="gsl">${chips}</div>${moved()}${lastRecapRow()}${ovRow}</section>`;
   }
-  // the live tracking page: one column per game with its setup and status
+  // the live tracking page: a strip with every game and its status, then the
+  // card of the game you picked (and every game that is live right now)
+  const fzName = () => st.fz.game || "Forza Horizon 6";
+  function liveCol(g) {
+    const name = g === FZ ? "Forza Horizon 5 / 6" : g, live = gameLive(g), stt = gameState(g);
+    if (live) return `<section class="card live on">${liveBody(g)}</section>`;
+    return `<section class="card live"><div class="lh"><span class="lt"><span class="dot"></span>${esc(name)}</span><span class="gs ${stt === "seen" ? "live" : stt}"><i></i>${STATE_TXT[stt]}</span></div>${live ? liveBody(g) : setupBody(g)}</section>`;
+  }
+  // what every game sends: y = yes, p = partly, n = no
+  const READS = [
+    ["Lap times", "saved by themselves", { F1: "y", AC: "y", ACC: "y", LMU: "y", PC2: "y", FZ: "p" }],
+    ["Car and circuit", "named automatically", { F1: "y", AC: "y", ACC: "y", LMU: "y", PC2: "y", FZ: "p" }],
+    ["Sectors", "S1, S2, S3", { F1: "y", AC: "p", ACC: "y", LMU: "y", PC2: "y", FZ: "n" }],
+    ["Invalid laps", "track limits", { F1: "y", AC: "n", ACC: "y", LMU: "p", PC2: "y", FZ: "n" }],
+    ["Live delta", "in the overlay", { F1: "y", AC: "y", ACC: "y", LMU: "y", PC2: "y", FZ: "y" }],
+    ["Race position", "in the overlay", { F1: "y", AC: "n", ACC: "y", LMU: "y", PC2: "y", FZ: "n" }],
+    ["Race results", "for your rating", { F1: "y", AC: "n", ACC: "n", LMU: "n", PC2: "n", FZ: "n" }],
+  ];
+  const READ_TIPS = { "AC|Sectors": "Assetto Corsa sends no sectors, Lapbook uses thirds of the lap", "FZ|Lap times": "time trials and drag runs that you mark once", "FZ|Car and circuit": "you name a car once, the game sends only a number", "LMU|Invalid laps": "only if the game's interface reports it", "FZ|Live delta": "in time trials and drag runs" };
+  function readsCard() {
+    const cols = [["F1", "F1 25"], ["AC", "AC"], ["ACC", "ACC"], ["LMU", "LMU"], ["PC2", "PC2"], ["FZ", "FH5/6"]];
+    const cell = (k, f, v) => `<td title="${esc(READ_TIPS[k + "|" + f] || (v === "y" ? "yes" : v === "p" ? "partly" : "no"))}"><span class="${v}"></span></td>`;
+    return `<section class="card"><div class="ch"><h2>What Lapbook reads</h2><span class="mu" style="font-size:13px">hover a dot for details</span></div>
+      <table class="rmx"><tr><th></th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr>
+      ${READS.map(([f, sub, m]) => `<tr><td>${f}<small>${sub}</small></td>${cols.map(c => cell(c[0], f, m[c[0]])).join("")}</tr>`).join("")}</table>
+      <div class="rmk"><span><i class="y"></i>yes</span><span><i class="p"></i>partly</span><span><i class="n"></i>no</span></div></section>`;
+  }
   function livePage() {
-    const col = g => {
-      const name = g === FZ ? st.fz.game || "Forza Horizon 6" : g, live = gameLive(g);
-      const body = live ? (g === F1 ? f1Live_() : g === AC ? acLive_() : fzLive_()) : setupBody(g);
-      return `<section class="card live ${live ? "on" : ""}"><div class="lh"><span class="lt"><span class="dot"></span>${esc(name)}</span><span class="gs ${gameState(g)}"><i></i>${live ? "live" : gameState(g) === "ready" ? "waiting for the game" : "off"}</span></div>${body}</section>`;
-    };
-    return `<div class="ph"><h1>Live tracking</h1><span class="mu">Laps are saved by themselves while you drive. Set up each game once.</span><span class="sp"></span><button class="b" data-desk="overlay">Overlay</button><button class="b" data-live="set">Settings</button></div>
-      <div class="lgrid" id="livePage">${[F1, AC, FZ].map(col).join("")}</div>
+    const strip = LIVE_GAMES.map(g => {
+      const stt = gameState(g), art = g === FZ ? fzName() : g;
+      return `<button class="gtile ${stt} ${tab === g ? "sel" : ""}" data-live="tab" data-g="${esc(g)}" style="background:${esc(cov(art))}"><em><i></i>${STATE_TXT[stt]}</em><b>${esc(g === FZ ? "FH5 / FH6" : g === F1 ? g : abbr(g))}</b><span>${esc(g === FZ ? "Forza Horizon" : g)}</span></button>`;
+    }).join("");
+    const pick = LIVE_GAMES.includes(tab) ? tab : F1, cards = [pick, ...LIVE_GAMES.filter(g => g !== pick && gameLive(g))];
+    return `<div class="ph"><h1>Live tracking</h1><span class="mu">Laps are saved by themselves while you drive. Pick a game to set it up.</span><span class="sp"></span><span class="swb"><span class="mu" style="font-size:14px">Overlay</span>${ovSwitch()}</span><button class="b" data-desk="overlay">Customise overlay</button><button class="b" data-live="set">Settings</button></div>
+      <div class="gstrip">${strip}</div>
+      <div class="lgrid" id="livePage">${cards.map(liveCol).join("")}${readsCard()}</div>
       ${st.error ? `<p class="warn2" style="color:var(--dn)">${esc(st.error)}</p>` : ""}
       <div class="ph" style="margin-top:28px"><h2 style="margin:0">Session recaps</h2><span class="mu">a summary after every session</span></div>
       <div class="card">${recaps.length ? recaps.map((r, i) => `<button class="rrow" data-live="recap" data-i="${i}"><span><b>${esc(r.track)}</b><small>${esc(r.game)} · ${esc(r.car)} · ${esc(r.date)} · ${r.laps} lap${r.laps === 1 ? "" : "s"}</small></span><span class="tm pb">${r.best ? fmt(r.best) : "–"}</span></button>`).join("") : `<p class="mu" style="margin:0">After your first session with live tracking, its recap shows up here.</p>`}</div>`;
@@ -542,6 +649,11 @@
     if (k === "how") { showHow = true; placeCard(); }
     if (k === "hide") { showHow = false; placeCard(); }
     if (k === "tab") { tab = t.dataset.g; try { localStorage.setItem("lapbook.livetab", tab); } catch (x) {} placeCard(); }
+    if (k === "accon") {
+      const r = await B.accEnable();
+      toast(r.ok ? `ACC broadcasting switched on (port ${r.port}). Restart ACC once.` : r.error || "That did not work");
+      placeCard.last = ""; placeCard();
+    }
     if (k === "acdir") { const d = await B.pickACFolder(); if (d) { const f = await B.setACFolder(d); toast(f ? "Assetto Corsa folder found" : "No Assetto Corsa found in that folder (it needs content\\cars inside)"); } }
     if (k === "name") {
       const v = ($("#cname") || {}).value || "";
@@ -607,7 +719,7 @@
       + Object.entries(fl.routes || {}).flatMap(([g, rs]) => rs.map(r => `<span>${esc(g.replace("Forza Horizon", "FH"))}</span><input data-fzroute="${esc(r.id)}" data-g="${esc(g)}" value="${esc(r.name)}">`)).join("");
     $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Live tracking settings</h3>
       <h4>F1 25</h4>
-      <div class="two"><label>UDP port<input id="tport" inputmode="numeric" value="${esc(s.port)}"></label><label>Invalid laps<select id="tinv"><option value="0" ${s.saveInvalid ? "" : "selected"}>Skip them</option><option value="1" ${s.saveInvalid ? "selected" : ""}>Save them too</option></select></label></div>
+      <div class="two"><label>UDP port<input id="tport" inputmode="numeric" value="${esc(s.port)}"></label><label>Invalid laps (F1, ACC, LMU, PC2)<select id="tinv"><option value="0" ${s.saveInvalid ? "" : "selected"}>Skip them</option><option value="1" ${s.saveInvalid ? "selected" : ""}>Save them too</option></select></label></div>
       <label>F1 25 runs on<select id="tnet"><option value="0" ${s.network ? "" : "selected"}>This PC</option><option value="1" ${s.network ? "selected" : ""}>Another device (console or second PC)</option></select></label>
       ${f1Rows()}
       <h4>F1 25 car names</h4><p class="ls" style="margin:0 0 6px;color:var(--mu)">Give a team number its own name. Laps you already drove with it are renamed too.</p>
@@ -615,6 +727,10 @@
       <h4>Assetto Corsa</h4>
       <label>Live tracking<select id="acon"><option value="1" ${s.acOn !== false ? "selected" : ""}>On</option><option value="0" ${s.acOn === false ? "selected" : ""}>Off</option></select></label>
       <p class="ls" style="margin:0;color:var(--mu)">Folder: ${st.ac.folder ? esc(st.ac.folder) : "not found"} <button class="b ghost" id="acpick" type="button">Choose folder</button></p>
+      <h4>Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2</h4>
+      <div class="two"><label>ACC<select id="accon"><option value="1" ${s.accOn !== false ? "selected" : ""}>On</option><option value="0" ${s.accOn === false ? "selected" : ""}>Off</option></select></label><label>Le Mans Ultimate<select id="lmuon"><option value="1" ${s.lmuOn !== false ? "selected" : ""}>On</option><option value="0" ${s.lmuOn === false ? "selected" : ""}>Off</option></select></label></div>
+      <div class="two"><label>Project CARS 2<select id="pc2on"><option value="1" ${s.pc2On !== false ? "selected" : ""}>On</option><option value="0" ${s.pc2On === false ? "selected" : ""}>Off</option></select></label><label>Project CARS 2 port<input id="pc2port" inputmode="numeric" value="${esc(s.pc2Port || 5606)}"></label></div>
+      <p class="ls" style="margin:0;color:var(--mu)">Invalid laps follow the setting above. ACC reads its port from broadcasting.json${sim(ACC).file ? ` (${esc(sim(ACC).file)})` : ""}.</p>
       <h4>Forza Horizon</h4>
       <div class="two"><label>Live tracking<select id="fzon"><option value="1" ${s.forzaOn !== false ? "selected" : ""}>On</option><option value="0" ${s.forzaOn === false ? "selected" : ""}>Off</option></select></label><label>Data Out port<input id="fzport" inputmode="numeric" value="${esc(s.forzaPort || 5300)}"></label></div>
       <label>Normal races<select id="fzrl"><option value="0" ${s.forzaRaceLaps ? "" : "selected"}>Do not save their laps</option><option value="1" ${s.forzaRaceLaps ? "selected" : ""}>Save every lap of every race</option></select></label>
@@ -628,7 +744,7 @@
     $("#tsave").onclick = async () => {
       let n0 = 0;
       st.settings = await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1" });
-      await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1", forzaOn: $("#fzon").value === "1", forzaPort: Number($("#fzport").value), forzaGame: $("#fzgame").value, forzaRaceLaps: $("#fzrl").value === "1" });
+      await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1", forzaOn: $("#fzon").value === "1", forzaPort: Number($("#fzport").value), forzaGame: $("#fzgame").value, forzaRaceLaps: $("#fzrl").value === "1", accOn: $("#accon").value === "1", lmuOn: $("#lmuon").value === "1", pc2On: $("#pc2on").value === "1", pc2Port: Number($("#pc2port").value) });
       for (const i of document.querySelectorAll("#fzl [data-fzseg]")) { const r = await B.forzaNameSegment(i.dataset.g, i.dataset.fzseg, i.value); if (r.ok && !r.deleted) n0 += renameTrack(i.dataset.g, r.old, r.name); }
       for (const i of document.querySelectorAll("#fzl [data-fzcar]")) { const r = await B.forzaNameCar(i.dataset.fzcar, i.value); if (r.ok) for (const g of Object.keys(D.tracks).filter(isFz)) n0 += renameCar(g, r.old, r.name); }
       for (const i of document.querySelectorAll("#fzl [data-fzroute]")) { const r = await B.forzaNameRoute(i.dataset.g, i.dataset.fzroute, i.value); if (r.ok) n0 += renameTrack(i.dataset.g, r.old, r.name); }
@@ -696,7 +812,7 @@
   // a session ends when its game has sent nothing for 45 s
   setInterval(() => {
     for (const G of Object.keys(sessions)) {
-      const on = G === F1 ? f1Live() : G === AC ? acLive() : fzLive();
+      const on = isFz(G) ? fzLive() : gameLive(G);
       if (!on && Date.now() - sessions[G].last > 45000) endSession(G);
     }
   }, 5000);
@@ -761,23 +877,31 @@
       <div class="panel" style="margin-top:0"><div class="secg"><span></span><span>${split ? "1st" : "S1"}</span><span>${split ? "2nd" : "S2"}</span><span>${split ? "3rd" : "S3"}</span><span>lap</span>
       <span>best lap</span>${bl.sectors.map(x => `<b>${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(bl.timeInMs)}</b>
       <span>best</span>${bs.map((l, i) => `<b class="pu" title="${esc(l.car)}, ${esc(l.date)}">${(l.sectors[i] / 1000).toFixed(3)}</b>`).join("")}<b class="pu">${fmt(theo)}</b></div>
-      <p class="ls" style="margin:8px 0 0;color:var(--mu)">Theoretical best: <b style="color:var(--tx)">${fmt(theo)}</b>${bl.timeInMs > theo ? `, ${((bl.timeInMs - theo) / 1000).toFixed(3)} s quicker than your best lap with sector times` : ""}.</p></div></div>`;
+      <p class="ls" style="margin:8px 0 0;color:var(--mu)">Theoretical best: <b style="color:var(--tx)">${fmt(theo)}</b>${bl.timeInMs > theo ? `, ${((bl.timeInMs - theo) / 1000).toFixed(3)} s quicker than your best lap with sector times` : ""}.</p>
+      ${lossBars(bl, bs, split)}</div></div>`;
     const sb = [...document.querySelectorAll("#app .bh")].find(n => /^Scoreboard/.test(n.textContent.trim()));
     if (sb) sb.insertAdjacentHTML("beforebegin", html);
+  }
+
+  // where the best lap loses time against your best sectors, as bars
+  function lossBars(bl, bs, split) {
+    const loss = [0, 1, 2].map(i => bl.sectors[i] - bs[i].sectors[i]), mx = Math.max(...loss, 1);
+    if (loss.every(x => x <= 0)) return `<p class="ls" style="margin:10px 0 0;color:var(--pu)">Your best lap already has all your best ${split ? "thirds" : "sectors"}.</p>`;
+    return `<p class="ls" style="margin:12px 0 0;color:var(--tx)"><b>Where your best lap loses time</b></p><div class="sl" style="margin-top:6px">${loss.map((x, i) => `<span>${split ? ["1st", "2nd", "3rd"][i] : "S" + (i + 1)}</span><span class="bar"><i class="${x <= 0 ? "z" : ""}" style="width:${x <= 0 ? 4 : Math.max(4, (x / mx) * 100).toFixed(0)}%"></i></span><b style="color:${x <= 0 ? "var(--pu)" : "var(--tx)"}">${x <= 0 ? "best" : "+" + (x / 1000).toFixed(3)}</b>`).join("")}</div>`;
   }
 
   // ---------- overlay data: what the in-game overlay shows ----------
   let lastGame = "";
   function overlayFeed() {
-    const g = f1Live() ? F1 : acLive() ? AC : fzLive() ? st.fz.game : lastGame;
+    const g = f1Live() ? F1 : acLive() ? AC : SIMG.find(simLive) || (fzLive() ? st.fz.game : lastGame);
     if (!g) return B.overlayData({});
     const fzTrack = st.fz.run ? st.fz.run.name : st.fz.recording ? "Recording time trial" : st.fz.lastSegment ? st.fz.lastSegment.name : st.fz.near ? st.fz.near.name : st.fz.lastRoute ? st.fz.lastRoute.name : "";
-    const track = g === F1 ? (st.info || {}).track : isFz(g) ? fzTrack : st.ac.track, car = g === F1 ? (st.info || {}).car : isFz(g) ? st.fz.car : st.ac.car;
-    if (!track) return B.overlayData({ game: g, live: f1Live() || acLive() });
+    const track = g === F1 ? (st.info || {}).track : isFz(g) ? fzTrack : SIMG.includes(g) ? sim(g).track : st.ac.track, car = g === F1 ? (st.info || {}).car : isFz(g) ? st.fz.car : SIMG.includes(g) ? sim(g).car : st.ac.car;
+    if (!track) return B.overlayData({ game: g, live: isFz(g) ? fzLive() : gameLive(g) });
     const all = D.lapTimes.filter(l => l.game === g && l.track === track), mine = all.filter(l => l.car === car);
     const rec = best(all), b = best(mine), lastL = mine[mine.length - 1], prev = best(mine.slice(0, -1));
     B.overlayData({
-      game: g, live: g === F1 ? f1Live() : isFz(g) ? fzLive() : acLive(), track, car,
+      game: g, live: isFz(g) ? fzLive() : gameLive(g), track, car,
       last: lastGame === g && lastL ? lastL.timeInMs : 0, prevBest: prev ? prev.timeInMs : 0,
       best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
     });
@@ -794,7 +918,8 @@
     const at = o.bounds ? "" : o.anchor;
     $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp"><h3>In-game overlay</h3>
       <div class="lh" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px"><span class="ls" style="color:var(--mu)">Shows over the game in <b style="color:var(--tx)">borderless / windowed fullscreen</b>. Shortcut: Ctrl+Shift+O.</span>
-        <button class="b ${o.on ? "" : "pri"}" data-ov="on" data-v="${o.on ? 0 : 1}">${o.on ? "Turn off" : "Turn on"}</button></div>
+        <span class="swb"><b style="font-size:14px">${o.on ? "On" : "Off"}</b><span class="sw ${o.on ? "on" : ""}" data-ov="on" data-v="${o.on ? 0 : 1}" role="switch" aria-checked="${!!o.on}"></span></span></div>
+      <div class="ovprev" title="Preview with example data"><iframe id="ovpf" src="overlay.html" width="${(o.size || {}).width || 440}" height="${(o.size || {}).height || 190}" tabindex="-1"></iframe></div>
       <div class="ovcols"><div>
       <h4>Style</h4><div class="chips wrapc">${chip("layout", "clean", "Clean: time, delta, sectors, best and last", o.layout !== "compact")}${chip("layout", "compact", "Compact: time and delta only", o.layout === "compact")}</div>
       ${o.layout !== "compact" ? `<h4>Show</h4><div class="chips wrapc">${[["head", "Circuit and car"], ["position", "Race position"], ["delta", "Delta"], ["sectors", "Sectors"], ["foot", "Best and last lap"]].map(([k2, n]) => chip("show", k2, (sh[k2] ? "✓ " : "") + n, sh[k2])).join("")}</div>` : `<h4>Show</h4><div class="chips wrapc">${chip("show", "delta", (sh.delta ? "✓ " : "") + "Delta", sh.delta)}</div>`}
@@ -816,6 +941,13 @@
         <button class="b" data-ov="locked" data-v="${o.locked ? 0 : 1}" style="margin-top:8px">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
       </div></div>
       <div class="acts" style="margin-top:12px"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+    // the preview is the real overlay page, fed with example data
+    const pf = $("#ovpf");
+    if (pf) pf.onload = () => pf.contentWindow.postMessage({
+      cfg: { ...o, locked: true },
+      d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250 },
+      live: { game: "F1 25", t: 41234, delta: -123, sectors: [{ t: 26123, c: "purple" }, { t: 15111, c: "green" }, { t: 0 }], position: 3, cars: 20 },
+    }, "*");
     const dsel = $("#ovdisp");
     if (dsel) dsel.onchange = async () => { await B.setOverlay({ on: true, display: Number(dsel.value) }); openOverlayPanel(); };
   }
@@ -911,15 +1043,16 @@
     const y = scrollY; render(); scrollTo(0, y);
   }
   B.onStatus(s => {
-    st = { ...st, ...s, ac: { ...st.ac, ...(s.ac || {}) }, fz: { ...st.fz, ...(s.fz || {}) } };
+    st = { ...st, ...s, ac: { ...st.ac, ...(s.ac || {}) }, fz: { ...st.fz, ...(s.fz || {}) }, sims: s.sims || st.sims || {} };
     if (fzLive() && !fzWas) { fzWas = true; toast(st.fz.game + " connected. Race laps are saved automatically."); }
     if (f1Live() && !wasLive) { wasLive = true; toast("F1 25 connected. Laps are saved automatically."); }
     if (acLive() && !acWas) { acWas = true; toast("Assetto Corsa connected. Laps are saved automatically."); }
+    for (const g of SIMG) if (sim(g).connected && !simWas[g]) { simWas[g] = true; toast(g + " connected. Laps are saved automatically."); }
     header(); placeCard(); overlayFeed();
   });
-  B.onSkipped(() => { skipped++; placeCard.last = ""; placeCard(); toast("F1 25: invalid lap not saved"); });
+  B.onSkipped(l => { skipped++; placeCard.last = ""; placeCard(); toast(`${l && l.game && l.game !== F1 ? abbr(l.game) : "F1 25"}: invalid lap not saved`); });
   B.onLap(l => {
-    const G = l.game === AC ? AC : isFz(l.game) ? l.game : F1;
+    const G = l.game === AC || SIMG.includes(l.game) ? l.game : isFz(l.game) ? l.game : F1;
     const ms = Math.round(Number(l.timeInMs));
     if (!(ms > 0) || !l.track || !l.car) return;
     if (!Array.isArray(D.tracks[G])) D.tracks[G] = [];
@@ -935,6 +1068,7 @@
         airTemp: l.airTemp === undefined ? "" : String(l.airTemp), asphaltTemp: l.trackTemp === undefined ? "" : String(l.trackTemp),
       });
     } else if (isFz(G)) Object.assign(lap, { weather: "", condition: "", tire: "", season: "", notes: [l.carClass, "auto"].filter(Boolean).join(" · ") });
+    else if (SIMG.includes(G)) Object.assign(lap, { weather: "", condition: "", tire: "", notes: [l.session, l.carClass, l.valid ? "" : "invalid", "auto"].filter(Boolean).join(" · ") });
     else Object.assign(lap, { weather: "", condition: "", tire: "", notes: "auto" });
     if (Array.isArray(l.sectors) && l.sectors.length === 3) { lap.sectors = l.sectors.map(x => Math.round(x)); if (l.splits) lap.splits = true; }
     D.lapTimes.push(lap);
@@ -951,7 +1085,7 @@
     overlayFeed();
     const rec = !prev || ms < prev.timeInMs;
     if (isFz(G)) added[G] = added[G] || 0;
-    toast(`${G === AC ? "AC" : isFz(G) ? G.replace("Forza Horizon", "FH") : "F1 25"} · ${l.track}: ${fmt(ms)}` + (rec ? (prev ? `, new record by ${gp(prev.timeInMs - ms)}` : ", first lap here") : `, +${gp(ms - prev.timeInMs)} to record`) + (l.valid ? "" : " (invalid)"));
+    toast(`${G === F1 ? "F1 25" : abbr(G)} · ${l.track}: ${fmt(ms)}` + (rec ? (prev ? `, new record by ${gp(prev.timeInMs - ms)}` : ", first lap here") : `, +${gp(ms - prev.timeInMs)} to record`) + (l.valid ? "" : " (invalid)"));
   });
   B.getSettings().then(s => { st.settings = s; st.port = s.port; header(); placeCard(); });
   B.appInfo().then(i => { info = i; if (i.bootError) toast(i.bootError); });

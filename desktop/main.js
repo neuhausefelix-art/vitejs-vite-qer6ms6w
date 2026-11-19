@@ -12,12 +12,15 @@ const { ForzaTelemetry, placeholderCar } = require("./forza.js");
 const { execFile, spawn } = require("child_process");
 const { DeltaTracker } = require("./delta.js");
 const updates = require("./updates.js");
+const { ACCTelemetry, configFile: accConfigFile, enableConfig: accEnable } = require("./acc.js");
+const { LMUTelemetry } = require("./lmu.js");
+const { PC2Telemetry } = require("./pc2.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 // show: which parts of the overlay are visible; accent: colour of the side stripe
 const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false };
 const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team" };
-const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false };
+const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false, accOn: true, lmuOn: true, lmuPort: 6397, pc2On: true, pc2Port: 5606 };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
 let sock = null;
@@ -33,6 +36,12 @@ const dkey = (game, track, car) => (track && car ? `${game}|${track}|${car}` : "
 let f1Uid = "", lastSectors = { game: "", list: [] }; // sectors of the last finished lap, with colours
 let fzRace = { route: "", ordinal: null }; // route of the Forza race you are in
 let fzSock = null, fzStatus = { listening: false, port: 5300, error: "", movedFrom: 0 };
+// the other sims: Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2
+const acc = new ACCTelemetry();
+const lmu = new LMUTelemetry();
+const pc2 = new PC2Telemetry();
+const SIMS = [["acc", acc], ["lmu", lmu], ["pc2", pc2]];
+let pc2Sock = null, pc2Status = { listening: false, port: 5606, error: "", movedFrom: 0 };
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const backupDir = () => path.join(app.getPath("documents"), "Lapbook");
@@ -54,6 +63,9 @@ function loadSettings() {
   if (settings.overlay.v !== OVERLAY.v) settings.overlay = { ...settings.overlay, v: OVERLAY.v, bounds: settings.overlay.bounds ? { x: settings.overlay.bounds.x, y: settings.overlay.bounds.y } : null };
   for (const k of ["forzaCars", "forzaRoutes", "forzaSegments"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
   settings.forzaPort = clampPort(settings.forzaPort || 5300);
+  settings.pc2Port = clampPort(settings.pc2Port || 5606);
+  settings.lmuPort = clampPort(settings.lmuPort || 6397);
+  lmu.port = settings.lmuPort;
   fz.cars = settings.forzaCars;
   fz.routes = settings.forzaRoutes;
   fz.segments = settings.forzaSegments;
@@ -72,7 +84,14 @@ function send(channel, data) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, data);
 }
 function pushStatus() {
-  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings, ac: { ...ac.info(), on: settings.acOn, folder: acNames.folder }, fz: { ...fz.info(), ...fzStatus, on: settings.forzaOn } });
+  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings, ac: { ...ac.info(), on: settings.acOn, folder: acNames.folder }, fz: { ...fz.info(), ...fzStatus, on: settings.forzaOn }, sims: simStatus() });
+}
+function simStatus() {
+  return {
+    "Assetto Corsa Competizione": { ...acc.info(), on: settings.accOn, file: acc.configPath },
+    "Le Mans Ultimate": { ...lmu.info(), on: settings.lmuOn },
+    "Project CARS 2": { ...pc2.info(), ...pc2Status, on: settings.pc2On },
+  };
 }
 
 // Opens the UDP port. If another program already uses it, the next free port
@@ -217,6 +236,53 @@ function detectForza() {
       pushStatus();
     }
   });
+}
+
+// ---- Project CARS 2 on port 5606. The game sends to the whole local network
+// (broadcast), so Lapbook listens on all addresses and shares the port with
+// other tools such as SimHub or CrewChief.
+function listenPC2(port = settings.pc2Port, tries = 0) {
+  if (pc2Sock) {
+    try { pc2Sock.close(); } catch (e) {}
+    pc2Sock = null;
+  }
+  if (tries === 0) pc2Status.movedFrom = 0;
+  pc2Status = { ...pc2Status, listening: false, error: "", port };
+  if (!settings.pc2On) return pushStatus();
+  const s = dgram.createSocket({ type: "udp4", reuseAddr: true });
+  s.on("message", msg => pc2.handle(msg));
+  s.on("error", err => {
+    try { s.close(); } catch (e) {}
+    if (pc2Sock === s) pc2Sock = null;
+    if (err.code === "EADDRINUSE" && tries < AUTO_PORTS) {
+      if (tries === 0) pc2Status.movedFrom = port;
+      return listenPC2(port + 1, tries + 1);
+    }
+    pc2Status.error = `Project CARS 2: ${err.code === "EADDRINUSE" ? "the port is used by another program" : String(err.message || err)}`;
+    pushStatus();
+  });
+  s.on("listening", () => { pc2Status.listening = true; pushStatus(); });
+  s.bind(port, "0.0.0.0");
+  pc2Sock = s;
+}
+function startSims() {
+  if (settings.accOn) acc.start(); else acc.stop();
+  if (settings.lmuOn) lmu.start(); else lmu.stop();
+}
+for (const [, sim] of SIMS) {
+  sim.on("car", L => { if (delta && L && L.track && L.car) delta.sample(dkey(sim.game, L.track, L.car), L.lapNum, L.distance, L.t); });
+  sim.on("session", () => { const L = sim.live; if (delta && L && L.track && L.car) delta.newSession(dkey(sim.game, L.track, L.car)); });
+  sim.on("lap", lap => {
+    lapDone(sim.game, lap);
+    if (!lap.valid && !settings.saveInvalid) {
+      send("telemetry:skipped", lap);
+      return;
+    }
+    send("telemetry:lap", lap);
+    pushStatus();
+  });
+  sim.on("status", pushStatus);
+  sim.on("error", () => {});
 }
 
 // the lap is done: colour its sectors, then let it count for the best lap
@@ -373,6 +439,17 @@ function liveForOverlay() {
     });
     return out;
   }
+  for (const [, sim] of SIMS) {
+    const L = sim.live;
+    if (!L || now - L.at > 3000 || !L.track || !L.car) continue;
+    const k = dkey(sim.game, L.track, L.car), secs = [L.sector >= 1 ? L.s1 : 0, L.sector >= 2 ? L.s2 : 0, 0];
+    Object.assign(out, {
+      game: sim.game, t: L.t, delta: delta && L.distance > 50 ? delta.delta(k, L.distance, L.t) : null, invalid: L.invalid,
+      sectors: last && last.game === sim.game && L.sector === 0 && L.t < 8000 ? last.list : secs.map((t, j) => ({ t, c: L.invalid ? "invalid" : delta ? delta.colour(k, j, t) : "" })),
+      position: L.race ? L.position : 0, cars: L.race ? L.cars : 0,
+    });
+    return out;
+  }
   if (fz.live && now - fz.live.at < 3000 && (fz.rec || fz.run)) {
     const car = fz.cur ? fz.carName(fz.cur.ordinal) : "";
     if (fz.rec) Object.assign(out, { game: fz.game, t: fz.rec.launch || !fz.rec.standing ? (fz.cur ? fz.cur.ts : 0) - (fz.rec.standing ? fz.rec.launch : fz.rec.ts0) : 0, rec: fz.rec.standing && !fz.rec.launch ? "drag" : "rec", trial: "Recording" });
@@ -418,7 +495,7 @@ function setOverlay(next) {
     nudgeShortcuts(false);
   }
   pushStatus();
-  return { ...o, displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
+  return { ...o, size: overlaySize(), displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
 }
 ipcMain.handle("overlay:set", (e, next) => setOverlay(next || {}));
 ipcMain.handle("overlay:get", () => setOverlay({}));
@@ -518,6 +595,10 @@ ipcMain.handle("settings:set", (e, next) => {
     forzaPort: next && next.forzaPort !== undefined ? clampPort(next.forzaPort) : settings.forzaPort,
     forzaGame: next && next.forzaGame ? String(next.forzaGame) : settings.forzaGame,
     forzaRaceLaps: next && next.forzaRaceLaps !== undefined ? !!next.forzaRaceLaps : settings.forzaRaceLaps,
+    accOn: next && next.accOn !== undefined ? !!next.accOn : settings.accOn,
+    lmuOn: next && next.lmuOn !== undefined ? !!next.lmuOn : settings.lmuOn,
+    pc2On: next && next.pc2On !== undefined ? !!next.pc2On : settings.pc2On,
+    pc2Port: next && next.pc2Port !== undefined ? clampPort(next.pc2Port) : settings.pc2Port,
   };
   fz.raceLaps = !!settings.forzaRaceLaps;
   if (settings.forzaGame !== "auto") fz.game = settings.forzaGame;
@@ -526,6 +607,8 @@ ipcMain.handle("settings:set", (e, next) => {
   if (settings.acOn) ac.start();
   else ac.stop();
   if (beforeFz.on !== settings.forzaOn || beforeFz.port !== settings.forzaPort || before.network !== settings.network) listenForza();
+  if (before.pc2On !== settings.pc2On || before.pc2Port !== settings.pc2Port) listenPC2();
+  startSims();
   pushStatus();
   return settings;
 });
@@ -636,6 +719,18 @@ ipcMain.handle("ac:pick", async () => {
   const r = await dialog.showOpenDialog(win, { title: "Choose your Assetto Corsa folder (the one with content\\cars inside)", properties: ["openDirectory"] });
   return r.canceled ? "" : r.filePaths[0] || "";
 });
+// ACC: switch on its broadcasting interface in broadcasting.json (port 9000)
+ipcMain.handle("acc:enable", () => {
+  try {
+    const c = accEnable(acc.configPath);
+    acc.stop();
+    if (settings.accOn) acc.start();
+    pushStatus();
+    return { ok: c.port > 0, port: c.port };
+  } catch (e) {
+    return { ok: false, error: String(e.message || e) };
+  }
+});
 ipcMain.on("backup:write", (e, json) => writeBackup(json));
 ipcMain.handle("backup:open", async () => {
   fs.mkdirSync(backupDir(), { recursive: true });
@@ -702,6 +797,9 @@ if (!app.requestSingleInstanceLock()) {
     listen();
     if (settings.acOn) ac.start();
     listenForza();
+    acc.configPath = accConfigFile(app.getPath("documents"));
+    listenPC2();
+    startSims();
     setInterval(detectForza, 3000);
     if (ov().on) openOverlay();
     // Ctrl+Shift+O: overlay on/off, Ctrl+Shift+L: lock/unlock (to move it)
@@ -711,7 +809,7 @@ if (!app.requestSingleInstanceLock()) {
     offerUpdate(updateArg(process.argv));
     setInterval(pushStatus, 2000);
   });
-  app.on("will-quit", () => globalShortcut.unregisterAll());
+  app.on("will-quit", () => { globalShortcut.unregisterAll(); try { acc.stop(); } catch (e) {} });
   app.on("window-all-closed", () => app.quit());
 }
 

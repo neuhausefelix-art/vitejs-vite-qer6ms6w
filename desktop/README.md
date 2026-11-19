@@ -1,20 +1,20 @@
-# Lapbook für Windows – Anleitung (Version 1.9.0)
+# Lapbook für Windows – Anleitung (Version 2.0.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
-- **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
-- **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen.
+- **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
+- **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen. Mit einem Schalter in der Seitenleiste an und aus.
 - **Sektorzeiten, Rennen automatisch, Session-Rückblick.**
 - **Aufgeräumtes Layout mit Seitenleiste**, ausgelegt für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
 
-Die App liest nur die offizielle Telemetrie, die F1 25, Assetto Corsa und Forza selbst senden. Sie greift nicht ins Spiel ein.
+Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten. Sie greift nicht ins Spiel ein.
 
 ---
 
-## 0. Update auf 1.9.0
+## 0. Update auf 2.0.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.9.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.0.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -28,8 +28,8 @@ Links steht die **Seitenleiste**. Von dort erreichst du alles mit einem Klick:
 | Bereich | Was du dort findest |
 |---|---|
 | **Overview** | Startseite: Live-Status, deine zuletzt gefahrenen Strecken, deine Spiele, Kennzahlen (Runden, Strecken, Autos, Fahrerwertung) und die letzten Runden |
-| **Live tracking** | Einrichtung pro Spiel (F1 25, Assetto Corsa, Forza Horizon 6) mit Schritt-für-Schritt-Hinweisen, aktueller Status und alle **Session-Rückblicke** |
-| **Overlay** | Overlay ein- und ausschalten, Stil, Größe und Position |
+| **Live tracking** | oben eine Leiste mit allen Spielen und ihrem Status (live, Spiel gefunden, wartet, 1 Schritt offen, aus). Klick auf ein Spiel zeigt seine Einrichtung Schritt für Schritt. Daneben die Tabelle **„What Lapbook reads“** und darunter alle **Session-Rückblicke** |
+| **Overlay** | der **Schalter** rechts daneben macht das Overlay sofort an oder aus. Ein Klick auf „Overlay“ öffnet die Einstellungen mit **Vorschau** |
 | **Games** | deine Spiele mit Rundenzahl. Darunter liegen Strecken, Autos, Rennen und Meisterschaften. Weitere Spiele klappst du mit „… more games“ auf. |
 | **Analyse** | **Progress** (Verbesserung über die Zeit), **Duel** (Auto gegen Auto), **Strategy** (Boxenstopp-Rechner) |
 | **Career** | **Driver & races** (Fahrerwertung, Rennen), **Achievements** (Meilensteine und Rang, siehe 2g) |
@@ -44,7 +44,9 @@ Auf jeder Strecke findest du: Rekord, „Add lap“, Sektoren, Rangliste, Vergle
 
 ## Was kann welches Spiel?
 
-| | F1 25 | Assetto Corsa | Forza Horizon 6 |
+Für ACC, Le Mans Ultimate und Project CARS 2 gilt: Runden, Auto, Strecke, Sektoren, Live-Delta und Position werden automatisch gelesen (Details in 2h bis 2j). Die Tabelle zeigt die drei ersten Spiele ausführlich. Eine Kurzfassung für alle Spiele steht in der App unter **Live tracking → „What Lapbook reads“**.
+
+| | F1 25 | Assetto Corsa | Forza Horizon 5 / 6 |
 |---|---|---|---|
 | Runden automatisch speichern | ✅ jede fertige Runde | ✅ jede fertige Runde | ✅ deine **Zeitfahren und Drag-Runs**; normale Rennrunden nur, wenn eingeschaltet |
 | Strecke erkannt | ✅ automatisch | ✅ automatisch (Name aus dem AC-Ordner) | ⚠️ du benennst jedes Zeitfahren einmal |
@@ -169,6 +171,10 @@ Best 1:21.000                   Last 1:21.150 +0.150
 - **Position** (P4/20) in F1-25- und Forza-Rennen.
 - Der farbige Strich am linken Rand ist die **Teamfarbe** deines Autos.
 
+**An und aus:** In der Seitenleiste steht neben „Overlay“ ein **Schalter**. Ein Klick darauf macht das Overlay sofort an oder aus, ohne Menü. Den gleichen Schalter gibt es auf der Startseite in der Live-Karte und oben auf der Seite „Live tracking“. Im Spiel geht es weiter mit **Strg+Umschalt+O**.
+
+**Vorschau:** Oben in den Overlay-Einstellungen siehst du das Overlay mit Beispieldaten. Jede Änderung (Stil, Anzeige, Farbe, Größe, Hintergrund) siehst du dort sofort.
+
 ### Einstellen
 Klicke in der Seitenleiste auf **„Overlay“**. Es öffnet sich ein Fenster mit:
 - **Turn on / Turn off** (oder **Strg+Umschalt+O**, auch im Spiel)
@@ -234,7 +240,9 @@ Alle Rückblicke findest du auf der Seite **„Live tracking“** unten unter **
 
 ---
 
-## 2e. Forza Horizon 6
+## 2e. Forza Horizon 5 und 6
+
+Beide Teile funktionieren gleich. Lapbook erkennt am laufenden Programm, ob FH5 oder FH6 läuft, und speichert die Runden beim richtigen Spiel.
 
 **In Forza einstellen (einmalig):** Einstellungen → **HUD und Gameplay** → ganz nach unten zu **Data Out**:
 
@@ -275,6 +283,40 @@ Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Tra
 
 ---
 
+## 2h. Assetto Corsa Competizione
+
+ACC hat eine offizielle **Broadcasting-Schnittstelle** (die nutzen TV-Overlays und Rennleitungen). Lapbook meldet sich dort als Zuschauer an, nur lesend.
+
+1. In Lapbook auf **Live tracking → ACC** klicken.
+2. Steht dort „1 step to do“: auf **„Switch on“** klicken. Lapbook trägt Port 9000 in `Dokumente\Assetto Corsa Competizione\Config\broadcasting.json` ein. Die alte Datei bleibt als `broadcasting.json.lapbook-backup` erhalten. Gibt es die Datei noch nicht, starte ACC einmal und schließe es wieder.
+3. **ACC neu starten** (die Datei wird nur beim Start gelesen) und auf die Strecke fahren. Die Kachel zeigt dann „live“.
+
+Gelesen werden: Rundenzeit, **echte Sektoren**, ungültige Runden, Auto (z. B. Ferrari 296 GT3), Strecke, Session-Art und Position. Lapbook nimmt das Auto, auf das die Kamera zeigt. Beim Fahren ist das immer dein Auto, in Wiederholungen speichert Lapbook nichts.
+
+## 2i. Le Mans Ultimate
+
+**Nichts einzustellen.** LMU hat eine eingebaute lokale Schnittstelle (über sie laufen auch die Menüs des Spiels, Port 6397). Lapbook fragt sie mehrmals pro Sekunde ab, nur lesend.
+
+1. LMU starten und auf die Strecke fahren.
+2. Die Kachel **LMU** zeigt „live“. Jede fertige Runde wird gespeichert.
+
+Gelesen werden: Rundenzeit, Sektoren, Auto, Klasse (z. B. Hypercar), Strecke, Session-Art und Position. **Ungültige Runden:** Ob LMU sie über diese Schnittstelle meldet, konnte ich nicht sicher prüfen. Runden ohne Zeit werden nicht gespeichert.
+
+## 2j. Project CARS 2
+
+**Im Spiel einstellen (einmalig):** Options → **System**:
+
+| Einstellung | Wert |
+|---|---|
+| UDP Frequency | **1** (am schnellsten) bis 4. 0 bedeutet aus |
+| UDP Protocol Version | **Project CARS 2** |
+
+Project CARS 2 sendet seine Daten ins ganze Heimnetz. Fragt die Windows-Firewall beim ersten Start nach Lapbook, erlaube den Zugriff für **private Netzwerke**. Lapbook teilt sich den Port 5606 mit Programmen wie SimHub oder CrewChief.
+
+Gelesen werden: Rundenzeit, Sektoren, ungültige Runden, Auto, Strecke mit Variante (z. B. „Brands Hatch Indy“), Session-Art und Position.
+
+---
+
 ## 3. Einstellungen
 
 Klicke auf der Seite **„Live tracking“** oben rechts auf **„Settings“**. Dort kannst du:
@@ -292,7 +334,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-1.9.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.0.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.
@@ -340,6 +382,9 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 | Forza: Zeitfahren startet nicht | Durch den Startpunkt in **derselben Richtung** fahren wie beim Anlegen (ca. 20 m Toleranz). Beim Drag-Run vorher am Start **stehen bleiben**. |
 | Forza: nichts kommt an | Data Out **An**, IP **127.0.0.1**, Port wie in Lapbook. Bei Game Pass: „Allow Forza“ klicken und Forza neu starten. |
 | Forza: „packets of … bytes“ | Diese Forza-Version sendet ein anderes Format. Sag mir die Zahl, dann passe ich es an. |
+| ACC: Kachel bleibt bei „waiting for the game“ | Hast du ACC nach „Switch on“ neu gestartet? Du musst auf der Strecke sein. Steht ein Fehler wie „Wrong password“ da, stimmt das Passwort in broadcasting.json nicht mehr: noch einmal „Switch on“ klicken. |
+| LMU: nichts kommt an | LMU muss laufen und du musst auf der Strecke sein. Andere Tools (z. B. TinyPedal) stören nicht. |
+| Project CARS 2: nichts kommt an | UDP Frequency nicht auf 0, Protocol Version „Project CARS 2“. Firewall-Abfrage erlauben. |
 | Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
 
 ---
