@@ -53,19 +53,22 @@
    .wd.hm>.c2{order:2}
    .wd.tr{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
    .wd.tr>.c2{position:static;max-height:none;overflow:visible}
-   #app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+   #app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(480px,1fr));gap:14px}
+   #app .list>.gcov{height:150px;padding:0 30px;font-size:30px}
+   #app .list>.gcov small{font-size:15px}
    #app[data-v=game] .list:has(>.row),#app[data-v=prog] .list,#app[data-v=game] .list:has(>details){display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:10px}
    #app[data-v=game] .list>.row,#app[data-v=prog] .list>.row{margin-bottom:0}
    #app[data-v=ach] .ac{display:inline-block;vertical-align:top;width:calc(50% - 6px);margin-right:6px}
    .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
    .md{max-width:760px}
   }
-  @media (min-width:2200px){.wd{grid-template-columns:minmax(0,1fr) minmax(420px,26%)}#app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(380px,1fr))}}`;
+  @media (min-width:2200px){.wd{grid-template-columns:minmax(0,1fr) minmax(420px,26%)}#app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(560px,1fr))}#app .list>.gcov{height:180px;font-size:34px}}`;
   document.head.appendChild(css);
 
   const f1Live = () => st.listening && Date.now() - st.lastPacket < 5000;
   const acLive = () => st.ac && st.ac.on && st.ac.connected;
   const port = () => st.port || st.settings.port;
+  const ovOn = () => !!(st.settings.overlay && st.settings.overlay.on);
 
   // ---------- header buttons ----------
   function header() {
@@ -82,7 +85,14 @@
       u.title = "Install a Lapbook update file";
       u.addEventListener("click", e => { e.stopPropagation(); openUpdate(""); });
       a.insertBefore(u, b.nextSibling);
+      const o = document.createElement("button");
+      o.id = "ovb"; o.className = "b"; o.type = "button";
+      o.title = "In-game overlay (Ctrl+Shift+O)";
+      o.addEventListener("click", async e => { e.stopPropagation(); const r = await B.setOverlay({ on: !ovOn() }); st.settings.overlay = r; header(); toast(r.on ? "Overlay on. Ctrl+Shift+L to move it, Ctrl+Shift+O to hide it." : "Overlay off"); });
+      a.insertBefore(o, u);
     }
+    const ob = document.getElementById("ovb");
+    if (ob) { ob.textContent = ovOn() ? "Overlay ✓" : "Overlay"; ob.style.color = ovOn() ? "var(--gr)" : ""; }
     const on = [f1Live() && "F1 25", acLive() && "AC"].filter(Boolean);
     b.textContent = st.error ? "Live: problem" : on.length ? "● Live · " + on.join(" + ") : "○ Live";
     b.style.color = st.error ? "var(--dn)" : on.length ? "var(--gr)" : "var(--mu)";
@@ -239,11 +249,19 @@
       <h4>Assetto Corsa</h4>
       <label>Live tracking<select id="acon"><option value="1" ${s.acOn !== false ? "selected" : ""}>On</option><option value="0" ${s.acOn === false ? "selected" : ""}>Off</option></select></label>
       <p class="ls" style="margin:0;color:var(--mu)">Folder: ${st.ac.folder ? esc(st.ac.folder) : "not found"} <button class="b ghost" id="acpick" type="button">Choose folder</button></p>
+      <h4>In-game overlay</h4>
+      <div class="two"><label>Overlay<select id="ovon"><option value="1" ${ovOn() ? "selected" : ""}>On</option><option value="0" ${ovOn() ? "" : "selected"}>Off</option></select></label>
+      <label>Position<select id="ovlk"><option value="1" ${(s.overlay || {}).locked !== false ? "selected" : ""}>Locked (clicks go to the game)</option><option value="0" ${(s.overlay || {}).locked === false ? "selected" : ""}>Unlocked (drag to move)</option></select></label></div>
+      <div class="two"><label>Size<select id="ovsz">${[[0.8, "Small"], [1, "Medium"], [1.3, "Large"], [1.7, "Extra large"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).scale || 1) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <label>Background<select id="ovop">${[[0.6, "See-through"], [0.82, "Normal"], [0.95, "Solid"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).opacity || 0.82) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label></div>
+      <p class="ls" style="margin:0;color:var(--mu)">Shortcuts: <b>Ctrl+Shift+O</b> overlay on/off, <b>Ctrl+Shift+L</b> lock/unlock to move it. The game must run in <b>borderless</b> or <b>windowed fullscreen</b> mode. <button class="b ghost" id="ovrs" type="button">Reset position</button></p>
       <p class="ls" style="color:var(--mu)">This session: ${added[F1]} F1 25 and ${added[AC]} Assetto Corsa lap${added[AC] === 1 ? "" : "s"} saved. Lapbook ${esc(info.version)}.</p>
       <div class="acts"><button class="b pri" id="tsave" type="button">Save</button><button class="b" id="tfold" type="button">Open backup folder</button><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+    $("#ovrs").onclick = async () => { st.settings.overlay = await B.setOverlay({ on: true, reset: true }); toast("Overlay moved to the top right"); };
     $("#acpick").onclick = async () => { const d = await B.pickACFolder(); if (d) { await B.setACFolder(d); openPanel(); } };
     $("#tsave").onclick = async () => {
       st.settings = await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1" });
+      st.settings.overlay = await B.setOverlay({ on: $("#ovon").value === "1", locked: $("#ovlk").value === "1", scale: Number($("#ovsz").value), opacity: Number($("#ovop").value) });
       for (const i of document.querySelectorAll("#cnl [data-team]")) await B.nameCar(i.dataset.team, i.value);
       const nid = $("#cnid").value.trim(), nn = $("#cnn").value.trim();
       if (/^\d+$/.test(nid) && nn) await B.nameCar(nid, nn);
@@ -259,6 +277,22 @@
       toast("Live tracking settings saved");
     };
     $("#tfold").onclick = () => B.openBackups();
+  }
+
+  // ---------- overlay data: what the in-game overlay shows ----------
+  let lastGame = "";
+  function overlayFeed() {
+    const g = f1Live() ? F1 : acLive() ? AC : lastGame;
+    if (!g) return B.overlayData({});
+    const track = g === F1 ? (st.info || {}).track : st.ac.track, car = g === F1 ? (st.info || {}).car : st.ac.car;
+    if (!track) return B.overlayData({ game: g, live: f1Live() || acLive() });
+    const all = D.lapTimes.filter(l => l.game === g && l.track === track), mine = all.filter(l => l.car === car);
+    const rec = best(all), b = best(mine), lastL = mine[mine.length - 1], prev = best(mine.slice(0, -1));
+    B.overlayData({
+      game: g, live: g === F1 ? f1Live() : acLive(), track, car,
+      last: lastGame === g && lastL ? lastL.timeInMs : 0, prevBest: prev ? prev.timeInMs : 0,
+      best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
+    });
   }
 
   // ---------- updates ----------
@@ -337,7 +371,7 @@
     st = { ...st, ...s, ac: { ...st.ac, ...(s.ac || {}) } };
     if (f1Live() && !wasLive) { wasLive = true; toast("F1 25 connected. Laps are saved automatically."); }
     if (acLive() && !acWas) { acWas = true; toast("Assetto Corsa connected. Laps are saved automatically."); }
-    header(); placeCard();
+    header(); placeCard(); overlayFeed();
   });
   B.onSkipped(() => { skipped++; placeCard.last = ""; placeCard(); toast("F1 25: invalid lap not saved"); });
   B.onLap(l => {
@@ -362,10 +396,11 @@
     if (!D.cars[G].includes(l.car)) D.cars[G].push(l.car);
     LAST = { g: G, t: l.track };
     try { localStorage.setItem("lapbook.last", JSON.stringify(LAST)); } catch (e) {}
-    added[G]++; lastLap[G] = ms;
+    added[G]++; lastLap[G] = ms; lastGame = G;
     if (!ok) { ok = true; try { localStorage.setItem("lapbook.liveok", "1"); } catch (e) {} }
     save();
     refresh();
+    overlayFeed();
     const rec = !prev || ms < prev.timeInMs;
     toast(`${G === AC ? "AC" : "F1 25"} · ${l.track}: ${fmt(ms)}` + (rec ? (prev ? `, new record by ${gp(prev.timeInMs - ms)}` : ", first lap here") : `, +${gp(ms - prev.timeInMs)} to record`) + (l.valid ? "" : " (invalid)"));
   });

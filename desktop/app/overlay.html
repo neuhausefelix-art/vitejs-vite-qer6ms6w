@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Lapbook overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--sf:#131316;--ln:#27272d;--tx:#f4f4f6;--mu:#8e8e98;--rd:#ff3030;--pu:#c58bff;--gr:#3ddc97;--dn:#ff8a7a;--op:.82;--k:1}
+*{box-sizing:border-box;margin:0}
+html,body{background:transparent;overflow:hidden;height:100%;font-family:'Saira Semi Condensed',system-ui,sans-serif;color:var(--tx);user-select:none}
+#o{position:absolute;inset:0;padding:calc(10px*var(--k)) calc(14px*var(--k));border-radius:calc(12px*var(--k));background:rgba(11,11,13,var(--op));border:1px solid rgba(255,255,255,.08);border-left:calc(3px*var(--k)) solid var(--rd);display:flex;flex-direction:column;gap:calc(6px*var(--k));font-variant-numeric:tabular-nums}
+body.edit #o{-webkit-app-region:drag;border:1px dashed var(--rd);cursor:move}
+.h{display:flex;align-items:center;gap:calc(7px*var(--k));font-size:calc(13px*var(--k));color:var(--mu);white-space:nowrap;overflow:hidden}
+.h b{color:var(--tx);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.dot{width:calc(8px*var(--k));height:calc(8px*var(--k));border-radius:50%;background:var(--mu);flex:none}
+.on .dot{background:var(--gr)}
+.cur{font-size:calc(38px*var(--k));font-weight:700;line-height:1}
+.cur small{font-size:calc(13px*var(--k));color:var(--mu);font-weight:500;margin-left:6px}
+.cur.inv{color:var(--dn)}
+.g{display:grid;grid-template-columns:auto 1fr auto;gap:calc(2px*var(--k)) calc(12px*var(--k));align-items:baseline;font-size:calc(17px*var(--k))}
+.g span{color:var(--mu);font-size:calc(12px*var(--k));text-transform:uppercase;letter-spacing:.06em}
+.g b{font-weight:600}.g i{font-style:normal;font-size:calc(14px*var(--k));text-align:right;font-weight:600}
+.up{color:var(--gr)}.dn{color:var(--dn)}.pb{color:var(--pu)}
+.hint{display:none;font-size:calc(11px*var(--k));color:var(--mu)}
+body.edit .hint{display:block}
+.idle{color:var(--mu);font-size:calc(14px*var(--k))}
+</style></head><body>
+<div id="o"><div class="idle">Lapbook overlay · waiting for F1 25 or Assetto Corsa</div></div>
+<script>
+const $ = s => document.querySelector(s);
+const pad = (n, l = 2) => String(n).padStart(l, "0");
+const fmt = ms => ms > 0 ? `${Math.floor(ms / 6e4)}:${pad(Math.floor(ms % 6e4 / 1e3))}.${pad(Math.floor(ms % 1e3), 3)}` : "–";
+const gap = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1e3).toFixed(3);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.82 };
+
+function draw() {
+  document.documentElement.style.setProperty("--k", cfg.scale || 1);
+  document.documentElement.style.setProperty("--op", cfg.opacity ?? 0.82);
+  document.body.classList.toggle("edit", !cfg.locked);
+  const o = $("#o");
+  if (!d.game) {
+    o.className = "";
+    o.innerHTML = `<div class="idle">Lapbook overlay · waiting for F1 25 or Assetto Corsa</div><div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
+    return;
+  }
+  // running lap: F1 25 sends it, for Assetto Corsa it is counted from the last finished lap
+  let cur = 0, approx = false;
+  if (d.game === "F1 25" && live.f1 && Date.now() - live.f1.at < 3000) cur = live.f1.current;
+  else if (d.game === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
+  const inv = d.game === "F1 25" && live.f1 && live.f1.invalid;
+  const delta = d.last && d.prevBest ? d.last - d.prevBest : null;
+  o.className = d.live ? "on" : "";
+  o.innerHTML = `<div class="h"><span class="dot"></span><b>${esc(d.track || d.game)}</b><span>${esc(d.car || "")}</span></div>
+    <div class="cur ${inv ? "inv" : ""}">${fmt(cur)}${approx && cur ? "<small>approx.</small>" : ""}${inv ? "<small>invalid</small>" : ""}</div>
+    <div class="g"><span>Last</span><b>${fmt(d.last)}</b><i class="${delta === null ? "" : delta < 0 ? "up" : "dn"}">${delta === null ? "" : gap(delta)}</i>
+    <span>Best</span><b class="pb">${fmt(d.best)}</b><i>${d.laps ? d.laps + " lap" + (d.laps === 1 ? "" : "s") : ""}</i>
+    ${d.record && d.record !== d.best ? `<span>Record</span><b>${fmt(d.record)}</b><i>${esc(d.recordCar || "")}</i>` : ""}</div>
+    <div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
+}
+window.overlay.onData(x => { d = x || {}; draw(); });
+window.overlay.onLive(x => { live = x || {}; draw(); });
+window.overlay.onConfig(x => { cfg = { ...cfg, ...x }; draw(); });
+draw();
+</script></body></html>

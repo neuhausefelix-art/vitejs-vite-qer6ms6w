@@ -1,7 +1,7 @@
 // Lapbook for Windows: the Lapbook page in its own window, plus a listener
 // for the F1 25 UDP telemetry so finished laps are logged automatically.
 "use strict";
-const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, shell, dialog, globalShortcut, screen } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const dgram = require("dgram");
@@ -11,7 +11,8 @@ const { ACNames } = require("./acnames.js");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
-const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true };
+const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.82, bounds: null };
+const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY } };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
 let sock = null;
@@ -37,6 +38,7 @@ function loadSettings() {
   }
   settings.port = clampPort(settings.port);
   if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
+  settings.overlay = { ...OVERLAY, ...(settings.overlay || {}) };
   f1.names = settings.carNames;
   acNames.setFolder(settings.acPath);
 }
@@ -107,6 +109,97 @@ ac.on("lap", lap => {
 });
 ac.on("session", pushStatus);
 ac.on("error", () => {});
+
+// ---- in-game overlay: a small always-on-top window above the game ----
+// It is a normal window drawn on top, nothing is injected into the game.
+// Shows over games in borderless / windowed fullscreen mode.
+let overlay = null, overlayData = {}, overlayTimer = null;
+const ov = () => settings.overlay;
+function overlaySize() {
+  const k = Math.max(0.6, Math.min(2.5, Number(ov().scale) || 1));
+  return { width: Math.round(300 * k), height: Math.round(168 * k) };
+}
+function placeOverlay() {
+  const b = ov().bounds;
+  const d = screen.getPrimaryDisplay().workArea;
+  const sz = overlaySize();
+  if (b && screen.getAllDisplays().some(x => b.x >= x.bounds.x - 50 && b.y >= x.bounds.y - 50 && b.x < x.bounds.x + x.bounds.width && b.y < x.bounds.y + x.bounds.height))
+    return { x: b.x, y: b.y, width: b.width || sz.width, height: b.height || sz.height };
+  return { x: d.x + d.width - sz.width - 24, y: d.y + 24, ...sz };
+}
+function pushOverlayConfig() {
+  if (!overlay || overlay.isDestroyed()) return;
+  overlay.setIgnoreMouseEvents(!!ov().locked);
+  overlay.setFocusable(!ov().locked);
+  overlay.setResizable(!ov().locked);
+  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity });
+}
+function openOverlay() {
+  if (overlay && !overlay.isDestroyed()) return pushOverlayConfig();
+  overlay = new BrowserWindow({
+    ...placeOverlay(),
+    frame: false,
+    transparent: true,
+    backgroundColor: "#00000000",
+    hasShadow: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    resizable: !ov().locked,
+    focusable: !ov().locked,
+    show: false,
+    title: "Lapbook overlay",
+    webPreferences: { preload: path.join(__dirname, "overlay-preload.js"), contextIsolation: true, sandbox: true, nodeIntegration: false },
+  });
+  overlay.setAlwaysOnTop(true, "screen-saver");
+  overlay.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+  overlay.loadFile(path.join(__dirname, "app", "overlay.html"));
+  overlay.webContents.on("did-finish-load", () => {
+    pushOverlayConfig();
+    overlay.webContents.send("overlay:data", overlayData);
+    overlay.showInactive();
+  });
+  const keep = () => {
+    if (!overlay || overlay.isDestroyed()) return;
+    ov().bounds = overlay.getBounds();
+    saveSettings();
+  };
+  overlay.on("moved", keep);
+  overlay.on("resized", keep);
+  overlay.on("closed", () => (overlay = null));
+  clearInterval(overlayTimer);
+  overlayTimer = setInterval(() => {
+    if (!overlay || overlay.isDestroyed()) return;
+    overlay.webContents.send("overlay:live", { f1: f1.live, acAt: ac.lastLap ? ac.lastLap.at : 0 });
+  }, 100);
+}
+function closeOverlay() {
+  clearInterval(overlayTimer);
+  if (overlay && !overlay.isDestroyed()) overlay.close();
+  overlay = null;
+}
+function setOverlay(next) {
+  const o = ov();
+  Object.assign(o, {
+    on: next.on !== undefined ? !!next.on : o.on,
+    locked: next.locked !== undefined ? !!next.locked : o.locked,
+    scale: next.scale !== undefined ? Math.max(0.6, Math.min(2.5, Number(next.scale) || 1)) : o.scale,
+    opacity: next.opacity !== undefined ? Math.max(0.2, Math.min(1, Number(next.opacity) || 0.82)) : o.opacity,
+  });
+  if (next.scale !== undefined) o.bounds = o.bounds ? { ...o.bounds, ...overlaySize() } : null;
+  if (next.reset) o.bounds = null;
+  saveSettings();
+  if (o.on) {
+    openOverlay();
+    if (next.scale !== undefined || next.reset) overlay.setBounds(placeOverlay());
+  } else closeOverlay();
+  pushStatus();
+  return o;
+}
+ipcMain.handle("overlay:set", (e, next) => setOverlay(next || {}));
+ipcMain.on("overlay:data", (e, d) => {
+  overlayData = d && typeof d === "object" ? d : {};
+  if (overlay && !overlay.isDestroyed()) overlay.webContents.send("overlay:data", overlayData);
+});
 
 // ---- automatic backup into Documents\Lapbook ----
 let lastBackup = "";
@@ -179,7 +272,10 @@ function createWindow() {
     fs.mkdirSync(backupDir(), { recursive: true });
     item.setSaveDialogOptions({ defaultPath: path.join(backupDir(), item.getFilename()) });
   });
-  win.on("closed", () => (win = null));
+  win.on("closed", () => {
+    win = null;
+    closeOverlay();
+  });
 }
 
 ipcMain.handle("settings:get", () => settings);
@@ -292,9 +388,14 @@ if (!app.requestSingleInstanceLock()) {
     createWindow();
     listen();
     if (settings.acOn) ac.start();
+    if (ov().on) openOverlay();
+    // Ctrl+Shift+O: overlay on/off, Ctrl+Shift+L: lock/unlock (to move it)
+    globalShortcut.register("CommandOrControl+Shift+O", () => setOverlay({ on: !ov().on }));
+    globalShortcut.register("CommandOrControl+Shift+L", () => { if (ov().on) setOverlay({ locked: !ov().locked }); });
     offerUpdate(updateArg(process.argv));
     setInterval(pushStatus, 2000);
   });
+  app.on("will-quit", () => globalShortcut.unregisterAll());
   app.on("window-all-closed", () => app.quit());
 }
 

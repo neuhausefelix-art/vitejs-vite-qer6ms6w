@@ -1,7 +1,8 @@
-# Lapbook für Windows – Anleitung (Version 1.2.0)
+# Lapbook für Windows – Anleitung (Version 1.3.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für F1 25 und Assetto Corsa:** Jede gefahrene Runde wird automatisch gespeichert. Bei F1 25 kommen Strecke, Auto, Zeit, Reifen, Wetter und Temperaturen mit, bei Assetto Corsa Strecke, Auto und Zeit.
+- **Overlay im Spiel:** aktuelle Runde, letzte Runde mit Abstand zur Bestzeit, Bestzeit und Streckenrekord.
 - **Breites Layout** für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
@@ -10,9 +11,9 @@ Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst 
 
 ---
 
-## 0. Update von 1.1.0 auf 1.2.0
+## 0. Update auf 1.3.0
 
-Du hast Lapbook 1.1.0 schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.2.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder 1.2.0 schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.3.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -87,6 +88,36 @@ Im Spiel musst du **nichts einstellen**. Assetto Corsa hat eine eingebaute Telem
 
 ---
 
+## 2d. Overlay im Spiel
+
+Ein kleines, halbtransparentes Fenster, das über dem Spiel liegt:
+
+| Zeile | Bedeutung |
+|---|---|
+| groß oben | **aktuelle Runde**. Bei F1 25 kommt die Zeit live aus dem Spiel. Bei Assetto Corsa wird ab der letzten fertigen Runde mitgezählt („approx.“), deshalb läuft die Zeit dort auch im Pausenmenü weiter. |
+| Last | letzte Runde, daneben der Abstand zu deiner bisherigen Bestzeit mit diesem Auto (grün = schneller) |
+| Best | deine Bestzeit auf dieser Strecke mit diesem Auto, daneben die Runden dieser Session |
+| Record | Streckenrekord mit einem anderen Auto, falls schneller |
+
+**Einschalten:** oben in Lapbook auf **„Overlay“** klicken oder **Strg+Umschalt+O** drücken, das geht auch im Spiel.
+
+**Verschieben und Größe ändern:**
+1. **Strg+Umschalt+L** drücken. Das Overlay bekommt einen gestrichelten Rahmen.
+2. Mit der Maus an die gewünschte Stelle ziehen, an den Rändern die Größe ändern.
+3. Noch einmal **Strg+Umschalt+L**, dann ist es fest. Klicks gehen dann wieder ans Spiel.
+
+Lapbook merkt sich die Position. Größe (S/M/L/XL) und Hintergrund (durchsichtig bis deckend) stellst du unter **Live → Settings → In-game overlay** ein. Dort findest du auch „Reset position“.
+
+**Wichtig:** Das Overlay ist nur sichtbar, wenn das Spiel im Anzeigemodus **„Randlos“** bzw. **„Vollbild (Fenster)“** läuft:
+- **F1 25:** Einstellungen → Grafik → Anzeigemodus → **Randloses Fenster** (Borderless)
+- **Assetto Corsa / Content Manager:** Einstellungen → Assetto Corsa → Video → Display mode: **Fullscreen** ausschalten und **Borderless** bzw. „Windowed“ mit Bildschirmauflösung wählen
+
+Im exklusiven Vollbild zeichnet Windows das Spiel über alle anderen Fenster, dann siehst du das Overlay nicht. In VR geht es ebenfalls nicht.
+
+Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht ins Spiel ein.
+
+---
+
 ## 3. Einstellungen
 
 Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**. Dort kannst du:
@@ -144,6 +175,8 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 | Windows blockiert den Start | „Weitere Informationen“ → „Trotzdem ausführen“. |
 | Assetto Corsa: „Live“ erscheint nicht | Du musst auf der Strecke sein, im Menü sendet AC nichts. Prüfe in den Einstellungen, ob Assetto Corsa auf „On“ steht. |
 | AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Choose folder“ und den `assettocorsa`-Ordner wählen. |
+| Overlay nicht zu sehen | Spiel auf „Randlos“ / „Borderless“ stellen. Mit Strg+Umschalt+O prüfen, ob es an ist, und unter Settings „Reset position“ drücken. |
+| Klicks im Spiel landen im Overlay | Strg+Umschalt+L drücken, um es wieder festzustellen. |
 | Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
 
 ---
@@ -164,6 +197,7 @@ Aufbau:
 - `updates.js`: Update-Pakete lesen, prüfen, installieren und zurücksetzen
 - `main.js`: Fenster, UDP-Empfang (mit automatischem Port-Ausweichen) und Sicherung
 - `f1-25.js`: liest die F1-25-Pakete
+- `app/overlay.html`, `overlay-preload.js`: das Overlay-Fenster
 - `ac.js`, `acnames.js`: Assetto-Corsa-Telemetrie und echte Namen aus dem AC-Ordner
 - `preload.js`: sichere Brücke zur Oberfläche
 - `app/lapbook.html`: die unveränderte Lapbook-Seite

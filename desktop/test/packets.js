@@ -49,3 +49,16 @@ function history(opt, laps, stints, car = opt.player || 0) {
 }
 
 module.exports = { header, session, participants, history };
+
+// Lap Data: 22 cars of 57 bytes (F1 25) + 2 time-trial bytes
+function lapData(opt, { last = 0, current = 0, lapNum = 1, invalid = 0 } = {}) {
+  const stride = 57;
+  const b = header(PACKET.LAP_DATA, opt, HEADER + 22 * stride + 2);
+  const o = HEADER + (opt.player || 0) * stride;
+  b.writeUInt32LE(last, o);
+  b.writeUInt32LE(current, o + 4);
+  b.writeUInt8(lapNum, o + 33);
+  b.writeUInt8(invalid, o + 37);
+  return b;
+}
+module.exports.lapData = lapData;

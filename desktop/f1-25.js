@@ -5,7 +5,7 @@
 const { EventEmitter } = require("events");
 
 const HEADER = 29;
-const PACKET = { SESSION: 1, PARTICIPANTS: 4, SESSION_HISTORY: 11 };
+const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, SESSION_HISTORY: 11 };
 const LAP_SIZE = 14; // LapHistoryData
 const MAX_LAPS = 100;
 const STINT_SIZE = 3; // TyreStintHistoryData
@@ -62,6 +62,7 @@ class F1Telemetry extends EventEmitter {
     this.lastPacket = 0;
     this.format = 0;
     this.names = {}; // your own names for team IDs
+    this.live = null; // { current, last, lapNum, invalid, at } for the overlay
   }
 
   // what is being driven right now, for the live card
@@ -92,10 +93,12 @@ class F1Telemetry extends EventEmitter {
       this.uid = uid;
       this.session = null;
       this.teamId = null;
+      this.live = null;
     }
     if (id === PACKET.SESSION) this.onSession(buf, uid);
     else if (id === PACKET.PARTICIPANTS) this.onParticipants(buf, player);
     else if (id === PACKET.SESSION_HISTORY) this.onHistory(buf, uid, player);
+    else if (id === PACKET.LAP_DATA) this.onLapData(buf, player);
   }
 
   onSession(buf, uid) {
@@ -107,6 +110,21 @@ class F1Telemetry extends EventEmitter {
       airTemp: buf.readInt8(31),
       type: buf.readUInt8(35),
       trackId: buf.readInt8(36),
+    };
+  }
+
+  // running lap time of your car (Lap Data packet: 22 cars, then 2 time-trial bytes)
+  onLapData(buf, player) {
+    const stride = (buf.length - HEADER - 2) / 22;
+    if (!Number.isInteger(stride) || stride < 38 || player >= 22) return;
+    const o = HEADER + player * stride;
+    const inv = buf.readUInt8(o + 37);
+    this.live = {
+      last: buf.readUInt32LE(o),
+      current: buf.readUInt32LE(o + 4),
+      lapNum: buf.readUInt8(o + 33),
+      invalid: inv === 1,
+      at: Date.now(),
     };
   }
 

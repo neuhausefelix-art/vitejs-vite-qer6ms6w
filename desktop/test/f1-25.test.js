@@ -85,3 +85,11 @@ test("2026 McLaren (team 228) and your own names", () => {
   assert.strictEqual(got[0].car, "APXGP");
   assert.strictEqual(got[0].teamId, 251);
 });
+
+test("running lap time for the overlay", () => {
+  const { lapData } = require("./packets.js");
+  const t = new F1Telemetry();
+  t.handle(lapData({ player: 2 }, { last: 81000, current: 12345, lapNum: 4, invalid: 1 }));
+  assert.strictEqual(lapData({}).length, 1285);
+  assert.deepStrictEqual({ ...t.live, at: 0 }, { last: 81000, current: 12345, lapNum: 4, invalid: true, at: 0 });
+});
