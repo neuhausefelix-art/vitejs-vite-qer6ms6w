@@ -5,10 +5,13 @@
 (function () {
   const B = window.lapbridge;
   if (!B) return;
-  const F1 = "F1 25", AC = "Assetto Corsa";
-  let st = { listening: false, port: 20777, error: "", movedFrom: 0, lastPacket: 0, info: {}, lastLap: null, settings: { port: 20777, saveInvalid: false, network: false, acOn: true, carNames: {} }, ac: { connected: false, on: true, folder: "" } };
+  const F1 = "F1 25", AC = "Assetto Corsa", FZ = "Forza";
+  const isFz = g => /^Forza/.test(g || "");
+  let st = { listening: false, port: 20777, error: "", movedFrom: 0, lastPacket: 0, info: {}, lastLap: null, settings: { port: 20777, saveInvalid: false, network: false, acOn: true, carNames: {} }, ac: { connected: false, on: true, folder: "" }, fz: { live: false, on: true, port: 5300, game: "Forza Horizon 6" } };
   let info = { version: "", overlay: false, canRollback: false, previous: "" };
   const added = { [F1]: 0, [AC]: 0 }, lastLap = {};
+  const addedFz = () => Object.entries(added).filter(([g]) => isFz(g)).reduce((n, [, v]) => n + v, 0);
+  let fzWas = false;
   let skipped = 0, wasLive = false, acWas = false, showHow = false, tab = F1;
   let ok = false;
   try { ok = localStorage.getItem("lapbook.liveok") === "1"; tab = localStorage.getItem("lapbook.livetab") || F1; } catch (e) {}
@@ -67,6 +70,7 @@
 
   const f1Live = () => st.listening && Date.now() - st.lastPacket < 5000;
   const acLive = () => st.ac && st.ac.on && st.ac.connected;
+  const fzLive = () => st.fz && st.fz.on && st.fz.live;
   const port = () => st.port || st.settings.port;
   const ovOn = () => !!(st.settings.overlay && st.settings.overlay.on);
 
@@ -93,10 +97,10 @@
     }
     const ob = document.getElementById("ovb");
     if (ob) { ob.textContent = ovOn() ? "Overlay ✓" : "Overlay"; ob.style.color = ovOn() ? "var(--gr)" : ""; }
-    const on = [f1Live() && "F1 25", acLive() && "AC"].filter(Boolean);
+    const on = [f1Live() && "F1 25", acLive() && "AC", fzLive() && "Forza"].filter(Boolean);
     b.textContent = st.error ? "Live: problem" : on.length ? "● Live · " + on.join(" + ") : "○ Live";
     b.style.color = st.error ? "var(--dn)" : on.length ? "var(--gr)" : "var(--mu)";
-    b.title = st.error || (on.length ? "Receiving telemetry" : "Waiting for F1 25 or Assetto Corsa");
+    b.title = st.error || (on.length ? "Receiving telemetry" : "Waiting for F1 25, Assetto Corsa or Forza");
   }
 
   // ---------- live card on the home page ----------
@@ -123,17 +127,39 @@
     return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · Assetto Corsa</span>${openBtn(AC, a.track)}</div>
       <div class="lh"><span><b>${esc(a.track || "Waiting for track")}</b><br><span class="ls">${esc(a.car || "")}</span></span>${lapBox(AC)}</div>${st.ac.folder ? "" : folderNote()}</div>`;
   }
+  function fzRows() {
+    return `<div class="gset"><span>Data Out</span><b>On</b><span>Data Out IP Address</span><b>127.0.0.1</b><span>Data Out IP Port</span><b>${esc(st.fz.port || 5300)}</b><span>Data Out Packet Format</span><b>Car Dash (if offered)</b></div>
+    <p class="ls" style="margin:0">In Forza: Settings → HUD and Gameplay → scroll down to Data Out.</p>
+    <p class="ls" style="margin:0">Microsoft Store / Game Pass version? Windows blocks the data until you allow it once: <button class="b ghost" data-live="loop">Allow Forza</button> (Steam: not needed)</p>`;
+  }
+  function fzLive_() {
+    const f = st.fz, r = f.lastRoute, here = f.near;
+    const askCar = f.ordinal !== null && f.ordinal !== undefined && !f.carKnown;
+    const askRoute = r && /^Unnamed route/.test(r.name);
+    const where = f.inRace ? (here ? here.name : r ? r.name : "Race") : "Free roam";
+    return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(f.game)}</span>${openBtn(f.game, here ? here.name : r ? r.name : "")}</div>
+      <div class="lh"><span><b>${esc(where)}</b><br><span class="ls">${esc([f.car, f.carClass].filter(Boolean).join(" · "))}</span></span>${lapBox(f.game)}</div>
+      ${askCar ? `<div class="nm2"><span class="warn2">Which car is this (Forza car #${esc(f.ordinal)})?</span><input id="fzcar" placeholder="for example Porsche 911 GT3 RS" maxlength="80"><button class="b pri" data-live="fzcar" data-id="${esc(f.ordinal)}">Save name</button></div>` : ""}
+      ${askRoute ? `<div class="nm2"><span class="warn2">Name this race (${esc(r.name)}):</span><input id="fzroute" placeholder="for example Goliath" maxlength="80"><button class="b pri" data-live="fzroute" data-id="${esc(r.id)}">Save name</button></div>` : ""}
+      ${f.unsupported ? `<p class="warn2" style="margin:0">Forza sends packets of ${esc(f.unsupported)} bytes, which Lapbook does not know yet. Tell Claude this number.</p>` : ""}</div>`;
+  }
   function liveCard() {
     if (st.error) {
       return `<section class="panel live err" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking needs attention</span><button class="b" data-live="set">Settings</button></div><p class="ls" style="margin:0;color:var(--dn)">${esc(st.error)}</p></section>`;
     }
-    const a = f1Live(), c = acLive();
-    if (a || c) return `<section class="panel live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}</section>`;
+    const a = f1Live(), c = acLive(), z = fzLive();
+    if (a || c || z) return `<section class="panel live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}${z ? fzLive_() : ""}</section>`;
     if (ok && !showHow) {
-      return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking ready</span><span class="acts"><button class="b ghost" data-live="how">How to</button><button class="b" data-live="set">Settings</button></span></div><p class="ls" style="margin:0">Start F1 25 or Assetto Corsa and drive. Every finished lap is saved automatically.</p>${moved()}</section>`;
+      return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking ready</span><span class="acts"><button class="b ghost" data-live="how">How to</button><button class="b" data-live="set">Settings</button></span></div><p class="ls" style="margin:0">Start F1 25, Assetto Corsa or Forza and drive. Every finished lap is saved automatically.</p>${moved()}</section>`;
     }
-    const chips = `<div class="chips" style="margin:0">${[F1, AC].map(g => `<button class="chip ${tab === g ? "on" : ""}" data-live="tab" data-g="${g}">${g}</button>`).join("")}</div>`;
-    const body = tab === AC
+    const chips = `<div class="chips" style="margin:0">${[F1, AC, FZ].map(g => `<button class="chip ${tab === g ? "on" : ""}" data-live="tab" data-g="${g}">${g}</button>`).join("")}</div>`;
+    const body = tab === FZ
+      ? `<ol class="steps"><li class="${st.fz.listening ? "done" : ""}"><i>${st.fz.listening ? "✓" : "1"}</i><span>Lapbook is ready for Forza on port ${esc(st.fz.port || 5300)}</span></li>
+         <li class="${fzWas ? "done" : ""}"><i>${fzWas ? "✓" : "2"}</i><span>Turn on Data Out in Forza with these settings:</span></li></ol>
+         ${fzRows()}
+         <ol class="steps"><li class="${addedFz() ? "done" : ""}"><i>${addedFz() ? "✓" : "3"}</i><span>Drive a race with laps. After the first lap Lapbook asks once for the car and the race name.</span></li></ol>
+         ${st.fz.movedFrom ? `<p class="warn2" style="margin:0">Port ${st.fz.movedFrom} is used by another program, so Lapbook uses <b>${esc(st.fz.port)}</b>. Set that port in Forza.</p>` : ""}`
+      : tab === AC
       ? `<ol class="steps"><li class="done"><i>✓</i><span>Lapbook is ready for Assetto Corsa</span></li>
          <li class="${acWas ? "done" : ""}"><i>${acWas ? "✓" : "2"}</i><span>Start a session in Assetto Corsa (for example through Content Manager). There is nothing to set in the game: Lapbook connects by itself once you are on track.</span></li>
          <li class="${added[AC] ? "done" : ""}"><i>${added[AC] ? "✓" : "3"}</i><span>Drive one full lap. It is saved here by itself.</span></li></ol>${folderNote()}`
@@ -179,7 +205,7 @@
     if (S.v !== "home") { if (old) old.remove(); return; }
     const html = liveCard();
     if (old && placeCard.last === html) return;
-    if (old && old.contains(document.activeElement) && document.activeElement.id === "cname") return; // typing a car name
+    if (old && old.contains(document.activeElement) && /^(cname|fzcar|fzroute)$/.test(document.activeElement.id)) return; // typing a name
     placeCard.last = html;
     if (old) { old.outerHTML = html; return; }
     const host = document.querySelector("#app .wd > .c2") || document.querySelector("#app .top");
@@ -198,12 +224,23 @@
     if (cs.includes(from)) D.cars[game] = [...new Set(cs.map(c => (c === from ? to : c)))];
     return n;
   }
+  function renameTrack(game, from, to) {
+    if (!from || !to || from === to) return 0;
+    let n = 0;
+    D.lapTimes.forEach(l => { if (l.game === game && l.track === from) { l.track = to; n++; } });
+    D.races.forEach(r => { if (r.game === game && r.track === from) { r.track = to; n++; } });
+    const ts = D.tracks[game] || [];
+    if (ts.includes(from)) D.tracks[game] = [...new Set(ts.map(t => (t === from ? to : t)))];
+    if (D.trackTypes[game] && D.trackTypes[game][from] && !D.trackTypes[game][to]) { D.trackTypes[game][to] = D.trackTypes[game][from]; delete D.trackTypes[game][from]; }
+    if (LAST && LAST.g === game && LAST.t === from) { LAST = { g: game, t: to }; try { localStorage.setItem("lapbook.last", JSON.stringify(LAST)); } catch (e) {} }
+    return n;
+  }
   // laps saved before a team was known get their real name
   async function fixNames() {
     try {
       const k = await B.knownCars();
       let n = 0;
-      for (const [id, name] of Object.entries(k.names)) n += renameCar(F1, k.placeholder[id], name);
+      for (const [id, name] of Object.entries(k.names)) for (const o of (k.old && k.old[id]) || [k.placeholder[id]]) n += renameCar(F1, o, name);
       if (n) { save(); refresh(); toast(`${n} F1 25 lap${n === 1 ? "" : "s"} got their car name`); }
     } catch (e) {}
   }
@@ -225,6 +262,24 @@
       placeCard.last = "";
       toast("Car name saved");
     }
+    if (k === "loop") {
+      const r = await B.forzaLoopback();
+      toast(r.ok ? "Windows asks for permission. Click Yes, then restart Forza." : r.error || "That did not work");
+    }
+    if (k === "fzcar") {
+      const v = ($("#fzcar") || {}).value || "";
+      if (!v.trim()) return toast("Type the car's name first");
+      const r = await B.forzaNameCar(t.dataset.id, v.trim());
+      if (r.ok) { for (const g of Object.keys(D.tracks).filter(isFz)) renameCar(g, r.old, r.name); save(); }
+      placeCard.last = ""; refresh(); toast("Car name saved");
+    }
+    if (k === "fzroute") {
+      const v = ($("#fzroute") || {}).value || "";
+      if (!v.trim()) return toast("Type the race's name first");
+      const r = await B.forzaNameRoute(st.fz.game, t.dataset.id, v.trim());
+      if (r.ok) { renameTrack(st.fz.game, r.old, r.name); save(); }
+      placeCard.last = ""; refresh(); toast("Race name saved");
+    }
     if (k === "open") {
       Object.assign(S, { v: "track", g: t.dataset.g, t: t.dataset.t, tab: "tracks", F: {}, open: "", add: false, edit: "", hc: "", hn: 30, co: false });
       render(); scrollTo(0, 0);
@@ -239,6 +294,9 @@
   async function openPanel() {
     const s = st.settings, k = await B.knownCars().catch(() => ({ names: {} }));
     const own = Object.entries(s.carNames || {});
+    const fl = await B.forzaList().catch(() => ({ cars: {}, routes: {} }));
+    const fzl = Object.entries(fl.cars || {}).map(([id, n]) => `<span>Car ${esc(id)}</span><input data-fzcar="${esc(id)}" value="${esc(n)}">`).join("")
+      + Object.entries(fl.routes || {}).flatMap(([g, rs]) => rs.map(r => `<span>${esc(g.replace("Forza Horizon", "FH"))}</span><input data-fzroute="${esc(r.id)}" data-g="${esc(g)}" value="${esc(r.name)}">`)).join("");
     $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Live tracking settings</h3>
       <h4>F1 25</h4>
       <div class="two"><label>UDP port<input id="tport" inputmode="numeric" value="${esc(s.port)}"></label><label>Invalid laps<select id="tinv"><option value="0" ${s.saveInvalid ? "" : "selected"}>Skip them</option><option value="1" ${s.saveInvalid ? "selected" : ""}>Save them too</option></select></label></div>
@@ -249,6 +307,10 @@
       <h4>Assetto Corsa</h4>
       <label>Live tracking<select id="acon"><option value="1" ${s.acOn !== false ? "selected" : ""}>On</option><option value="0" ${s.acOn === false ? "selected" : ""}>Off</option></select></label>
       <p class="ls" style="margin:0;color:var(--mu)">Folder: ${st.ac.folder ? esc(st.ac.folder) : "not found"} <button class="b ghost" id="acpick" type="button">Choose folder</button></p>
+      <h4>Forza Horizon</h4>
+      <div class="two"><label>Live tracking<select id="fzon"><option value="1" ${s.forzaOn !== false ? "selected" : ""}>On</option><option value="0" ${s.forzaOn === false ? "selected" : ""}>Off</option></select></label><label>Data Out port<input id="fzport" inputmode="numeric" value="${esc(s.forzaPort || 5300)}"></label></div>
+      <label>Game<select id="fzgame">${[["auto", "Find out by itself"], ["Forza Horizon 6", "Forza Horizon 6"], ["Forza Horizon 5", "Forza Horizon 5"]].map(([v, n]) => `<option value="${v}" ${(s.forzaGame || "auto") === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+      <div class="cn" id="fzl">${fzl}</div>
       <h4>In-game overlay</h4>
       <div class="two"><label>Overlay<select id="ovon"><option value="1" ${ovOn() ? "selected" : ""}>On</option><option value="0" ${ovOn() ? "" : "selected"}>Off</option></select></label>
       <label>Position<select id="ovlk"><option value="1" ${(s.overlay || {}).locked !== false ? "selected" : ""}>Locked (clicks go to the game)</option><option value="0" ${(s.overlay || {}).locked === false ? "selected" : ""}>Unlocked (drag to move)</option></select></label></div>
@@ -260,7 +322,12 @@
     $("#ovrs").onclick = async () => { st.settings.overlay = await B.setOverlay({ on: true, reset: true }); toast("Overlay moved to the top right"); };
     $("#acpick").onclick = async () => { const d = await B.pickACFolder(); if (d) { await B.setACFolder(d); openPanel(); } };
     $("#tsave").onclick = async () => {
+      let n0 = 0;
       st.settings = await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1" });
+      await B.setSettings({ port: Number($("#tport").value), saveInvalid: $("#tinv").value === "1", network: $("#tnet").value === "1", acOn: $("#acon").value === "1", forzaOn: $("#fzon").value === "1", forzaPort: Number($("#fzport").value), forzaGame: $("#fzgame").value });
+      for (const i of document.querySelectorAll("#fzl [data-fzcar]")) { const r = await B.forzaNameCar(i.dataset.fzcar, i.value); if (r.ok) for (const g of Object.keys(D.tracks).filter(isFz)) n0 += renameCar(g, r.old, r.name); }
+      for (const i of document.querySelectorAll("#fzl [data-fzroute]")) { const r = await B.forzaNameRoute(i.dataset.g, i.dataset.fzroute, i.value); if (r.ok) n0 += renameTrack(i.dataset.g, r.old, r.name); }
+      if (n0) save();
       st.settings.overlay = await B.setOverlay({ on: $("#ovon").value === "1", locked: $("#ovlk").value === "1", scale: Number($("#ovsz").value), opacity: Number($("#ovop").value) });
       for (const i of document.querySelectorAll("#cnl [data-team]")) await B.nameCar(i.dataset.team, i.value);
       const nid = $("#cnid").value.trim(), nn = $("#cnn").value.trim();
@@ -282,14 +349,15 @@
   // ---------- overlay data: what the in-game overlay shows ----------
   let lastGame = "";
   function overlayFeed() {
-    const g = f1Live() ? F1 : acLive() ? AC : lastGame;
+    const g = f1Live() ? F1 : acLive() ? AC : fzLive() ? st.fz.game : lastGame;
     if (!g) return B.overlayData({});
-    const track = g === F1 ? (st.info || {}).track : st.ac.track, car = g === F1 ? (st.info || {}).car : st.ac.car;
+    const fzTrack = st.fz.near ? st.fz.near.name : st.fz.lastRoute ? st.fz.lastRoute.name : "";
+    const track = g === F1 ? (st.info || {}).track : isFz(g) ? fzTrack : st.ac.track, car = g === F1 ? (st.info || {}).car : isFz(g) ? st.fz.car : st.ac.car;
     if (!track) return B.overlayData({ game: g, live: f1Live() || acLive() });
     const all = D.lapTimes.filter(l => l.game === g && l.track === track), mine = all.filter(l => l.car === car);
     const rec = best(all), b = best(mine), lastL = mine[mine.length - 1], prev = best(mine.slice(0, -1));
     B.overlayData({
-      game: g, live: g === F1 ? f1Live() : acLive(), track, car,
+      game: g, live: g === F1 ? f1Live() : isFz(g) ? fzLive() : acLive(), track, car,
       last: lastGame === g && lastL ? lastL.timeInMs : 0, prevBest: prev ? prev.timeInMs : 0,
       best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
     });
@@ -368,14 +436,15 @@
     const y = scrollY; render(); scrollTo(0, y);
   }
   B.onStatus(s => {
-    st = { ...st, ...s, ac: { ...st.ac, ...(s.ac || {}) } };
+    st = { ...st, ...s, ac: { ...st.ac, ...(s.ac || {}) }, fz: { ...st.fz, ...(s.fz || {}) } };
+    if (fzLive() && !fzWas) { fzWas = true; toast(st.fz.game + " connected. Race laps are saved automatically."); }
     if (f1Live() && !wasLive) { wasLive = true; toast("F1 25 connected. Laps are saved automatically."); }
     if (acLive() && !acWas) { acWas = true; toast("Assetto Corsa connected. Laps are saved automatically."); }
     header(); placeCard(); overlayFeed();
   });
   B.onSkipped(() => { skipped++; placeCard.last = ""; placeCard(); toast("F1 25: invalid lap not saved"); });
   B.onLap(l => {
-    const G = l.game === AC ? AC : F1;
+    const G = l.game === AC ? AC : isFz(l.game) ? l.game : F1;
     const ms = Math.round(Number(l.timeInMs));
     if (!(ms > 0) || !l.track || !l.car) return;
     if (!Array.isArray(D.tracks[G])) D.tracks[G] = [];
@@ -390,19 +459,21 @@
         notes: [l.session, l.valid ? "" : "invalid", "auto"].filter(Boolean).join(" · "),
         airTemp: l.airTemp === undefined ? "" : String(l.airTemp), asphaltTemp: l.trackTemp === undefined ? "" : String(l.trackTemp),
       });
-    } else Object.assign(lap, { weather: "", condition: "", tire: "", notes: "auto" });
+    } else if (isFz(G)) Object.assign(lap, { weather: "", condition: "", tire: "", season: "", notes: [l.carClass, "auto"].filter(Boolean).join(" · ") });
+    else Object.assign(lap, { weather: "", condition: "", tire: "", notes: "auto" });
     D.lapTimes.push(lap);
     if (!D.tracks[G].includes(l.track)) D.tracks[G].push(l.track);
     if (!D.cars[G].includes(l.car)) D.cars[G].push(l.car);
     LAST = { g: G, t: l.track };
     try { localStorage.setItem("lapbook.last", JSON.stringify(LAST)); } catch (e) {}
-    added[G]++; lastLap[G] = ms; lastGame = G;
+    added[G] = (added[G] || 0) + 1; lastLap[G] = ms; lastGame = G;
     if (!ok) { ok = true; try { localStorage.setItem("lapbook.liveok", "1"); } catch (e) {} }
     save();
     refresh();
     overlayFeed();
     const rec = !prev || ms < prev.timeInMs;
-    toast(`${G === AC ? "AC" : "F1 25"} · ${l.track}: ${fmt(ms)}` + (rec ? (prev ? `, new record by ${gp(prev.timeInMs - ms)}` : ", first lap here") : `, +${gp(ms - prev.timeInMs)} to record`) + (l.valid ? "" : " (invalid)"));
+    if (isFz(G)) added[G] = added[G] || 0;
+    toast(`${G === AC ? "AC" : isFz(G) ? G.replace("Forza Horizon", "FH") : "F1 25"} · ${l.track}: ${fmt(ms)}` + (rec ? (prev ? `, new record by ${gp(prev.timeInMs - ms)}` : ", first lap here") : `, +${gp(ms - prev.timeInMs)} to record`) + (l.valid ? "" : " (invalid)"));
   });
   B.getSettings().then(s => { st.settings = s; st.port = s.port; header(); placeCard(); });
   B.appInfo().then(i => { info = i; if (i.bootError) toast(i.bootError); });

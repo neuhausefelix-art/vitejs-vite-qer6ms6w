@@ -29,6 +29,13 @@ const TEAMS_2026 = {
   220: "Mercedes", 221: "Ferrari", 222: "Red Bull Racing", 223: "Williams", 224: "Aston Martin", 225: "Alpine",
   226: "Racing Bulls", 227: "Haas", 228: "McLaren", 229: "Audi", 230: "Cadillac",
 };
+// the real car names (chassis) per team ID
+const CHASSIS = {
+  0: "Mercedes W16", 1: "Ferrari SF-25", 2: "Red Bull Racing RB21", 3: "Williams FW47", 4: "Aston Martin AMR25",
+  5: "Alpine A525", 6: "Racing Bulls VCARB 02", 7: "Haas VF-25", 8: "McLaren MCL39", 9: "Kick Sauber C45",
+  220: "Mercedes W17", 221: "Ferrari SF-26", 222: "Red Bull Racing RB22", 223: "Williams FW48", 224: "Aston Martin AMR26",
+  225: "Alpine A526", 226: "Racing Bulls VCARB 03", 227: "Haas VF-26", 228: "McLaren MCL40", 229: "Audi R26",
+};
 const SESSIONS = {
   1: "Practice 1", 2: "Practice 2", 3: "Practice 3", 4: "Short Practice", 5: "Q1", 6: "Q2", 7: "Q3",
   8: "Short Qualifying", 9: "One-Shot Qualifying", 10: "Sprint Shootout 1", 11: "Sprint Shootout 2",
@@ -44,7 +51,9 @@ const trackName = id => TRACKS[id] || `Track ${id}`;
 const unknownCar = id => `F1 25 car (team ${id})`;
 // own names (set in Lapbook) win over the built-in list
 const carName = (id, own = {}) =>
-  own[id] ? String(own[id]) : TEAMS[id] ? `${TEAMS[id]} F1 25` : TEAMS_2026[id] ? `${TEAMS_2026[id]} 2026` : unknownCar(id);
+  own[id] ? String(own[id]) : CHASSIS[id] || (TEAMS[id] ? `${TEAMS[id]} F1 25` : TEAMS_2026[id] ? `${TEAMS_2026[id]} 2026` : unknownCar(id));
+// names earlier Lapbook versions used, so old laps can be renamed to the real car
+const oldNames = id => [unknownCar(id), TEAMS[id] && `${TEAMS[id]} F1 25`, TEAMS_2026[id] && `${TEAMS_2026[id]} 2026`].filter(Boolean);
 const knownCars = () => {
   const o = {};
   for (const id of Object.keys(TEAMS)) o[id] = carName(Number(id));
@@ -176,4 +185,4 @@ class F1Telemetry extends EventEmitter {
   }
 }
 
-module.exports = { F1Telemetry, TRACKS, TEAMS, TEAMS_2026, carName, unknownCar, knownCars, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };
+module.exports = { F1Telemetry, TRACKS, TEAMS, TEAMS_2026, CHASSIS, carName, unknownCar, oldNames, knownCars, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };

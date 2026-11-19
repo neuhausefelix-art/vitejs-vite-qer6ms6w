@@ -21,7 +21,7 @@ test("emits each finished lap once, with track, car, tyre and weather", () => {
   assert.strictEqual(got.length, 2);
   assert.deepStrictEqual(
     { track: got[0].track, car: got[0].car, ms: got[0].timeInMs, valid: got[0].valid, tire: got[0].tire, w: got[0].weather, s: got[0].session },
-    { track: "Monza", car: "McLaren F1 25", ms: 81234, valid: true, tire: "soft", w: "light_cloud", s: "Time Trial" }
+    { track: "Monza", car: "McLaren MCL39", ms: 81234, valid: true, tire: "soft", w: "light_cloud", s: "Time Trial" }
   );
   assert.strictEqual(got[1].valid, false);
   assert.strictEqual(got[1].lapNum, 2);
@@ -38,7 +38,7 @@ test("ignores other cars and waits until track and car are known", () => {
   t.handle(participants(opt, 1));
   t.handle(history(opt, [[90000, true]], [[255, 17]]));
   assert.strictEqual(got.length, 1);
-  assert.strictEqual(got[0].car, "Ferrari F1 25");
+  assert.strictEqual(got[0].car, "Ferrari SF-25");
   assert.strictEqual(got[0].tire, "medium");
 });
 
@@ -72,8 +72,9 @@ test("ignores packets from other games or years", () => {
 
 test("2026 McLaren (team 228) and your own names", () => {
   const { carName, unknownCar } = require("../f1-25.js");
-  assert.strictEqual(carName(228), "McLaren 2026");
-  assert.strictEqual(carName(8), "McLaren F1 25");
+  assert.strictEqual(carName(228), "McLaren MCL40");
+  assert.strictEqual(carName(8), "McLaren MCL39");
+  assert.strictEqual(carName(230), "Cadillac 2026");
   assert.strictEqual(carName(250), unknownCar(250));
   assert.strictEqual(carName(250, { 250: "Konnersport" }), "Konnersport");
   const t = new F1Telemetry(), got = [];

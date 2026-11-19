@@ -1,7 +1,7 @@
-# Lapbook für Windows – Anleitung (Version 1.3.0)
+# Lapbook für Windows – Anleitung (Version 1.4.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
-- **Live-Tracking für F1 25 und Assetto Corsa:** Jede gefahrene Runde wird automatisch gespeichert. Bei F1 25 kommen Strecke, Auto, Zeit, Reifen, Wetter und Temperaturen mit, bei Assetto Corsa Strecke, Auto und Zeit.
+- **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
 - **Overlay im Spiel:** aktuelle Runde, letzte Runde mit Abstand zur Bestzeit, Bestzeit und Streckenrekord.
 - **Breites Layout** für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
@@ -11,9 +11,9 @@ Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst 
 
 ---
 
-## 0. Update auf 1.3.0
+## 0. Update auf 1.4.0
 
-Du hast Lapbook 1.1.0 oder 1.2.0 schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.3.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.4.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -81,10 +81,50 @@ Im Spiel musst du **nichts einstellen**. Assetto Corsa hat eine eingebaute Telem
 
 ## 2c. F1 25: Autonamen
 
-- Die Autos der Saison 2025 heißen z. B. „McLaren F1 25“, die der Saison 2026 z. B. „McLaren 2026“.
-- Kennt Lapbook ein Auto nicht, z. B. Fantasie-Teams oder F2, fragt die Live-Karte **„Which car is this?“**. Gib den Namen einmal ein, ab dann erkennt Lapbook das Auto.
-- Runden, die schon unter einem Namen wie „F1 25 car (team 228)“ gespeichert sind, werden dabei **automatisch umbenannt**.
-- Namen ändern kannst du jederzeit unter **Live → Settings → F1 25 car names**.
+Lapbook kennt die echten Fahrzeugnamen:
+
+| 2025 | 2026 |
+|---|---|
+| McLaren MCL39 | McLaren MCL40 |
+| Ferrari SF-25 | Ferrari SF-26 |
+| Red Bull Racing RB21 | Red Bull Racing RB22 |
+| Mercedes W16 | Mercedes W17 |
+| Aston Martin AMR25 | Aston Martin AMR26 |
+| Alpine A525 | Alpine A526 |
+| Williams FW47 | Williams FW48 |
+| Racing Bulls VCARB 02 | Racing Bulls VCARB 03 |
+| Haas VF-25 | Haas VF-26 |
+| Kick Sauber C45 | Audi R26 |
+| – | Cadillac (noch ohne Modellnamen) |
+
+- Runden, die du mit älteren Versionen gespeichert hast, z. B. als „McLaren 2026“ oder „F1 25 car (team 228)“, werden **automatisch umbenannt**.
+- Ein Hinweis zu den 2026er-Autos: Sicher bekannt ist nur, dass Team 228 der McLaren ist. Die anderen Nummern sind aus derselben Reihenfolge abgeleitet. Steht bei einem Auto etwas Falsches, korrigiere es einmal unter **Live → Settings → F1 25 car names**. Dort gibst du die Teamnummer und den richtigen Namen ein, die Runden werden mit umbenannt.
+- Ganz unbekannte Autos, z. B. Fantasie-Teams oder F2, fragt die Live-Karte einmal ab: **„Which car is this?“**.
+
+---
+
+## 2e. Forza Horizon 6 / 5
+
+**In Forza einstellen (einmalig):** Einstellungen → **HUD und Gameplay** → ganz nach unten zu **Data Out**:
+
+| Einstellung | Wert |
+|---|---|
+| Data Out | **An** |
+| Data Out IP Address | **127.0.0.1** |
+| Data Out IP Port | **5300** (oder die Zahl, die Lapbook anzeigt) |
+| Data Out Packet Format | **Car Dash**, falls die Auswahl angeboten wird |
+
+**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke in der Live-Karte im Reiter „Forza“ einmal auf **„Allow Forza“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte danach Forza neu. Die **Steam-Version** braucht das nicht.
+
+**So funktioniert es:**
+- Forza sendet **keinen Auto- und keinen Streckennamen**, nur eine Auto-Nummer und die Position auf der Karte. Deshalb fragt Lapbook nach der ersten Runde **einmal**:
+  - **„Which car is this?“**: den Autonamen eingeben, z. B. „Porsche 911 GT3 RS“
+  - **„Name this race“**: den Namen des Rennens eingeben, z. B. „Goliath“
+- Danach erkennt Lapbook das Auto an seiner Nummer und das Rennen an der Stelle der Ziellinie, und zwar dauerhaft.
+- Gespeichert werden **Rundenrennen**, also Rundkurse. Bei jeder fertigen Runde wird die Zeit gespeichert. Sprints von A nach B ohne Runden erkennt Lapbook noch nicht.
+- Klasse und PI werden als Notiz mitgespeichert, z. B. „S1 812 · auto“.
+- Lapbook erkennt selbst, ob Forza Horizon 6 oder 5 läuft. Falls nicht, stellst du es unter **Settings → Forza Horizon → Game** ein.
+- Namen ändern: **Live → Settings → Forza Horizon**.
 
 ---
 
@@ -177,6 +217,8 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 | AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Choose folder“ und den `assettocorsa`-Ordner wählen. |
 | Overlay nicht zu sehen | Spiel auf „Randlos“ / „Borderless“ stellen. Mit Strg+Umschalt+O prüfen, ob es an ist, und unter Settings „Reset position“ drücken. |
 | Klicks im Spiel landen im Overlay | Strg+Umschalt+L drücken, um es wieder festzustellen. |
+| Forza: nichts kommt an | Data Out **An**, IP **127.0.0.1**, Port wie in Lapbook. Bei Game Pass: „Allow Forza“ klicken und Forza neu starten. |
+| Forza: „packets of … bytes“ | Diese Forza-Version sendet ein anderes Format. Sag mir die Zahl, dann passe ich es an. |
 | Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
 
 ---
@@ -198,6 +240,7 @@ Aufbau:
 - `main.js`: Fenster, UDP-Empfang (mit automatischem Port-Ausweichen) und Sicherung
 - `f1-25.js`: liest die F1-25-Pakete
 - `app/overlay.html`, `overlay-preload.js`: das Overlay-Fenster
+- `forza.js`: Forza Data Out (Runden, Auto-Nummern, Rennen anhand der Ziellinie)
 - `ac.js`, `acnames.js`: Assetto-Corsa-Telemetrie und echte Namen aus dem AC-Ordner
 - `preload.js`: sichere Brücke zur Oberfläche
 - `app/lapbook.html`: die unveränderte Lapbook-Seite

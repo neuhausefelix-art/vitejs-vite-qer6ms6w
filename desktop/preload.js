@@ -25,5 +25,10 @@ contextBridge.exposeInMainWorld("lapbridge", {
   pickACFolder: () => ipcRenderer.invoke("ac:pick"),
   setOverlay: o => ipcRenderer.invoke("overlay:set", o),
   overlayData: d => ipcRenderer.send("overlay:data", d),
+  forzaNameCar: (ordinal, name) => ipcRenderer.invoke("forza:nameCar", ordinal, name),
+  forzaNameRoute: (game, id, name) => ipcRenderer.invoke("forza:nameRoute", game, id, name),
+  forzaList: () => ipcRenderer.invoke("forza:list"),
+  forzaDeleteRoute: (game, id) => ipcRenderer.invoke("forza:deleteRoute", game, id),
+  forzaLoopback: () => ipcRenderer.invoke("forza:loopback"),
   onOpenUpdate: cb => ipcRenderer.on("update:open", (e, file) => cb(file)),
 });

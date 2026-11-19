@@ -22,7 +22,7 @@ body.edit #o{-webkit-app-region:drag;border:1px dashed var(--rd);cursor:move}
 body.edit .hint{display:block}
 .idle{color:var(--mu);font-size:calc(14px*var(--k))}
 </style></head><body>
-<div id="o"><div class="idle">Lapbook overlay · waiting for F1 25 or Assetto Corsa</div></div>
+<div id="o"><div class="idle">Lapbook overlay · waiting for F1 25, Assetto Corsa or Forza</div></div>
 <script>
 const $ = s => document.querySelector(s);
 const pad = (n, l = 2) => String(n).padStart(l, "0");
@@ -38,12 +38,13 @@ function draw() {
   const o = $("#o");
   if (!d.game) {
     o.className = "";
-    o.innerHTML = `<div class="idle">Lapbook overlay · waiting for F1 25 or Assetto Corsa</div><div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
+    o.innerHTML = `<div class="idle">Lapbook overlay · waiting for F1 25, Assetto Corsa or Forza</div><div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
     return;
   }
   // running lap: F1 25 sends it, for Assetto Corsa it is counted from the last finished lap
   let cur = 0, approx = false;
   if (d.game === "F1 25" && live.f1 && Date.now() - live.f1.at < 3000) cur = live.f1.current;
+  else if (/^Forza/.test(d.game) && live.fz && Date.now() - live.fz.at < 3000 && live.fz.inRace) cur = live.fz.current;
   else if (d.game === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
   const inv = d.game === "F1 25" && live.f1 && live.f1.invalid;
   const delta = d.last && d.prevBest ? d.last - d.prevBest : null;

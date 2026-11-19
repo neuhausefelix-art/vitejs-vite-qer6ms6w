@@ -5,14 +5,16 @@ const { app, BrowserWindow, ipcMain, shell, dialog, globalShortcut, screen } = r
 const path = require("path");
 const fs = require("fs");
 const dgram = require("dgram");
-const { F1Telemetry, knownCars, unknownCar } = require("./f1-25.js");
+const { F1Telemetry, knownCars, unknownCar, oldNames } = require("./f1-25.js");
 const { ACTelemetry } = require("./ac.js");
 const { ACNames } = require("./acnames.js");
+const { ForzaTelemetry, placeholderCar } = require("./forza.js");
+const { execFile, spawn } = require("child_process");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.82, bounds: null };
-const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY } };
+const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {} };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
 let sock = null;
@@ -22,6 +24,8 @@ let pendingUpdate = "";
 const f1 = new F1Telemetry();
 const acNames = new ACNames();
 const ac = new ACTelemetry({ names: acNames });
+const fz = new ForzaTelemetry();
+let fzSock = null, fzStatus = { listening: false, port: 5300, error: "", movedFrom: 0 };
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const backupDir = () => path.join(app.getPath("documents"), "Lapbook");
@@ -39,6 +43,11 @@ function loadSettings() {
   settings.port = clampPort(settings.port);
   if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
   settings.overlay = { ...OVERLAY, ...(settings.overlay || {}) };
+  for (const k of ["forzaCars", "forzaRoutes"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
+  settings.forzaPort = clampPort(settings.forzaPort || 5300);
+  fz.cars = settings.forzaCars;
+  fz.routes = settings.forzaRoutes;
+  if (settings.forzaGame && settings.forzaGame !== "auto") fz.game = settings.forzaGame;
   f1.names = settings.carNames;
   acNames.setFolder(settings.acPath);
 }
@@ -52,7 +61,7 @@ function send(channel, data) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, data);
 }
 function pushStatus() {
-  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings, ac: { ...ac.info(), on: settings.acOn, folder: acNames.folder } });
+  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings, ac: { ...ac.info(), on: settings.acOn, folder: acNames.folder }, fz: { ...fz.info(), ...fzStatus, on: settings.forzaOn } });
 }
 
 // Opens the UDP port. If another program already uses it, the next free port
@@ -90,6 +99,63 @@ function listen(port = settings.port, tries = 0) {
   // 127.0.0.1 = only this PC. "network" also accepts a console or a second PC.
   s.bind(port, settings.network ? "0.0.0.0" : "127.0.0.1");
   sock = s;
+}
+
+// ---- Forza "Data Out" on its own port (default 5300), same auto-fallback ----
+function listenForza(port = settings.forzaPort, tries = 0) {
+  if (fzSock) {
+    try { fzSock.close(); } catch (e) {}
+    fzSock = null;
+  }
+  if (tries === 0) fzStatus.movedFrom = 0;
+  fzStatus = { ...fzStatus, listening: false, error: "", port };
+  if (!settings.forzaOn) return pushStatus();
+  const s = dgram.createSocket({ type: "udp4" });
+  s.on("message", msg => fz.handle(msg));
+  s.on("error", err => {
+    try { s.close(); } catch (e) {}
+    if (fzSock === s) fzSock = null;
+    if (err.code === "EADDRINUSE" && tries < AUTO_PORTS) {
+      if (tries === 0) fzStatus.movedFrom = port;
+      return listenForza(port + 1, tries + 1);
+    }
+    fzStatus.error = err.code === "EADDRINUSE" ? `Forza: ports ${settings.forzaPort} to ${port} are used by other programs.` : String(err.message || err);
+    pushStatus();
+  });
+  s.on("listening", () => {
+    fzStatus.listening = true;
+    if (fzStatus.movedFrom) {
+      settings.forzaPort = port;
+      saveSettings();
+    }
+    pushStatus();
+  });
+  s.bind(port, settings.network ? "0.0.0.0" : "127.0.0.1");
+  fzSock = s;
+}
+fz.on("lap", lap => {
+  send("telemetry:lap", lap);
+  pushStatus();
+});
+fz.on("routes", routes => {
+  settings.forzaRoutes = routes;
+  saveSettings();
+});
+// Which Forza is running? Forza sends no game name, so look at the running programs.
+let fzCheck = 0;
+function detectForza() {
+  if (settings.forzaGame && settings.forzaGame !== "auto") { fz.game = settings.forzaGame; return; }
+  if (process.platform !== "win32" || Date.now() - fz.lastPacket > 5000 || Date.now() - fzCheck < 15000) return;
+  fzCheck = Date.now();
+  execFile("tasklist", ["/FO", "CSV", "/NH"], { windowsHide: true, timeout: 8000 }, (err, out) => {
+    if (err || !out) return;
+    const t = out.toLowerCase();
+    const g = t.includes("forzahorizon6") ? "Forza Horizon 6" : t.includes("forzahorizon5") ? "Forza Horizon 5" : t.includes("forzahorizon4") ? "Forza Horizon 4" : t.includes("forza") && t.includes("motorsport") ? "Forza Motorsport" : "";
+    if (g && g !== fz.game) {
+      fz.game = g;
+      pushStatus();
+    }
+  });
 }
 
 f1.on("lap", lap => {
@@ -169,7 +235,7 @@ function openOverlay() {
   clearInterval(overlayTimer);
   overlayTimer = setInterval(() => {
     if (!overlay || overlay.isDestroyed()) return;
-    overlay.webContents.send("overlay:live", { f1: f1.live, acAt: ac.lastLap ? ac.lastLap.at : 0 });
+    overlay.webContents.send("overlay:live", { f1: f1.live, fz: fz.live, acAt: ac.lastLap ? ac.lastLap.at : 0 });
   }, 100);
 }
 function closeOverlay() {
@@ -281,25 +347,81 @@ function createWindow() {
 ipcMain.handle("settings:get", () => settings);
 ipcMain.handle("settings:set", (e, next) => {
   const before = { ...settings };
+  const beforeFz = { on: settings.forzaOn, port: settings.forzaPort };
   settings = {
     ...settings,
     port: clampPort(next && next.port),
     saveInvalid: !!(next && next.saveInvalid),
     network: !!(next && next.network),
     acOn: next && next.acOn !== undefined ? !!next.acOn : settings.acOn,
+    forzaOn: next && next.forzaOn !== undefined ? !!next.forzaOn : settings.forzaOn,
+    forzaPort: next && next.forzaPort !== undefined ? clampPort(next.forzaPort) : settings.forzaPort,
+    forzaGame: next && next.forzaGame ? String(next.forzaGame) : settings.forzaGame,
   };
+  if (settings.forzaGame !== "auto") fz.game = settings.forzaGame;
   saveSettings();
   if (before.port !== settings.port || before.network !== settings.network) listen();
   if (settings.acOn) ac.start();
   else ac.stop();
+  if (beforeFz.on !== settings.forzaOn || beforeFz.port !== settings.forzaPort || before.network !== settings.network) listenForza();
   pushStatus();
   return settings;
 });
+// Forza: name a car (by its number) or a route; laps keep their link by name
+ipcMain.handle("forza:nameCar", (e, ordinal, name) => {
+  const id = String(Math.round(Number(ordinal)));
+  const n = String(name || "").trim().slice(0, 80);
+  if (!/^\d+$/.test(id) || !n) return { ok: false };
+  const old = settings.forzaCars[id] || placeholderCar(id);
+  settings.forzaCars[id] = n;
+  fz.cars = settings.forzaCars;
+  saveSettings();
+  pushStatus();
+  return { ok: true, old, name: n };
+});
+ipcMain.handle("forza:nameRoute", (e, game, id, name) => {
+  const list = settings.forzaRoutes[game] || [];
+  const r = list.find(x => x.id === id);
+  const n = String(name || "").trim().slice(0, 80);
+  if (!r || !n) return { ok: false };
+  const old = r.name;
+  r.name = n;
+  fz.routes = settings.forzaRoutes;
+  saveSettings();
+  pushStatus();
+  return { ok: true, old, name: n };
+});
+ipcMain.handle("forza:list", () => ({ cars: settings.forzaCars, routes: settings.forzaRoutes, game: fz.game }));
+ipcMain.handle("forza:deleteRoute", (e, game, id) => {
+  settings.forzaRoutes[game] = (settings.forzaRoutes[game] || []).filter(x => x.id !== id);
+  fz.routes = settings.forzaRoutes;
+  saveSettings();
+  return { ok: true };
+});
+// Microsoft Store / Game Pass versions of Forza may not send to 127.0.0.1 until
+// Windows allows it ("loopback exemption"). This asks Windows for admin rights once.
+ipcMain.handle("forza:loopback", () => {
+  if (process.platform !== "win32") return { ok: false, error: "Only needed on Windows." };
+  const script = [
+    "$fams = Get-AppxPackage | Where-Object { $_.Name -match 'Forza|SunriseBaseGame|624F8B84B80' -or (((Get-AppxPackageManifest $_ -ErrorAction SilentlyContinue).Package.Properties.DisplayName) -match 'Forza') } | ForEach-Object { $_.PackageFamilyName }",
+    "if (-not $fams) { Write-Host 'No Microsoft Store / Game Pass version of Forza found. The Steam version does not need this.'; Start-Sleep 6; exit }",
+    "foreach ($f in $fams) { CheckNetIsolation.exe LoopbackExempt -a -n=$f; Write-Host ('Allowed: ' + $f) }",
+    "Write-Host 'Done. Restart Forza.'; Start-Sleep 5",
+  ].join("\n");
+  const enc = Buffer.from(script, "utf16le").toString("base64");
+  try {
+    spawn("powershell.exe", ["-NoProfile", "-Command", `Start-Process powershell.exe -Verb RunAs -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-EncodedCommand','${enc}'`], { windowsHide: true, detached: true, stdio: "ignore" }).unref();
+    return { ok: true };
+  } catch (err) {
+    return { ok: false, error: String(err.message || err) };
+  }
+});
+
 // F1 25 car names: the built-in list plus your own names for unknown team IDs
 ipcMain.handle("cars:known", () => {
   const all = { ...knownCars() };
   for (const [id, n] of Object.entries(settings.carNames)) all[id] = n;
-  return { names: all, placeholder: Object.fromEntries(Object.keys(all).map(id => [id, unknownCar(id)])) };
+  return { names: all, placeholder: Object.fromEntries(Object.keys(all).map(id => [id, unknownCar(id)])), old: Object.fromEntries(Object.keys(all).map(id => [id, oldNames(Number(id))])) };
 });
 ipcMain.handle("cars:name", (e, teamId, name) => {
   const id = String(Math.round(Number(teamId)));
@@ -388,6 +510,8 @@ if (!app.requestSingleInstanceLock()) {
     createWindow();
     listen();
     if (settings.acOn) ac.start();
+    listenForza();
+    setInterval(detectForza, 3000);
     if (ov().on) openOverlay();
     // Ctrl+Shift+O: overlay on/off, Ctrl+Shift+L: lock/unlock (to move it)
     globalShortcut.register("CommandOrControl+Shift+O", () => setOverlay({ on: !ov().on }));
