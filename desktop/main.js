@@ -14,7 +14,7 @@ const { DeltaTracker } = require("./delta.js");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
-const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.88, bounds: null, v: 2 };
+const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr" };
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
@@ -252,26 +252,57 @@ ac.on("error", () => {});
 // ---- in-game overlay: a small always-on-top window above the game ----
 // It is a normal window drawn on top, nothing is injected into the game.
 // Shows over games in borderless / windowed fullscreen mode.
-let overlay = null, overlayData = {}, overlayTimer = null;
+let overlay = null, overlayData = {}, overlayTimer = null, placingAt = 0;
 const ov = () => settings.overlay;
 function overlaySize() {
   const k = Math.max(0.6, Math.min(2.5, Number(ov().scale) || 1));
-  return { width: Math.round(360 * k), height: Math.round(186 * k) };
+  return ov().layout === "compact" ? { width: Math.round(330 * k), height: Math.round(80 * k) } : { width: Math.round(380 * k), height: Math.round(196 * k) };
+}
+const displays = () => screen.getAllDisplays();
+function displayOf(o) {
+  const all = displays();
+  return all.find(x => x.id === o.display) || screen.getPrimaryDisplay();
+}
+// 9 places on the screen: t/m/b (top, middle, bottom) + l/c/r (left, centre, right)
+function anchored(anchor, sz, disp) {
+  const a = disp.workArea, m = 24;
+  const v = anchor[0], h = anchor[1];
+  const x = h === "l" ? a.x + m : h === "c" ? Math.round(a.x + (a.width - sz.width) / 2) : a.x + a.width - sz.width - m;
+  const y = v === "t" ? a.y + m : v === "m" ? Math.round(a.y + (a.height - sz.height) / 2) : a.y + a.height - sz.height - m;
+  return { x, y, ...sz };
 }
 function placeOverlay() {
-  const b = ov().bounds;
-  const d = screen.getPrimaryDisplay().workArea;
-  const sz = overlaySize();
-  if (b && screen.getAllDisplays().some(x => b.x >= x.bounds.x - 50 && b.y >= x.bounds.y - 50 && b.x < x.bounds.x + x.bounds.width && b.y < x.bounds.y + x.bounds.height))
+  const o = ov(), b = o.bounds, sz = overlaySize();
+  if (b && displays().some(x => b.x >= x.bounds.x - 50 && b.y >= x.bounds.y - 50 && b.x < x.bounds.x + x.bounds.width && b.y < x.bounds.y + x.bounds.height))
     return { x: b.x, y: b.y, width: b.width || sz.width, height: b.height || sz.height };
-  return { x: d.x + d.width - sz.width - 24, y: d.y + 24, ...sz };
+  return anchored(o.anchor || "tr", sz, displayOf(o));
+}
+// Ctrl+Shift+arrows move the overlay, but only while it is unlocked, so the game keeps those keys otherwise
+const NUDGE = { Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
+let nudgeKeys = false;
+function nudgeShortcuts(on) {
+  if (on === nudgeKeys) return;
+  nudgeKeys = on;
+  for (const [k, [dx, dy]] of Object.entries(NUDGE)) {
+    const acc = "CommandOrControl+Shift+" + k;
+    if (on) globalShortcut.register(acc, () => nudge(dx * 20, dy * 20));
+    else globalShortcut.unregister(acc);
+  }
+}
+function nudge(dx, dy) {
+  if (!overlay || overlay.isDestroyed()) return;
+  const b = overlay.getBounds();
+  overlay.setBounds({ ...b, x: b.x + dx, y: b.y + dy });
+  ov().bounds = overlay.getBounds();
+  saveSettings();
 }
 function pushOverlayConfig() {
   if (!overlay || overlay.isDestroyed()) return;
   overlay.setIgnoreMouseEvents(!!ov().locked);
   overlay.setFocusable(!ov().locked);
   overlay.setResizable(!ov().locked);
-  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity });
+  nudgeShortcuts(!ov().locked);
+  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout });
 }
 function openOverlay() {
   if (overlay && !overlay.isDestroyed()) return pushOverlayConfig();
@@ -298,7 +329,8 @@ function openOverlay() {
     overlay.showInactive();
   });
   const keep = () => {
-    if (!overlay || overlay.isDestroyed()) return;
+    // moves made by Lapbook itself (grid, size) are not "dragged" positions
+    if (!overlay || overlay.isDestroyed() || Date.now() - placingAt < 800) return;
     ov().bounds = overlay.getBounds();
     saveSettings();
   };
@@ -355,23 +387,33 @@ function closeOverlay() {
 }
 function setOverlay(next) {
   const o = ov();
+  const sizeChange = (next.scale !== undefined && Number(next.scale) !== o.scale) || (next.layout && next.layout !== o.layout);
   Object.assign(o, {
     on: next.on !== undefined ? !!next.on : o.on,
     locked: next.locked !== undefined ? !!next.locked : o.locked,
     scale: next.scale !== undefined ? Math.max(0.6, Math.min(2.5, Number(next.scale) || 1)) : o.scale,
-    opacity: next.opacity !== undefined ? Math.max(0.2, Math.min(1, Number(next.opacity) || 0.82)) : o.opacity,
+    opacity: next.opacity !== undefined ? Math.max(0.2, Math.min(1, Number(next.opacity) || 0.86)) : o.opacity,
+    layout: next.layout === "compact" || next.layout === "clean" ? next.layout : o.layout,
   });
-  if (next.scale !== undefined) o.bounds = o.bounds ? { ...o.bounds, ...overlaySize() } : null;
-  if (next.reset) o.bounds = null;
+  if (next.display !== undefined) o.display = next.display;
+  // a place from the grid (or another screen) replaces the dragged position
+  if (next.anchor && /^[tmb][lcr]$/.test(next.anchor)) { o.anchor = next.anchor; o.bounds = null; }
+  else if (next.display !== undefined || next.reset) o.bounds = null;
+  else if (sizeChange && o.bounds) o.bounds = { x: o.bounds.x, y: o.bounds.y };
+  if (next.nudge && overlay && !overlay.isDestroyed()) nudge(Number(next.nudge[0]) || 0, Number(next.nudge[1]) || 0);
   saveSettings();
   if (o.on) {
     openOverlay();
-    if (next.scale !== undefined || next.reset) overlay.setBounds(placeOverlay());
-  } else closeOverlay();
+    if (sizeChange || next.anchor || next.display !== undefined || next.reset) { placingAt = Date.now(); overlay.setBounds(placeOverlay()); }
+  } else {
+    closeOverlay();
+    nudgeShortcuts(false);
+  }
   pushStatus();
-  return o;
+  return { ...o, displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
 }
 ipcMain.handle("overlay:set", (e, next) => setOverlay(next || {}));
+ipcMain.handle("overlay:get", () => setOverlay({}));
 ipcMain.on("overlay:data", (e, d) => {
   overlayData = d && typeof d === "object" ? d : {};
   if (overlay && !overlay.isDestroyed()) overlay.webContents.send("overlay:data", overlayData);

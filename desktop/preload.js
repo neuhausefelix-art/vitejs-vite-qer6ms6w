@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld("lapbridge", {
   setACFolder: dir => ipcRenderer.invoke("ac:folder", dir),
   pickACFolder: () => ipcRenderer.invoke("ac:pick"),
   setOverlay: o => ipcRenderer.invoke("overlay:set", o),
+  getOverlay: () => ipcRenderer.invoke("overlay:get"),
   overlayData: d => ipcRenderer.send("overlay:data", d),
   forzaNameCar: (ordinal, name) => ipcRenderer.invoke("forza:nameCar", ordinal, name),
   forzaNameRoute: (game, id, name) => ipcRenderer.invoke("forza:nameRoute", game, id, name),

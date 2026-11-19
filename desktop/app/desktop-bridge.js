@@ -49,6 +49,11 @@
   .rcp .new{color:var(--pu)}
   .secg{display:grid;grid-template-columns:auto repeat(3,1fr) auto;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:15px;align-items:baseline}
   .secg span{color:var(--mu);font-size:12px}.secg b{font-weight:600}.secg .pu{color:var(--pu)}
+  .ovgrid{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,34px);gap:4px;padding:6px;border:1px solid var(--ln);border-radius:var(--r);background:var(--sf2)}
+  .ovgrid button{border:1px solid var(--ln);border-radius:6px;background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .ovgrid button i{width:18px;height:8px;border-radius:2px;background:var(--mu);opacity:.5}
+  .ovgrid button.on{border-color:var(--rd)}.ovgrid button.on i{background:var(--rd);opacity:1}
+  .ovnudge{display:grid;grid-template-columns:repeat(3,40px);gap:4px}.ovnudge button{height:36px;border:1px solid var(--ln);border-radius:8px;background:var(--sf2);color:var(--tx);cursor:pointer;font-size:16px}
   .unotes{margin:6px 0 0;padding-left:18px;color:var(--mu);font-size:14px}
   .md h4{margin:16px 0 6px;font-size:14px}
   .cn{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;align-items:center;font-size:14px}
@@ -97,7 +102,7 @@
       const o = document.createElement("button");
       o.id = "ovb"; o.className = "b"; o.type = "button";
       o.title = "In-game overlay (Ctrl+Shift+O)";
-      o.addEventListener("click", async e => { e.stopPropagation(); const r = await B.setOverlay({ on: !ovOn() }); st.settings.overlay = r; header(); toast(r.on ? "Overlay on. Ctrl+Shift+L to move it, Ctrl+Shift+O to hide it." : "Overlay off"); });
+      o.addEventListener("click", e => { e.stopPropagation(); openOverlayPanel(); });
       a.insertBefore(o, u);
     }
     const ob = document.getElementById("ovb");
@@ -338,15 +343,10 @@
       <label>Normal races<select id="fzrl"><option value="0" ${s.forzaRaceLaps ? "" : "selected"}>Do not save their laps</option><option value="1" ${s.forzaRaceLaps ? "selected" : ""}>Save every lap of every race</option></select></label>
       <label>Game<select id="fzgame">${[["auto", "Find out by itself"], ["Forza Horizon 6", "Forza Horizon 6"], ["Forza Horizon 5", "Forza Horizon 5"]].map(([v, n]) => `<option value="${v}" ${(s.forzaGame || "auto") === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
       <div class="cn" id="fzl">${fzl}</div>
-      <h4>In-game overlay</h4>
-      <div class="two"><label>Overlay<select id="ovon"><option value="1" ${ovOn() ? "selected" : ""}>On</option><option value="0" ${ovOn() ? "" : "selected"}>Off</option></select></label>
-      <label>Position<select id="ovlk"><option value="1" ${(s.overlay || {}).locked !== false ? "selected" : ""}>Locked (clicks go to the game)</option><option value="0" ${(s.overlay || {}).locked === false ? "selected" : ""}>Unlocked (drag to move)</option></select></label></div>
-      <div class="two"><label>Size<select id="ovsz">${[[0.8, "Small"], [1, "Medium"], [1.3, "Large"], [1.7, "Extra large"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).scale || 1) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
-      <label>Background<select id="ovop">${[[0.6, "See-through"], [0.88, "Normal"], [0.97, "Solid"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).opacity || 0.88) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label></div>
-      <p class="ls" style="margin:0;color:var(--mu)">Shortcuts: <b>Ctrl+Shift+O</b> overlay on/off, <b>Ctrl+Shift+L</b> lock/unlock to move it. The game must run in <b>borderless</b> or <b>windowed fullscreen</b> mode. <button class="b ghost" id="ovrs" type="button">Reset position</button></p>
+      <h4>In-game overlay</h4><p class="ls" style="margin:0;color:var(--mu)">Position, size and style: <button class="b ghost" id="ovset" type="button">Overlay settings</button></p>
       <p class="ls" style="color:var(--mu)">This session: ${added[F1]} F1 25 and ${added[AC]} Assetto Corsa lap${added[AC] === 1 ? "" : "s"} saved. Lapbook ${esc(info.version)}.</p>
       <div class="acts"><button class="b pri" id="tsave" type="button">Save</button><button class="b" id="tfold" type="button">Open backup folder</button><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
-    $("#ovrs").onclick = async () => { st.settings.overlay = await B.setOverlay({ on: true, reset: true }); toast("Overlay moved to the top right"); };
+    $("#ovset").onclick = () => openOverlayPanel();
     $("#acpick").onclick = async () => { const d = await B.pickACFolder(); if (d) { await B.setACFolder(d); openPanel(); } };
     $("#tsave").onclick = async () => {
       let n0 = 0;
@@ -356,7 +356,6 @@
       for (const i of document.querySelectorAll("#fzl [data-fzcar]")) { const r = await B.forzaNameCar(i.dataset.fzcar, i.value); if (r.ok) for (const g of Object.keys(D.tracks).filter(isFz)) n0 += renameCar(g, r.old, r.name); }
       for (const i of document.querySelectorAll("#fzl [data-fzroute]")) { const r = await B.forzaNameRoute(i.dataset.g, i.dataset.fzroute, i.value); if (r.ok) n0 += renameTrack(i.dataset.g, r.old, r.name); }
       if (n0) save();
-      st.settings.overlay = await B.setOverlay({ on: $("#ovon").value === "1", locked: $("#ovlk").value === "1", scale: Number($("#ovsz").value), opacity: Number($("#ovop").value) });
       for (const i of document.querySelectorAll("#cnl [data-team]")) await B.nameCar(i.dataset.team, i.value);
       const nid = $("#cnid").value.trim(), nn = $("#cnn").value.trim();
       if (/^\d+$/.test(nid) && nn) await B.nameCar(nid, nn);
@@ -506,6 +505,51 @@
       best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
     });
   }
+
+  // ---------- overlay panel: on/off, style, size, position ----------
+  async function openOverlayPanel() {
+    const o = await B.getOverlay();
+    st.settings.overlay = o;
+    header();
+    const chip = (attr, v, label, on) => `<button class="chip ${on ? "on" : ""}" data-ov="${attr}" data-v="${v}">${label}</button>`;
+    const grid = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
+    const at = o.bounds ? "" : o.anchor;
+    $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp"><h3>In-game overlay</h3>
+      <div class="lh" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px"><span class="ls" style="color:var(--mu)">Shows over the game in <b style="color:var(--tx)">borderless / windowed fullscreen</b>. Shortcut: Ctrl+Shift+O.</span>
+        <button class="b ${o.on ? "" : "pri"}" data-ov="on" data-v="${o.on ? 0 : 1}">${o.on ? "Turn off" : "Turn on"}</button></div>
+      <h4>Style</h4><div class="chips wrapc">${chip("layout", "clean", "Clean: time, delta, sectors, best and last", o.layout !== "compact")}${chip("layout", "compact", "Compact: time and delta only", o.layout === "compact")}</div>
+      <h4>Size</h4><div class="chips wrapc">${[[0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"]].map(([v, n]) => chip("scale", v, n, Math.abs((o.scale || 1) - v) < 0.01)).join("")}</div>
+      <h4>Background</h4><div class="chips wrapc">${[[0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]].map(([v, n]) => chip("opacity", v, n, Math.abs((o.opacity || 0.86) - v) < 0.01)).join("")}</div>
+      <h4>Position</h4>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
+        <div class="ovgrid">${grid.map(g => `<button class="${at === g ? "on" : ""}" data-ov="anchor" data-v="${g}" title="${g}"><i></i></button>`).join("")}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="ovnudge"><span></span><button data-ov="nudge" data-v="0,-20" title="Up">↑</button><span></span><button data-ov="nudge" data-v="-20,0" title="Left">←</button><button data-ov="nudge" data-v="0,20" title="Down">↓</button><button data-ov="nudge" data-v="20,0" title="Right">→</button></div>
+          <span class="ls" style="color:var(--mu);max-width:280px">Pick a corner, then fine-tune with the arrows.</span>
+        </div>
+      </div>
+      ${o.displays && o.displays.length > 1 ? `<label style="margin-top:10px">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label>` : ""}
+      <div class="panel" style="margin:12px 0 0"><b>Move it while you drive</b><p class="ls" style="margin:6px 0 0;color:var(--mu)">Press <b style="color:var(--tx)">Ctrl+Shift+L</b> in the game. The overlay gets a red frame. Drag it with the mouse or press <b style="color:var(--tx)">Ctrl+Shift+arrow keys</b>. Press <b style="color:var(--tx)">Ctrl+Shift+L</b> again to lock it, then clicks go to the game again.</p>
+        <button class="b" data-ov="locked" data-v="${o.locked ? 0 : 1}" style="margin-top:8px">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
+      <div class="acts" style="margin-top:12px"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+    const dsel = $("#ovdisp");
+    if (dsel) dsel.onchange = async () => { await B.setOverlay({ on: true, display: Number(dsel.value) }); openOverlayPanel(); };
+  }
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-ov]");
+    if (!t) return;
+    e.stopPropagation();
+    const k = t.dataset.ov, v = t.dataset.v, next = {};
+    if (k === "on") next.on = v === "1";
+    else if (k === "locked") next.locked = v === "1";
+    else if (k === "layout") next.layout = v;
+    else if (k === "scale" || k === "opacity") next[k] = Number(v);
+    else if (k === "anchor") next.anchor = v;
+    else if (k === "nudge") next.nudge = v.split(",").map(Number);
+    if (k !== "on") next.on = true; // changing it shows it
+    st.settings.overlay = await B.setOverlay(next);
+    openOverlayPanel();
+  }, true);
 
   // ---------- updates ----------
   let ufile = "";
