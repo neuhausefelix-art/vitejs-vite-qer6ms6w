@@ -1,4 +1,4 @@
-# Lapbook für Windows – Anleitung (Version 1.6.0)
+# Lapbook für Windows – Anleitung (Version 1.7.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
@@ -12,9 +12,9 @@ Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst 
 
 ---
 
-## 0. Update auf 1.6.0
+## 0. Update auf 1.7.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.6.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.7.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -43,15 +43,15 @@ Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Dat
 
 ---
 
-## 1. Installieren (neu)
+## 1. Installieren (neu, z. B. auf einem anderen PC)
 
-1. Entpacke **`Lapbook-1.1.0-portable.zip`**: Rechtsklick → **„Alle extrahieren…“**. Wähle einen festen Ordner, z. B. `C:\Spiele\Lapbook`.
-2. Öffne den Ordner und starte **`Lapbook.exe`**.
-3. Zeigt Windows **„Der Computer wurde durch Windows geschützt“**: Klicke auf **„Weitere Informationen“** und dann auf **„Trotzdem ausführen“**. Die Meldung kommt nur, weil die App nicht kostenpflichtig signiert ist.
-4. Fragt die **Windows-Firewall** nach, klicke auf **„Zulassen“**.
-5. Für eine Desktop-Verknüpfung: Rechtsklick auf `Lapbook.exe` → **„Weitere Optionen anzeigen“** → **„Senden an“** → **„Desktop (Verknüpfung erstellen)“**.
+1. Lade die aktuelle Version von GitHub: Repo → Reiter **Actions** → Workflow **„Lapbook Windows build“** → neuester grüner Lauf → unten unter **Artifacts** auf **„Lapbook-Windows“** klicken.
+2. Entpacke die ZIP. Darin liegen der Installer **`Lapbook-Setup-…exe`** und eine portable Version **`Lapbook-…-portable.zip`**. Du brauchst nur eins davon.
+3. Starte den Installer bzw. entpacke die portable Version und starte **`Lapbook.exe`**.
+4. Zeigt Windows **„Der Computer wurde durch Windows geschützt“**: Klicke auf **„Weitere Informationen“** und dann auf **„Trotzdem ausführen“**. Die Meldung kommt nur, weil die App nicht kostenpflichtig signiert ist.
+5. Fragt die **Windows-Firewall** nach, klicke auf **„Zulassen“**.
 
-**Du hast schon Version 1.0.0?** Lösche den Inhalt des alten Ordners und entpacke 1.1.0 dorthin, oder nimm einen neuen Ordner. **Deine Runden bleiben erhalten**, denn sie liegen nicht im App-Ordner, sondern in deinem Windows-Profil. Ab 1.1.0 brauchst du das nicht mehr, dann kommen Updates per Drag & Drop (siehe Punkt 4).
+Deine Runden liegen nicht im App-Ordner, sondern in deinem Windows-Profil. Eine Neuinstallation oder ein neuer Ordner löscht also nichts.
 
 ---
 
@@ -126,6 +126,67 @@ Lapbook kennt die echten Fahrzeugnamen:
 
 ---
 
+## 2d. Overlay im Spiel
+
+Ein ruhiges Zeitenpanel über dem Spiel. Zwei Stile stehen zur Wahl:
+
+**Clean** (Standard):
+```
+MONZA  McLaren MCL40                    P4/20
+0:42.200                              −0.234      ← laufende Runde · Live-Delta (grün/rot)
+▬▬▬▬▬▬▬▬     ▬▬▬▬▬▬▬▬     ▬▬▬▬▬▬▬▬               ← Sektoren als Farbbalken
+27.350       –            –
+Best 1:21.000                   Last 1:21.150 +0.150
+```
+**Compact:** nur laufende Runde und Delta, in einer Zeile.
+
+- **Live-Delta:** grün = schneller als deine Bestzeit an dieser Stelle der Runde, rot = langsamer. Verglichen wird mit deiner schnellsten gültigen Runde mit diesem Auto auf dieser Strecke, auch aus früheren Sessions. Das Delta erscheint ab der **zweiten** Runde, die du mit Lapbook fährst.
+- **Sektorfarben** wie im TV: **Lila** = deine beste Zeit überhaupt, **Grün** = beste dieser Session, **Weiß/Gelb** = langsamer.
+  - F1 25: echte Sektoren
+  - Assetto Corsa: drei gleich lange Drittel der Runde (AC sendet seine Sektoren nicht)
+  - Forza: keine Sektoren, aber Live-Delta bei Zeitfahren
+- **Position** (P4/20) in F1-25- und Forza-Rennen.
+- Der farbige Strich am linken Rand ist die **Teamfarbe** deines Autos.
+
+### Einstellen
+Klicke oben in Lapbook auf **„Overlay“**. Es öffnet sich ein Fenster mit:
+- **Turn on / Turn off** (oder **Strg+Umschalt+O**, auch im Spiel)
+- **Style:** Clean oder Compact
+- **Size:** S, M, L, XL
+- **Background:** See-through, Normal, Solid
+- **Position:** Klicke auf eines der 9 Felder, z. B. unten Mitte oder oben links. Mit den **Pfeilen** daneben verschiebst du es in 20-px-Schritten. Bei mehreren Monitoren wählst du den **Bildschirm**.
+
+### Im Spiel verschieben
+1. Drücke **Strg+Umschalt+L**. Das Overlay bekommt einen **roten Rahmen**.
+2. Zieh es mit der Maus an die gewünschte Stelle oder drücke **Strg+Umschalt+Pfeiltasten**.
+3. Drücke wieder **Strg+Umschalt+L**. Jetzt ist es fest, und Klicks gehen wieder ans Spiel.
+
+Die Pfeiltasten-Kürzel gibt es nur, solange das Overlay entsperrt ist, damit das Spiel sie sonst normal bekommt. Lapbook merkt sich die Position.
+
+**Wichtig:** Das Overlay ist nur sichtbar, wenn das Spiel im Anzeigemodus **„Randlos“** bzw. **„Vollbild (Fenster)“** läuft:
+- **F1 25:** Einstellungen → Grafik → Anzeigemodus → **Randloses Fenster** (Borderless)
+- **Assetto Corsa / Content Manager:** Einstellungen → Assetto Corsa → Video → Display mode: **Fullscreen** ausschalten und **Borderless** bzw. „Windowed“ mit Bildschirmauflösung wählen
+
+Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht ins Spiel ein.
+
+---
+
+## 2f. Sektoren, Rennen und Session-Rückblick
+
+**Sektoren auf der Streckenseite:** Über der Rangliste steht der Block **„Sectors“** (bei AC „Splits“). Er zeigt die Sektoren deiner Bestzeit, deine besten Sektoren und die **theoretische Bestzeit**. Das ist die Zeit, die du mit allen besten Sektoren zusammen fahren würdest.
+
+**Rennen automatisch (F1 25):** Wenn ein F1-25-Rennen zu Ende ist, speichert Lapbook es im Reiter **„Races“** mit Startplatz, Endplatz, Gegnerzahl, Runden und Boxenstopps. Deine **Fahrerwertung** wird automatisch berechnet. Die Gegnerstärke steht auf „Even“, das kannst du beim Rennen über „Edit“ ändern.
+
+**Session-Rückblick:** Hast du 45 Sekunden lang nicht mehr gefahren oder wechselst du Strecke oder Auto, zeigt Lapbook eine Zusammenfassung:
+- Bestzeit (mit „new personal best“, falls es eine ist) und Vergleich mit der Bestzeit davor
+- Durchschnitt und **Konstanz**, also die Streuung deiner Runden (Ausrutscher über 107 % werden ignoriert)
+- alle Runden als Balken, die beste in Lila, ungültige in Rot
+- beste Sektoren und theoretische Bestzeit
+
+Ältere Rückblicke findest du auf der Startseite in der Live-Karte unter **„View recap“** und dann **„Earlier sessions“**.
+
+---
+
 ## 2e. Forza Horizon 6
 
 **In Forza einstellen (einmalig):** Einstellungen → **HUD und Gameplay** → ganz nach unten zu **Data Out**:
@@ -175,13 +236,16 @@ Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**.
 - einstellen, ob F1 25 auf **einem anderen Gerät** läuft (PlayStation, Xbox oder ein zweiter PC). Dann trägst du im Spiel statt 127.0.0.1 die IP-Adresse deines PCs ein.
 - den **Backup-Ordner** öffnen,
 - F1-25-**Autonamen** vergeben oder ändern,
-- Assetto Corsa **ein- oder ausschalten** und den **AC-Ordner** wählen.
+- Assetto Corsa **ein- oder ausschalten** und den **AC-Ordner** wählen,
+- Forza-Einstellungen, Zeitfahren und Autos umbenennen.
+
+Das **Overlay** stellst du über den eigenen Knopf **„Overlay“** oben in Lapbook ein (siehe 2d).
 
 ---
 
 ## 4. Updates installieren
 
-Von mir bekommst du künftig eine Datei wie **`Lapbook-Update-1.2.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-1.7.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du oben auf **„Update“** und dann auf **„Choose file“**.
@@ -224,7 +288,7 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 | Windows blockiert den Start | „Weitere Informationen“ → „Trotzdem ausführen“. |
 | Assetto Corsa: „Live“ erscheint nicht | Du musst auf der Strecke sein, im Menü sendet AC nichts. Prüfe in den Einstellungen, ob Assetto Corsa auf „On“ steht. |
 | AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Choose folder“ und den `assettocorsa`-Ordner wählen. |
-| Overlay nicht zu sehen | Spiel auf „Randlos“ / „Borderless“ stellen. Mit Strg+Umschalt+O prüfen, ob es an ist, und unter Settings „Reset position“ drücken. |
+| Overlay nicht zu sehen | Spiel auf „Randlos“ / „Borderless“ stellen. Mit Strg+Umschalt+O prüfen, ob es an ist. In Lapbook unter „Overlay“ eine Ecke im Raster anklicken. |
 | Klicks im Spiel landen im Overlay | Strg+Umschalt+L drücken, um es wieder festzustellen. |
 | Forza: Zeitfahren startet nicht | Durch den Startpunkt in **derselben Richtung** fahren wie beim Anlegen (ca. 20 m Toleranz). Beim Drag-Run vorher am Start **stehen bleiben**. |
 | Forza: nichts kommt an | Data Out **An**, IP **127.0.0.1**, Port wie in Lapbook. Bei Game Pass: „Allow Forza“ klicken und Forza neu starten. |
