@@ -1,14 +1,14 @@
 {
   "name": "lapbook-desktop",
   "productName": "Lapbook",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Lapbook for Windows: logs your F1 25 laps automatically from the game's UDP telemetry.",
   "main": "boot.js",
   "type": "commonjs",
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node --test test/f1-25.test.js test/updates.test.js test/ac.test.js test/forza.test.js",
+    "test": "node --test test/f1-25.test.js test/updates.test.js test/ac.test.js test/forza.test.js test/delta.test.js",
     "dist": "electron-builder --win --x64 --publish never",
     "update": "node tools/make-update.js"
   },
@@ -32,6 +32,7 @@
       "ac.js",
       "acnames.js",
       "forza.js",
+      "delta.js",
       "updates.js",
       "app/**/*",
       "build/icon.png"

@@ -92,5 +92,23 @@ test("running lap time for the overlay", () => {
   const t = new F1Telemetry();
   t.handle(lapData({ player: 2 }, { last: 81000, current: 12345, lapNum: 4, invalid: 1 }));
   assert.strictEqual(lapData({}).length, 1285);
-  assert.deepStrictEqual({ ...t.live, at: 0 }, { last: 81000, current: 12345, lapNum: 4, invalid: true, at: 0 });
+  const { last, current, lapNum, invalid } = t.live;
+  assert.deepStrictEqual({ last, current, lapNum, invalid }, { last: 81000, current: 12345, lapNum: 4, invalid: true });
+});
+
+test("sectors of each lap and the race result", () => {
+  const { final, lapData } = require("./packets.js");
+  const t = new F1Telemetry(), laps = [], races = [];
+  t.on("lap", l => laps.push(l));
+  t.on("race", r => races.push(r));
+  t.handle(session({}, { type: 15, trackId: 11 }));
+  t.handle(participants({}, 228));
+  t.handle(history({}, [[81234, true, [27100, 28050, 26084]], [0, true]], [[255, 16]]));
+  assert.deepStrictEqual(laps[0].sectors, [27100, 28050, 26084]);
+  t.handle(lapData({}, { current: 30000, distance: 1234.5, position: 4, sector: 1, s1: 27000 }));
+  assert.deepStrictEqual([t.live.distance, t.live.position, t.live.sector, t.live.s1], [1234.5, 4, 1, 27000]);
+  t.handle(final({}, { finish: 3, start: 7, laps: 10, cars: 20 }));
+  t.handle(final({}, { finish: 3 })); // only once per race
+  assert.strictEqual(races.length, 1);
+  assert.deepStrictEqual([races[0].track, races[0].car, races[0].finish, races[0].start, races[0].field, races[0].laps, races[0].dnf], ["Monza", "McLaren MCL40", 3, 7, 19, 10, false]);
 });

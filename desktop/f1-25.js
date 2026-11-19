@@ -5,7 +5,8 @@
 const { EventEmitter } = require("events");
 
 const HEADER = 29;
-const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, SESSION_HISTORY: 11 };
+const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, FINAL_CLASSIFICATION: 8, SESSION_HISTORY: 11 };
+const RACES = new Set([15, 16, 17]); // session types that are races
 const LAP_SIZE = 14; // LapHistoryData
 const MAX_LAPS = 100;
 const STINT_SIZE = 3; // TyreStintHistoryData
@@ -82,6 +83,9 @@ class F1Telemetry extends EventEmitter {
       teamId: this.teamId,
       known: this.teamId === null || this.teamId in TEAMS || this.teamId in TEAMS_2026 || this.teamId in this.names,
       session: this.session ? SESSIONS[this.session.type] || "" : "",
+      uid: this.uid,
+      race: !!(this.session && RACES.has(this.session.type)),
+      trackLength: this.session ? this.session.trackLength : 0,
     };
   }
 
@@ -108,6 +112,7 @@ class F1Telemetry extends EventEmitter {
     else if (id === PACKET.PARTICIPANTS) this.onParticipants(buf, player);
     else if (id === PACKET.SESSION_HISTORY) this.onHistory(buf, uid, player);
     else if (id === PACKET.LAP_DATA) this.onLapData(buf, player);
+    else if (id === PACKET.FINAL_CLASSIFICATION) this.onFinal(buf, uid, player);
   }
 
   onSession(buf, uid) {
@@ -119,6 +124,7 @@ class F1Telemetry extends EventEmitter {
       airTemp: buf.readInt8(31),
       type: buf.readUInt8(35),
       trackId: buf.readInt8(36),
+      trackLength: buf.readUInt16LE(33),
     };
   }
 
@@ -128,11 +134,19 @@ class F1Telemetry extends EventEmitter {
     if (!Number.isInteger(stride) || stride < 38 || player >= 22) return;
     const o = HEADER + player * stride;
     const inv = buf.readUInt8(o + 37);
+    const sec = (ms, min) => buf.readUInt16LE(o + ms) + buf.readUInt8(o + min) * 60000;
     this.live = {
       last: buf.readUInt32LE(o),
       current: buf.readUInt32LE(o + 4),
+      s1: sec(8, 10), // sector 1 of the running lap (0 until done)
+      s2: sec(11, 13),
+      distance: buf.readFloatLE(o + 20), // metres into the lap (negative before the line)
+      position: buf.readUInt8(o + 32),
       lapNum: buf.readUInt8(o + 33),
+      sector: buf.readUInt8(o + 36), // 0, 1, 2
       invalid: inv === 1,
+      grid: stride >= 44 ? buf.readUInt8(o + 43) : 0,
+      cars: this.numCars || 0,
       at: Date.now(),
     };
   }
@@ -141,6 +155,34 @@ class F1Telemetry extends EventEmitter {
     const stride = (buf.length - HEADER - 1) / 22;
     if (!Number.isInteger(stride) || stride < 8 || player >= 22) return;
     this.teamId = buf.readUInt8(HEADER + 1 + player * stride + 3);
+    this.numCars = buf.readUInt8(HEADER);
+  }
+
+  // end of a race: your result, for the automatic race log
+  onFinal(buf, uid, player) {
+    const stride = (buf.length - HEADER - 1) / 22;
+    if (!Number.isInteger(stride) || stride < 20 || player >= 22) return;
+    if (!this.session || this.teamId === null || !RACES.has(this.session.type)) return;
+    const key = "race:" + uid;
+    if (this.sent.has(key)) return;
+    const o = HEADER + 1 + player * stride;
+    const cars = buf.readUInt8(HEADER);
+    const status = buf.readUInt8(o + 5); // 3 active, 4 finished, 5 DNF, 6 DSQ, 7 not classified, 8 retired
+    this.sent.add(key);
+    this.emit("race", {
+      game: "F1 25",
+      track: trackName(this.session.trackId),
+      car: carName(this.teamId, this.names),
+      finish: buf.readUInt8(o),
+      laps: buf.readUInt8(o + 1),
+      start: buf.readUInt8(o + 2),
+      pits: buf.readUInt8(o + 4),
+      dnf: status >= 5,
+      field: Math.max(0, cars - 1),
+      bestLap: buf.readUInt32LE(o + 6),
+      weather: WEATHER[this.session.weather] || "sun",
+      session: SESSIONS[this.session.type] || "Race",
+    });
   }
 
   onHistory(buf, uid, player) {
@@ -158,6 +200,8 @@ class F1Telemetry extends EventEmitter {
       if (!ms || this.sent.has(key)) continue; // 0 = lap still running
       this.sent.add(key);
       const flags = buf.readUInt8(o + 13);
+      const sec = (ms, min) => buf.readUInt16LE(o + ms) + buf.readUInt8(o + min) * 60000;
+      const sectors = [sec(4, 6), sec(7, 9), sec(10, 12)];
       this.emit("lap", {
         game: "F1 25",
         track: trackName(this.session.trackId),
@@ -166,6 +210,8 @@ class F1Telemetry extends EventEmitter {
         timeInMs: ms,
         valid: (flags & 1) === 1,
         lapNum: i + 1,
+        sectors: sectors.every(x => x > 0) ? sectors : null,
+        sessionUid: uid,
         tire: this.tyreFor(buf, stints, numStints, i + 1),
         weather: WEATHER[this.session.weather] || "sun",
         airTemp: this.session.airTemp,

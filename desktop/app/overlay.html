@@ -1,60 +1,75 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Lapbook overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--sf:#131316;--ln:#27272d;--tx:#f4f4f6;--mu:#8e8e98;--rd:#ff3030;--pu:#c58bff;--gr:#3ddc97;--dn:#ff8a7a;--op:.82;--k:1}
+/* Lapbook overlay: a timing panel in the spirit of TV race graphics,
+   in Lapbook's carbon black with its racing red. */
+:root{--k:1;--op:.88;--team:#ff3030;--tx:#f4f4f6;--mu:#9a9aa6;--rd:#ff3030;--purple:#b45bff;--green:#2fe07f;--yellow:#ffd12a;--panel:rgba(14,14,17,var(--op));--panel2:rgba(28,28,34,var(--op))}
 *{box-sizing:border-box;margin:0}
-html,body{background:transparent;overflow:hidden;height:100%;font-family:'Saira Semi Condensed',system-ui,sans-serif;color:var(--tx);user-select:none}
-#o{position:absolute;inset:0;padding:calc(10px*var(--k)) calc(14px*var(--k));border-radius:calc(12px*var(--k));background:rgba(11,11,13,var(--op));border:1px solid rgba(255,255,255,.08);border-left:calc(3px*var(--k)) solid var(--rd);display:flex;flex-direction:column;gap:calc(6px*var(--k));font-variant-numeric:tabular-nums}
-body.edit #o{-webkit-app-region:drag;border:1px dashed var(--rd);cursor:move}
-.h{display:flex;align-items:center;gap:calc(7px*var(--k));font-size:calc(13px*var(--k));color:var(--mu);white-space:nowrap;overflow:hidden}
-.h b{color:var(--tx);font-weight:600;overflow:hidden;text-overflow:ellipsis}
-.dot{width:calc(8px*var(--k));height:calc(8px*var(--k));border-radius:50%;background:var(--mu);flex:none}
-.on .dot{background:var(--gr)}
-.cur{font-size:calc(38px*var(--k));font-weight:700;line-height:1}
-.cur small{font-size:calc(13px*var(--k));color:var(--mu);font-weight:500;margin-left:6px}
-.cur.inv{color:var(--dn)}
-.g{display:grid;grid-template-columns:auto 1fr auto;gap:calc(2px*var(--k)) calc(12px*var(--k));align-items:baseline;font-size:calc(17px*var(--k))}
-.g span{color:var(--mu);font-size:calc(12px*var(--k));text-transform:uppercase;letter-spacing:.06em}
-.g b{font-weight:600}.g i{font-style:normal;font-size:calc(14px*var(--k));text-align:right;font-weight:600}
-.up{color:var(--gr)}.dn{color:var(--dn)}.pb{color:var(--pu)}
-.hint{display:none;font-size:calc(11px*var(--k));color:var(--mu)}
+html,body{background:transparent;overflow:hidden;height:100%;font-family:'Saira Semi Condensed',system-ui,sans-serif;color:var(--tx);user-select:none;font-variant-numeric:tabular-nums}
+#o{position:absolute;inset:0;display:flex;flex-direction:column;gap:calc(3px*var(--k));padding:calc(2px*var(--k))}
+body.edit #o{-webkit-app-region:drag;outline:1px dashed var(--rd);cursor:move}
+.bar{display:flex;align-items:stretch;height:calc(26px*var(--k));background:var(--panel);border-radius:calc(3px*var(--k));overflow:hidden}
+.tag{display:flex;align-items:center;padding:0 calc(12px*var(--k)) 0 calc(9px*var(--k));background:var(--rd);font-weight:800;font-style:italic;font-size:calc(12px*var(--k));letter-spacing:.06em;clip-path:polygon(0 0,100% 0,calc(100% - 8px*var(--k)) 100%,0 100%)}
+.trk{flex:1;display:flex;align-items:center;gap:calc(8px*var(--k));padding:0 calc(10px*var(--k));min-width:0;font-weight:700;font-size:calc(13px*var(--k));text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.trk span{overflow:hidden;text-overflow:ellipsis}.trk small{color:var(--mu);font-weight:600;font-size:calc(11px*var(--k));text-transform:none;letter-spacing:0;overflow:hidden;text-overflow:ellipsis}
+.pos{display:flex;align-items:center;padding:0 calc(10px*var(--k));background:var(--tx);color:#0b0b0d;font-weight:800;font-size:calc(14px*var(--k))}
+.pos small{font-weight:600;font-size:calc(11px*var(--k));opacity:.6;margin-left:2px}
+.main{display:flex;align-items:center;gap:calc(10px*var(--k));background:var(--panel);border-radius:calc(3px*var(--k));padding:calc(4px*var(--k)) calc(10px*var(--k)) calc(4px*var(--k)) 0;position:relative;overflow:hidden}
+.main:before{content:"";align-self:stretch;width:calc(5px*var(--k));background:var(--team);flex:none}
+.cur{font-size:calc(40px*var(--k));font-weight:800;line-height:1;letter-spacing:-.01em;flex:1}
+.cur.inv{color:#ff7a6b}
+.cur small{font-size:calc(11px*var(--k));font-weight:600;color:var(--mu);margin-left:6px;letter-spacing:.06em;text-transform:uppercase}
+.dl{font-size:calc(19px*var(--k));font-weight:800;padding:calc(2px*var(--k)) calc(9px*var(--k));border-radius:calc(3px*var(--k));min-width:calc(84px*var(--k));text-align:center}
+.dl.up{background:var(--green);color:#06130b}.dl.dn{background:var(--rd);color:#fff}.dl.no{background:var(--panel2);color:var(--mu)}
+.secs{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(3px*var(--k))}
+.sec{background:var(--panel);border-radius:calc(3px*var(--k));overflow:hidden}
+.sec i{display:block;height:calc(4px*var(--k));background:var(--panel2)}
+.sec.purple i{background:var(--purple)}.sec.green i{background:var(--green)}.sec.yellow i{background:var(--yellow)}.sec.invalid i{background:#ff7a6b}
+.sec div{display:flex;justify-content:space-between;align-items:baseline;padding:calc(3px*var(--k)) calc(8px*var(--k)) calc(4px*var(--k))}
+.sec span{font-size:calc(10px*var(--k));color:var(--mu);font-weight:700}.sec b{font-size:calc(15px*var(--k));font-weight:700}
+.sec.purple b{color:var(--purple)}.sec.green b{color:var(--green)}.sec.yellow b{color:var(--yellow)}
+.foot{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:baseline;gap:0 calc(8px*var(--k));background:var(--panel);border-radius:calc(3px*var(--k));padding:calc(4px*var(--k)) calc(10px*var(--k));font-size:calc(15px*var(--k))}
+.foot span{font-size:calc(10px*var(--k));color:var(--mu);font-weight:700;letter-spacing:.08em}
+.foot b{font-weight:700}.foot .pb{color:var(--purple)}.foot em{font-style:normal;font-size:calc(12px*var(--k));font-weight:700;margin-left:4px}
+.up2{color:var(--green)}.dn2{color:#ff7a6b}
+.idle{background:var(--panel);border-radius:calc(3px*var(--k));padding:calc(10px*var(--k)) calc(12px*var(--k));font-size:calc(13px*var(--k));color:var(--mu)}
+.hint{display:none;background:var(--panel);border-radius:calc(3px*var(--k));padding:calc(3px*var(--k)) calc(8px*var(--k));font-size:calc(10px*var(--k));color:var(--mu)}
 body.edit .hint{display:block}
-.idle{color:var(--mu);font-size:calc(14px*var(--k))}
 </style></head><body>
-<div id="o"><div class="idle">Lapbook overlay · waiting for F1 25, Assetto Corsa or Forza</div></div>
+<div id="o"></div>
 <script>
 const $ = s => document.querySelector(s);
 const pad = (n, l = 2) => String(n).padStart(l, "0");
-const fmt = ms => ms > 0 ? `${Math.floor(ms / 6e4)}:${pad(Math.floor(ms % 6e4 / 1e3))}.${pad(Math.floor(ms % 1e3), 3)}` : "–";
+const fmt = ms => ms > 0 ? `${Math.floor(ms / 6e4)}:${pad(Math.floor(ms % 6e4 / 1e3))}.${pad(Math.floor(ms % 1e3), 3)}` : "–:––.–––";
+const sfmt = ms => ms > 0 ? (ms >= 6e4 ? fmt(ms) : (ms / 1e3).toFixed(3)) : "––.–––";
 const gap = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1e3).toFixed(3);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.82 };
+// team colours for the stripe next to the lap time
+const TEAM = [[/mclaren/i, "#ff8000"], [/ferrari/i, "#e8002d"], [/red bull racing/i, "#3671c6"], [/mercedes/i, "#27f4d2"], [/aston/i, "#229971"], [/alpine/i, "#0093cc"], [/williams/i, "#64c4ff"], [/racing bulls/i, "#6692ff"], [/haas/i, "#b6babd"], [/sauber/i, "#52e252"], [/audi/i, "#ff2d2d"], [/cadillac/i, "#c9a55c"], [/porsche/i, "#d5001c"], [/bmw/i, "#1c69d4"], [/lamborghini/i, "#ddb321"]];
+let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.88 };
 
 function draw() {
-  document.documentElement.style.setProperty("--k", cfg.scale || 1);
-  document.documentElement.style.setProperty("--op", cfg.opacity ?? 0.82);
+  const R = document.documentElement.style;
+  R.setProperty("--k", cfg.scale || 1);
+  R.setProperty("--op", cfg.opacity ?? 0.88);
+  const team = TEAM.find(([re]) => re.test(d.car || ""));
+  R.setProperty("--team", team ? team[1] : "#ff3030");
   document.body.classList.toggle("edit", !cfg.locked);
-  const o = $("#o");
-  if (!d.game) {
-    o.className = "";
-    o.innerHTML = `<div class="idle">Lapbook overlay · waiting for F1 25, Assetto Corsa or Forza</div><div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
-    return;
-  }
-  // running lap: F1 25 sends it, for Assetto Corsa it is counted from the last finished lap
-  let cur = 0, approx = false;
-  if (d.game === "F1 25" && live.f1 && Date.now() - live.f1.at < 3000) cur = live.f1.current;
-  else if (/^Forza/.test(d.game) && live.fz && Date.now() - live.fz.at < 3000 && live.fz.inRace) cur = live.fz.current;
-  else if (d.game === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
-  const inv = d.game === "F1 25" && live.f1 && live.f1.invalid;
-  const delta = d.last && d.prevBest ? d.last - d.prevBest : null;
-  o.className = d.live ? "on" : "";
-  o.innerHTML = `<div class="h"><span class="dot"></span><b>${esc(d.track || d.game)}</b><span>${esc(d.car || "")}</span></div>
-    <div class="cur ${inv ? "inv" : ""}">${fmt(cur)}${approx && cur ? "<small>approx.</small>" : ""}${inv ? "<small>invalid</small>" : ""}</div>
-    <div class="g"><span>Last</span><b>${fmt(d.last)}</b><i class="${delta === null ? "" : delta < 0 ? "up" : "dn"}">${delta === null ? "" : gap(delta)}</i>
-    <span>Best</span><b class="pb">${fmt(d.best)}</b><i>${d.laps ? d.laps + " lap" + (d.laps === 1 ? "" : "s") : ""}</i>
-    ${d.record && d.record !== d.best ? `<span>Record</span><b>${fmt(d.record)}</b><i>${esc(d.recordCar || "")}</i>` : ""}</div>
-    <div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
+  const o = $("#o"), hint = `<div class="hint">Drag to move, drag the edges to resize. Ctrl+Shift+L locks it.</div>`;
+  const g = live.game || d.game;
+  if (!g) { o.innerHTML = `<div class="bar"><div class="tag">LAPBOOK</div><div class="trk"><small>waiting for F1 25, Assetto Corsa or Forza</small></div></div>${hint}`; return; }
+  let cur = live.game ? live.t : 0, approx = false;
+  if (!live.game && g === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
+  const dl = live.game ? live.delta : null;
+  const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
+  const secs = Array.isArray(live.sectors) ? live.sectors : null;
+  const name = i => (live.splits ? ["⅓", "⅔", "3/3"][i] : "S" + (i + 1));
+  o.innerHTML = `<div class="bar"><div class="tag">LAPBOOK</div><div class="trk"><span>${esc(d.track || g)}</span><small>${esc(d.car || "")}</small></div>${live.position ? `<div class="pos">P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}</div>` : ""}</div>
+    <div class="main"><div class="cur ${live.invalid ? "inv" : ""}">${fmt(cur)}${approx && cur ? "<small>approx.</small>" : ""}${live.invalid ? "<small>invalid</small>" : ""}</div>
+      <div class="dl ${dl === null || dl === undefined ? "no" : dl < 0 ? "up" : "dn"}">${dl === null || dl === undefined ? "Δ –" : gap(dl)}</div></div>
+    ${secs ? `<div class="secs">${secs.map((s, i) => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><div><span>${name(i)}</span><b>${sfmt(s.t)}</b></div></div>`).join("")}</div>` : ""}
+    <div class="foot"><span>LAST</span><b>${fmt(d.last)}${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</b><span>BEST</span><b class="pb">${fmt(d.best)}</b></div>${hint}`;
 }
 window.overlay.onData(x => { d = x || {}; draw(); });
 window.overlay.onLive(x => { live = x || {}; draw(); });

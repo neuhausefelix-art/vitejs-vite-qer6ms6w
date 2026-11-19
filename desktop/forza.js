@@ -34,6 +34,7 @@ function parse(buf) {
     y: buf.readFloatLE(d + 4),
     z: buf.readFloatLE(d + 8),
     speed: buf.readFloatLE(d + 12),
+    distance: buf.readFloatLE(d + 48),
     best: buf.readFloatLE(d + 52),
     last: buf.readFloatLE(d + 56),
     current: buf.readFloatLE(d + 60),
@@ -93,7 +94,9 @@ class ForzaTelemetry extends EventEmitter {
     if (!p.on) return; // menu or paused
     this.cur = p;
     const inRace = p.racePos > 0;
-    this.live = { current: Math.round(p.current * 1000), lapNum: p.lapNum, inRace, at: Date.now() };
+    // metres driven since this lap started, for the live delta
+    if (!this.lapStart || this.lapStart.lap !== p.lapNum || !inRace) this.lapStart = { lap: p.lapNum, dist: p.distance };
+    this.live = { current: Math.round(p.current * 1000), lapNum: p.lapNum, inRace, x: p.distance - this.lapStart.dist, racePos: p.racePos, at: Date.now() };
 
     // a lap has ended: LapNumber went up. The new LastLap can arrive a frame later.
     if (this.pending) {

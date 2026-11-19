@@ -1,8 +1,9 @@
-# Lapbook für Windows – Anleitung (Version 1.4.0)
+# Lapbook für Windows – Anleitung (Version 1.5.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
-- **Overlay im Spiel:** aktuelle Runde, letzte Runde mit Abstand zur Bestzeit, Bestzeit und Streckenrekord.
+- **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen.
+- **Sektorzeiten, Rennen automatisch, Session-Rückblick.**
 - **Breites Layout** für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
@@ -11,9 +12,9 @@ Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst 
 
 ---
 
-## 0. Update auf 1.4.0
+## 0. Update auf 1.5.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.4.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.5.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -103,7 +104,85 @@ Lapbook kennt die echten Fahrzeugnamen:
 
 ---
 
-## 2e. Forza Horizon 6 / 5
+## 2e. Forza Horizon 6
+
+**In Forza einstellen (einmalig):** Einstellungen → **HUD und Gameplay** → ganz nach unten zu **Data Out**:
+
+| Einstellung | Wert |
+|---|---|
+| Data Out | **An** |
+| Data Out IP Address | **127.0.0.1** |
+| Data Out IP Port | **5300** (oder die Zahl, die Lapbook anzeigt) |
+| Data Out Packet Format | **Car Dash**, falls die Auswahl angeboten wird |
+
+**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke in der Live-Karte im Reiter „Forza“ einmal auf **„Allow Forza“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte danach Forza neu. Die **Steam-Version** braucht das nicht.
+
+**So funktioniert es:**
+- Forza sendet **keinen Auto- und keinen Streckennamen**, nur eine Auto-Nummer und die Position auf der Karte. Deshalb fragt Lapbook nach der ersten Runde **einmal**:
+  - **„Which car is this?“**: den Autonamen eingeben, z. B. „Porsche 911 GT3 RS“
+  - **„Name this race“**: den Namen des Rennens eingeben, z. B. „Goliath“
+- Danach erkennt Lapbook das Auto an seiner Nummer und das Rennen an der Stelle der Ziellinie, und zwar dauerhaft.
+- Gespeichert werden **Rundenrennen**, also Rundkurse. Bei jeder fertigen Runde wird die Zeit gespeichert. Sprints von A nach B ohne Runden erkennt Lapbook noch nicht.
+- Klasse und PI werden als Notiz mitgespeichert, z. B. „S1 812 · auto“.
+- Lapbook erkennt selbst, ob Forza Horizon 6 oder 5 läuft. Falls nicht, stellst du es unter **Settings → Forza Horizon → Game** ein.
+- Namen ändern: **Live → Settings → Forza Horizon**.
+
+---
+
+## 2d. Overlay im Spiel
+
+Ein Zeitenpanel im Stil der TV-Grafiken, das über dem Spiel liegt:
+
+```
+┌ LAPBOOK │ MONZA  McLaren MCL40              P4/20 ┐
+│▌ 0:40.800                              [+0.300] │   laufende Runde · Live-Delta
+│ S1 27.350 │ S2 ––.––– │ S3 ––.–––                │   Sektoren mit Farbbalken
+│ LAST 1:21.000 −1.000          BEST 1:21.000     │
+└──────────────────────────────────────────────────┘
+```
+
+- **Live-Delta:** grün = schneller als deine Bestzeit an dieser Stelle der Runde, rot = langsamer. Verglichen wird mit deiner **schnellsten gültigen Runde** mit diesem Auto auf dieser Strecke, auch aus früheren Sessions. Lapbook zeichnet dafür jede Runde mit. Das Delta erscheint also ab der **zweiten** Runde, die du mit Lapbook fährst.
+- **Sektoren**, die Farben wie im TV: **Lila** = deine beste Zeit überhaupt, **Grün** = beste dieser Session, **Gelb** = langsamer.
+  - F1 25: die echten Sektoren aus dem Spiel
+  - Assetto Corsa: AC sendet seine Sektoren nicht. Lapbook teilt die Runde deshalb in **drei gleich lange Drittel** (⅓, ⅔, 3/3). Sie weichen von den Sektoren im Spiel ab, sind aber untereinander gut vergleichbar.
+  - Forza: keine Sektoren, aber Live-Delta ab der zweiten Runde eines Rennens
+- **Position** (P4/20) in F1-25-Rennen und Forza-Rennen
+- Der farbige Streifen links neben der Zeit ist die **Teamfarbe** deines Autos.
+
+**Einschalten:** oben in Lapbook auf **„Overlay“** klicken oder **Strg+Umschalt+O** drücken, das geht auch im Spiel.
+
+**Verschieben und Größe ändern:**
+1. **Strg+Umschalt+L** drücken. Das Overlay bekommt einen gestrichelten Rahmen.
+2. Mit der Maus an die gewünschte Stelle ziehen, an den Rändern die Größe ändern.
+3. Noch einmal **Strg+Umschalt+L**, dann ist es fest. Klicks gehen dann wieder ans Spiel.
+
+Größe (S/M/L/XL) und Hintergrund stellst du unter **Live → Settings → In-game overlay** ein. Dort findest du auch „Reset position“.
+
+**Wichtig:** Das Overlay ist nur sichtbar, wenn das Spiel im Anzeigemodus **„Randlos“** bzw. **„Vollbild (Fenster)“** läuft:
+- **F1 25:** Einstellungen → Grafik → Anzeigemodus → **Randloses Fenster** (Borderless)
+- **Assetto Corsa / Content Manager:** Einstellungen → Assetto Corsa → Video → Display mode: **Fullscreen** ausschalten und **Borderless** bzw. „Windowed“ mit Bildschirmauflösung wählen
+
+Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht ins Spiel ein.
+
+---
+
+## 2f. Sektoren, Rennen und Session-Rückblick
+
+**Sektoren auf der Streckenseite:** Über der Rangliste steht der Block **„Sectors“** (bei AC „Splits“). Er zeigt die Sektoren deiner Bestzeit, deine besten Sektoren und die **theoretische Bestzeit**. Das ist die Zeit, die du mit allen besten Sektoren zusammen fahren würdest.
+
+**Rennen automatisch (F1 25):** Wenn ein F1-25-Rennen zu Ende ist, speichert Lapbook es im Reiter **„Races“** mit Startplatz, Endplatz, Gegnerzahl, Runden und Boxenstopps. Deine **Fahrerwertung** wird automatisch berechnet. Die Gegnerstärke steht auf „Even“, das kannst du beim Rennen über „Edit“ ändern.
+
+**Session-Rückblick:** Hast du 45 Sekunden lang nicht mehr gefahren oder wechselst du Strecke oder Auto, zeigt Lapbook eine Zusammenfassung:
+- Bestzeit (mit „new personal best“, falls es eine ist) und Vergleich mit der Bestzeit davor
+- Durchschnitt und **Konstanz**, also die Streuung deiner Runden (Ausrutscher über 107 % werden ignoriert)
+- alle Runden als Balken, die beste in Lila, ungültige in Rot
+- beste Sektoren und theoretische Bestzeit
+
+Ältere Rückblicke findest du auf der Startseite in der Live-Karte unter **„View recap“** und dann **„Earlier sessions“**.
+
+---
+
+## 2e. Forza Horizon 6
 
 **In Forza einstellen (einmalig):** Einstellungen → **HUD und Gameplay** → ganz nach unten zu **Data Out**:
 
@@ -240,6 +319,7 @@ Aufbau:
 - `main.js`: Fenster, UDP-Empfang (mit automatischem Port-Ausweichen) und Sicherung
 - `f1-25.js`: liest die F1-25-Pakete
 - `app/overlay.html`, `overlay-preload.js`: das Overlay-Fenster
+- `delta.js`: Live-Delta (Aufzeichnung der schnellsten Runde) und Sektorfarben
 - `forza.js`: Forza Data Out (Runden, Auto-Nummern, Rennen anhand der Ziellinie)
 - `ac.js`, `acnames.js`: Assetto-Corsa-Telemetrie und echte Namen aus dem AC-Ordner
 - `preload.js`: sichere Brücke zur Oberfläche

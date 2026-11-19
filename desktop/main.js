@@ -10,10 +10,11 @@ const { ACTelemetry } = require("./ac.js");
 const { ACNames } = require("./acnames.js");
 const { ForzaTelemetry, placeholderCar } = require("./forza.js");
 const { execFile, spawn } = require("child_process");
+const { DeltaTracker } = require("./delta.js");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
-const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.82, bounds: null };
+const OVERLAY = { on: false, locked: true, scale: 1, opacity: 0.88, bounds: null, v: 2 };
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {} };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
@@ -25,6 +26,10 @@ const f1 = new F1Telemetry();
 const acNames = new ACNames();
 const ac = new ACTelemetry({ names: acNames });
 const fz = new ForzaTelemetry();
+let delta = null; // created when the app is ready (needs the user folder)
+const dkey = (game, track, car) => (track && car ? `${game}|${track}|${car}` : "");
+let f1Uid = "", lastSectors = { game: "", list: [] }; // sectors of the last finished lap, with colours
+let fzRace = { route: "", ordinal: null }; // route of the Forza race you are in
 let fzSock = null, fzStatus = { listening: false, port: 5300, error: "", movedFrom: 0 };
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
@@ -43,6 +48,7 @@ function loadSettings() {
   settings.port = clampPort(settings.port);
   if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
   settings.overlay = { ...OVERLAY, ...(settings.overlay || {}) };
+  if (settings.overlay.v !== OVERLAY.v) settings.overlay = { ...settings.overlay, v: OVERLAY.v, bounds: settings.overlay.bounds ? { x: settings.overlay.bounds.x, y: settings.overlay.bounds.y } : null };
   for (const k of ["forzaCars", "forzaRoutes"]) if (!settings[k] || typeof settings[k] !== "object") settings[k] = {};
   settings.forzaPort = clampPort(settings.forzaPort || 5300);
   fz.cars = settings.forzaCars;
@@ -74,7 +80,16 @@ function listen(port = settings.port, tries = 0) {
   if (tries === 0) status.movedFrom = 0;
   status = { ...status, listening: false, error: "", port };
   const s = dgram.createSocket({ type: "udp4" });
-  s.on("message", msg => f1.handle(msg));
+  s.on("message", msg => {
+    f1.handle(msg);
+    if (!delta || msg.length < 29) return;
+    const i = f1.info();
+    if (i.uid && i.uid !== f1Uid) {
+      f1Uid = i.uid;
+      if (i.track && i.car) delta.newSession(dkey("F1 25", i.track, i.car));
+    }
+    if (msg.readUInt8(6) === 2 && f1.live && i.track && i.car) delta.sample(dkey("F1 25", i.track, i.car), f1.live.lapNum, f1.live.distance, f1.live.current);
+  });
   s.on("error", err => {
     try { s.close(); } catch (e) {}
     if (sock === s) sock = null;
@@ -111,7 +126,14 @@ function listenForza(port = settings.forzaPort, tries = 0) {
   fzStatus = { ...fzStatus, listening: false, error: "", port };
   if (!settings.forzaOn) return pushStatus();
   const s = dgram.createSocket({ type: "udp4" });
-  s.on("message", msg => fz.handle(msg));
+  s.on("message", msg => {
+    fz.handle(msg);
+    const L = fz.live;
+    if (!delta || !L || !fz.cur) return;
+    if (!L.inRace) { fzRace = { route: "", ordinal: null }; return; }
+    if (fzRace.ordinal !== fz.cur.ordinal) fzRace = { route: "", ordinal: fz.cur.ordinal };
+    delta.sample(`${fz.game}|~|${fz.cur.ordinal}`, L.lapNum, L.x, L.current);
+  });
   s.on("error", err => {
     try { s.close(); } catch (e) {}
     if (fzSock === s) fzSock = null;
@@ -134,6 +156,11 @@ function listenForza(port = settings.forzaPort, tries = 0) {
   fzSock = s;
 }
 fz.on("lap", lap => {
+  if (delta) {
+    delta.moveRun(`${fz.game}|~|${lap.ordinal}`, dkey(lap.game, lap.track, lap.car));
+    lapDone(lap.game, lap);
+    fzRace.route = lap.track;
+  }
   send("telemetry:lap", lap);
   pushStatus();
 });
@@ -158,7 +185,16 @@ function detectForza() {
   });
 }
 
+// the lap is done: colour its sectors, then let it count for the best lap
+function lapDone(game, lap) {
+  if (!delta) return;
+  const k = dkey(game, lap.track, lap.car);
+  if (Array.isArray(lap.sectors)) lastSectors = { game, list: lap.sectors.map((t, i) => ({ t, c: lap.valid ? delta.colour(k, i, t) : "invalid" })), at: Date.now() };
+  delta.finish(k, lap.timeInMs, lap.valid, lap.sectors);
+}
+f1.on("race", race => send("telemetry:race", race));
 f1.on("lap", lap => {
+  lapDone("F1 25", lap);
   if (!lap.valid && !settings.saveInvalid) {
     send("telemetry:skipped", lap);
     return;
@@ -169,7 +205,13 @@ f1.on("lap", lap => {
   pushStatus();
 });
 
+ac.on("car", c => {
+  const s = ac.session;
+  if (delta && s) delta.sample(dkey("Assetto Corsa", s.track, s.car), c.lapCount, c.pos * 5000, c.lapTime);
+});
+ac.on("session", s => { if (delta && s) delta.newSession(dkey("Assetto Corsa", s.track, s.car)); });
 ac.on("lap", lap => {
+  lapDone("Assetto Corsa", lap);
   send("telemetry:lap", lap);
   pushStatus();
 });
@@ -183,7 +225,7 @@ let overlay = null, overlayData = {}, overlayTimer = null;
 const ov = () => settings.overlay;
 function overlaySize() {
   const k = Math.max(0.6, Math.min(2.5, Number(ov().scale) || 1));
-  return { width: Math.round(300 * k), height: Math.round(168 * k) };
+  return { width: Math.round(360 * k), height: Math.round(186 * k) };
 }
 function placeOverlay() {
   const b = ov().bounds;
@@ -235,8 +277,39 @@ function openOverlay() {
   clearInterval(overlayTimer);
   overlayTimer = setInterval(() => {
     if (!overlay || overlay.isDestroyed()) return;
-    overlay.webContents.send("overlay:live", { f1: f1.live, fz: fz.live, acAt: ac.lastLap ? ac.lastLap.at : 0 });
+    overlay.webContents.send("overlay:live", liveForOverlay());
   }, 100);
+}
+// what the overlay shows right now: running lap, delta, sectors, position
+function liveForOverlay() {
+  const now = Date.now(), out = { f1: f1.live, fz: fz.live, acAt: ac.lastLap ? ac.lastLap.at : 0 };
+  const last = lastSectors.at && now - lastSectors.at < 15000 ? lastSectors : null;
+  const i = f1.info();
+  if (f1.live && now - f1.live.at < 3000) {
+    const L = f1.live, k = dkey("F1 25", i.track, i.car);
+    const secs = [L.sector >= 1 ? L.s1 : 0, L.sector >= 2 ? L.s2 : 0, 0];
+    Object.assign(out, {
+      game: "F1 25", t: L.current, delta: delta && L.distance > 50 ? delta.delta(k, L.distance, L.current) : null, invalid: L.invalid,
+      sectors: last && last.game === "F1 25" && L.sector === 0 && L.current < 8000 ? last.list : secs.map((t, j) => ({ t, c: L.invalid ? "invalid" : delta ? delta.colour(k, j, t) : "" })),
+      position: i.race ? L.position : 0, cars: i.race ? L.cars : 0,
+    });
+    return out;
+  }
+  if (ac.live && now - ac.live.at < 3000 && ac.session) {
+    const L = ac.live, s = ac.session, k = dkey("Assetto Corsa", s.track, s.car), sp = ac.split || {};
+    const secs = [sp.t1 || 0, sp.t2 && sp.t1 ? sp.t2 - sp.t1 : 0, 0];
+    Object.assign(out, {
+      game: "Assetto Corsa", t: L.t, delta: delta && L.pos > 0.01 && L.pos < 0.99 ? delta.delta(k, L.pos * 5000, L.t) : null,
+      sectors: last && last.game === "Assetto Corsa" && L.t < 8000 ? last.list : secs.map((t, j) => ({ t, c: delta ? delta.colour(k, j, t) : "" })), splits: true,
+    });
+    return out;
+  }
+  if (fz.live && now - fz.live.at < 3000 && fz.live.inRace) {
+    const L = fz.live, car = fz.cur ? fz.carName(fz.cur.ordinal) : "", k = fzRace.route ? dkey(fz.game, fzRace.route, car) : "";
+    Object.assign(out, { game: fz.game, t: L.current, delta: delta && k && L.x > 50 ? delta.delta(k, L.x, L.current) : null, position: L.racePos || 0 });
+    return out;
+  }
+  return out;
 }
 function closeOverlay() {
   clearInterval(overlayTimer);
@@ -374,6 +447,7 @@ ipcMain.handle("forza:nameCar", (e, ordinal, name) => {
   if (!/^\d+$/.test(id) || !n) return { ok: false };
   const old = settings.forzaCars[id] || placeholderCar(id);
   settings.forzaCars[id] = n;
+  if (delta) for (const r of settings.forzaRoutes[fz.game] || []) delta.rename(dkey(fz.game, r.name, old), dkey(fz.game, r.name, n));
   fz.cars = settings.forzaCars;
   saveSettings();
   pushStatus();
@@ -386,6 +460,8 @@ ipcMain.handle("forza:nameRoute", (e, game, id, name) => {
   if (!r || !n) return { ok: false };
   const old = r.name;
   r.name = n;
+  if (delta && fz.cur) delta.rename(dkey(game, old, fz.carName(fz.cur.ordinal)), dkey(game, n, fz.carName(fz.cur.ordinal)));
+  if (fzRace.route === old) fzRace.route = n;
   fz.routes = settings.forzaRoutes;
   saveSettings();
   pushStatus();
@@ -507,6 +583,7 @@ if (!app.requestSingleInstanceLock()) {
   });
   app.whenReady().then(() => {
     loadSettings();
+    delta = new DeltaTracker(path.join(app.getPath("userData"), "best-laps"));
     createWindow();
     listen();
     if (settings.acOn) ac.start();

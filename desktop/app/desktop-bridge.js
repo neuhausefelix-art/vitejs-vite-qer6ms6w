@@ -44,6 +44,11 @@
   #dropall small{display:block;font-weight:400;font-size:14px;margin-top:6px}
   /* backups are written automatically on the PC, so the browser reminder is not needed */
   #app .note:has([data-act=dl]){display:none}
+  .rcp{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:12px 0}
+  .rcp div{background:var(--sf2);border-radius:var(--r);padding:10px 12px}.rcp b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.15}.rcp span{font-size:12px;color:var(--mu)}
+  .rcp .new{color:var(--pu)}
+  .secg{display:grid;grid-template-columns:auto repeat(3,1fr) auto;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:15px;align-items:baseline}
+  .secg span{color:var(--mu);font-size:12px}.secg b{font-weight:600}.secg .pu{color:var(--pu)}
   .unotes{margin:6px 0 0;padding-left:18px;color:var(--mu);font-size:14px}
   .md h4{margin:16px 0 6px;font-size:14px}
   .cn{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;align-items:center;font-size:14px}
@@ -150,7 +155,7 @@
     const a = f1Live(), c = acLive(), z = fzLive();
     if (a || c || z) return `<section class="panel live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}${z ? fzLive_() : ""}</section>`;
     if (ok && !showHow) {
-      return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking ready</span><span class="acts"><button class="b ghost" data-live="how">How to</button><button class="b" data-live="set">Settings</button></span></div><p class="ls" style="margin:0">Start F1 25, Assetto Corsa or Forza and drive. Every finished lap is saved automatically.</p>${moved()}</section>`;
+      return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking ready</span><span class="acts"><button class="b ghost" data-live="how">How to</button><button class="b" data-live="set">Settings</button></span></div><p class="ls" style="margin:0">Start F1 25, Assetto Corsa or Forza and drive. Every finished lap is saved automatically.</p>${moved()}${lastRecapRow()}</section>`;
     }
     const chips = `<div class="chips" style="margin:0">${[F1, AC, FZ].map(g => `<button class="chip ${tab === g ? "on" : ""}" data-live="tab" data-g="${g}">${g}</button>`).join("")}</div>`;
     const body = tab === FZ
@@ -262,6 +267,8 @@
       placeCard.last = "";
       toast("Car name saved");
     }
+    if (k === "recap") { showRecap(recaps[Number(t.dataset.i) || 0]); return; }
+    if (k === "recaps") { showRecapList(); return; }
     if (k === "loop") {
       const r = await B.forzaLoopback();
       toast(r.ok ? "Windows asks for permission. Click Yes, then restart Forza." : r.error || "That did not work");
@@ -281,6 +288,7 @@
       placeCard.last = ""; refresh(); toast("Race name saved");
     }
     if (k === "open") {
+      $("#modal").innerHTML = "";
       Object.assign(S, { v: "track", g: t.dataset.g, t: t.dataset.t, tab: "tracks", F: {}, open: "", add: false, edit: "", hc: "", hn: 30, co: false });
       render(); scrollTo(0, 0);
     }
@@ -288,7 +296,7 @@
 
   // keep our additions when Lapbook re-renders
   const baseRender = render;
-  render = function () { baseRender(); try { header(); wide(); placeCard.last = ""; placeCard(); } catch (e) { console.error(e); } };
+  render = function () { baseRender(); try { sectorPanel(); header(); wide(); placeCard.last = ""; placeCard(); } catch (e) { console.error(e); } };
 
   // ---------- settings ----------
   async function openPanel() {
@@ -315,7 +323,7 @@
       <div class="two"><label>Overlay<select id="ovon"><option value="1" ${ovOn() ? "selected" : ""}>On</option><option value="0" ${ovOn() ? "" : "selected"}>Off</option></select></label>
       <label>Position<select id="ovlk"><option value="1" ${(s.overlay || {}).locked !== false ? "selected" : ""}>Locked (clicks go to the game)</option><option value="0" ${(s.overlay || {}).locked === false ? "selected" : ""}>Unlocked (drag to move)</option></select></label></div>
       <div class="two"><label>Size<select id="ovsz">${[[0.8, "Small"], [1, "Medium"], [1.3, "Large"], [1.7, "Extra large"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).scale || 1) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label>
-      <label>Background<select id="ovop">${[[0.6, "See-through"], [0.82, "Normal"], [0.95, "Solid"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).opacity || 0.82) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label></div>
+      <label>Background<select id="ovop">${[[0.6, "See-through"], [0.88, "Normal"], [0.97, "Solid"]].map(([v, n]) => `<option value="${v}" ${Number((s.overlay || {}).opacity || 0.88) === v ? "selected" : ""}>${n}</option>`).join("")}</select></label></div>
       <p class="ls" style="margin:0;color:var(--mu)">Shortcuts: <b>Ctrl+Shift+O</b> overlay on/off, <b>Ctrl+Shift+L</b> lock/unlock to move it. The game must run in <b>borderless</b> or <b>windowed fullscreen</b> mode. <button class="b ghost" id="ovrs" type="button">Reset position</button></p>
       <p class="ls" style="color:var(--mu)">This session: ${added[F1]} F1 25 and ${added[AC]} Assetto Corsa lap${added[AC] === 1 ? "" : "s"} saved. Lapbook ${esc(info.version)}.</p>
       <div class="acts"><button class="b pri" id="tsave" type="button">Save</button><button class="b" id="tfold" type="button">Open backup folder</button><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
@@ -344,6 +352,113 @@
       toast("Live tracking settings saved");
     };
     $("#tfold").onclick = () => B.openBackups();
+  }
+
+  // ---------- session recap ----------
+  const sessions = {}; // game -> { key, track, car, laps: [], valid: [], pbBefore, start, last }
+  let recaps = [];
+  try { recaps = JSON.parse(localStorage.getItem("lapbook.recaps") || "[]"); } catch (e) {}
+  function sessionLap(G, lap, valid) {
+    const key = G + "|" + lap.track + "|" + lap.car;
+    let s = sessions[G];
+    if (s && s.key !== key) { endSession(G); s = null; }
+    if (!s) {
+      const before = best(D.lapTimes.filter(x => x.game === G && x.track === lap.track && x.car === lap.car && x.id !== lap.id));
+      s = sessions[G] = { key, game: G, track: lap.track, car: lap.car, laps: [], pbBefore: before ? before.timeInMs : 0, start: Date.now() };
+    }
+    s.laps.push({ t: lap.timeInMs, sectors: lap.sectors || null, valid, splits: !!lap.splits });
+    s.last = Date.now();
+  }
+  function endSession(G) {
+    const s = sessions[G];
+    delete sessions[G];
+    if (!s || !s.laps.length) return;
+    const ok = s.laps.filter(l => l.valid), ts = ok.map(l => l.t), bestT = ts.length ? Math.min(...ts) : 0;
+    // consistency: spread of the laps within 107 % of the best (out-laps and spins left out)
+    const clean = ts.filter(t => t <= bestT * 1.07), avg = clean.length ? clean.reduce((a, b) => a + b, 0) / clean.length : 0;
+    const sd = clean.length > 1 ? Math.sqrt(clean.reduce((a, t) => a + (t - avg) ** 2, 0) / (clean.length - 1)) : 0;
+    const secs = [0, 1, 2].map(i => Math.min(...ok.map(l => (l.sectors ? l.sectors[i] : Infinity))));
+    const theo = secs.every(isFinite) ? secs.reduce((a, b) => a + b, 0) : 0;
+    const r = { game: s.game, track: s.track, car: s.car, date: today(), at: Date.now(), laps: s.laps.length, valid: ok.length, best: bestT, avg: Math.round(avg), sd: Math.round(sd), pbBefore: s.pbBefore,
+      times: s.laps.map(l => (l.valid ? l.t : -l.t)), secs: theo ? secs : null, theo, splits: s.laps.some(l => l.splits) };
+    recaps = [r, ...recaps].slice(0, 20);
+    try { localStorage.setItem("lapbook.recaps", JSON.stringify(recaps)); } catch (e) {}
+    placeCard.last = "";
+    placeCard();
+    if (!$("#modal").innerHTML) showRecap(r);
+    else toast("Session recap ready: " + r.track);
+  }
+  // a session ends when its game has sent nothing for 45 s
+  setInterval(() => {
+    for (const G of Object.keys(sessions)) {
+      const on = G === F1 ? f1Live() : G === AC ? acLive() : fzLive();
+      if (!on && Date.now() - sessions[G].last > 45000) endSession(G);
+    }
+  }, 5000);
+  function chartSvg(times, bestT) {
+    const v = times.map(Math.abs);
+    if (v.length < 2) return "";
+    const W = 600, H = 110, mn = Math.min(...v), mx = Math.max(...v), cap = Math.min(mx, mn * 1.07), bw = Math.min(W / v.length, 40), x0 = (W - bw * v.length) / 2;
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;background:none" role="img" aria-label="Lap times of the session">${v.map((t, i) => {
+      const h = 14 + (1 - (Math.min(t, cap) - mn) / Math.max(cap - mn, 1)) * (H - 30);
+      const c = times[i] < 0 ? "var(--dn)" : t === bestT ? "var(--pu)" : "var(--mu)";
+      return `<rect x="${(x0 + i * bw + bw * 0.15).toFixed(1)}" y="${(H - h).toFixed(1)}" width="${(bw * 0.7).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${c}" opacity="${t === bestT ? 1 : 0.6}"><title>Lap ${i + 1}: ${fmt(t)}${times[i] < 0 ? " (invalid)" : ""}</title></rect>`;
+    }).join("")}</svg>`;
+  }
+  function showRecap(r) {
+    if (!r) return;
+    const isPb = r.best && (!r.pbBefore || r.best < r.pbBefore);
+    const tile = (v, l, cls = "") => `<div><b class="${cls}">${v}</b><span>${l}</span></div>`;
+    $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Session recap</h3>
+      <div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap"><b style="font-size:22px">${esc(r.track)}</b><span class="ls" style="color:var(--mu)">${esc(r.game)} · ${esc(r.car)} · ${esc(r.date)}</span></div>
+      <div class="rcp">${tile(r.best ? fmt(r.best) : "–", isPb ? "new personal best" : "best lap", isPb ? "new" : "")}
+      ${tile(r.pbBefore ? (r.best ? gpS(r.best - r.pbBefore) : "–") : "first time", r.pbBefore ? "vs. best before (" + fmt(r.pbBefore) + ")" : "on this circuit with this car")}
+      ${tile(r.avg ? fmt(r.avg) : "–", "average lap")}
+      ${tile(r.sd ? "±" + (r.sd / 1000).toFixed(3) : "–", "consistency (spread)")}
+      ${tile(r.valid + (r.laps > r.valid ? " / " + r.laps : ""), r.laps > r.valid ? "valid / all laps" : "laps")}</div>
+      ${chartSvg(r.times, r.best)}
+      ${r.secs ? `<div class="panel" style="margin:12px 0 0"><div class="secg"><span></span><span>${r.splits ? "1st third" : "S1"}</span><span>${r.splits ? "2nd third" : "S2"}</span><span>${r.splits ? "3rd third" : "S3"}</span><span>sum</span>
+        <span>best</span>${r.secs.map(x => `<b class="pu">${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(r.theo)}</b></div>
+        <p class="ls" style="margin:8px 0 0;color:var(--mu)">Put your best ${r.splits ? "thirds" : "sectors"} together and you would do <b style="color:var(--tx)">${fmt(r.theo)}</b>${r.best > r.theo ? `, ${((r.best - r.theo) / 1000).toFixed(3)} s faster than your best lap` : ""}.</p></div>` : ""}
+      <div class="acts" style="margin-top:12px">${D.tracks[r.game] && D.tracks[r.game].includes(r.track) ? `<button class="b pri" data-live="open" data-g="${esc(r.game)}" data-t="${esc(r.track)}">Open ${esc(r.track)}</button>` : ""}${recaps.length > 1 ? `<button class="b" data-live="recaps">Earlier sessions</button>` : ""}<button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+  }
+  window.lapbookDesktop = { endSession, showRecap: () => showRecap(recaps[0]) };
+  const gpS = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1000).toFixed(3);
+  function showRecapList() {
+    $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Earlier sessions</h3>${recaps.map((r, i) => `<button class="row" data-live="recap" data-i="${i}" style="margin-bottom:8px"><span class="nm">${esc(r.track)}<small>${esc(r.game)} · ${esc(r.car)} · ${esc(r.date)} · ${r.laps} laps</small></span><span class="tm pb">${r.best ? fmt(r.best) : "–"}</span></button>`).join("")}<div class="acts"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+  }
+  const lastRecapRow = () => recaps[0] ? `<div class="lh" style="border-top:1px solid var(--ln);padding-top:10px"><span class="ls">Last session: <b style="color:var(--tx)">${esc(recaps[0].track)}</b> · ${recaps[0].laps} laps · best ${recaps[0].best ? fmt(recaps[0].best) : "–"}</span><button class="b ghost" data-live="recap" data-i="0">View recap</button></div>` : "";
+
+  // ---------- races from F1 25 go into Lapbook's race log (and the driver rating) ----------
+  B.onRace(r => {
+    if (!r || !r.track || !r.car || !(r.field >= 0)) return;
+    const G = r.game || F1, day = today();
+    if (D.races.some(x => x.game === G && x.track === r.track && x.date === day && x.start === r.start && x.finish === (r.dnf ? r.field + 2 : r.finish) && x.laps === r.laps)) return;
+    const h0 = ratingHist().R;
+    const field = Math.max(1, r.field), start = Math.min(Math.max(1, r.start || 1), field + 1), finish = r.dnf ? field + 1 : Math.min(Math.max(1, r.finish), field + 1);
+    D.races.push({ id: uid(), game: G, track: r.track, date: day, car: r.car, laps: r.laps || 1, start, finish, field, strength: 0, weather: r.weather || "sun", condition: { rain: "wet", storm: "wet", light_rain: "damp" }[r.weather] || "green", tire: "", dnf: !!r.dnf, notes: [r.session, r.pits ? r.pits + " stop" + (r.pits > 1 ? "s" : "") : "", "auto"].filter(Boolean).join(" · ") });
+    if (!D.tracks[G].includes(r.track)) D.tracks[G].push(r.track);
+    if (!D.cars[G].includes(r.car)) D.cars[G].push(r.car);
+    save();
+    refresh();
+    const d = ratingHist().R - h0;
+    toast(`Race saved: ${r.dnf ? "DNF" : "P" + finish} from P${start} at ${r.track}, rating ${d >= 0 ? "+" : ""}${d.toFixed(1)}`);
+  });
+
+  // ---------- best sectors on the circuit page ----------
+  function sectorPanel() {
+    if (S.v !== "track" || document.getElementById("secpanel")) return;
+    const L = D.lapTimes.filter(l => l.game === S.g && l.track === S.t && Array.isArray(l.sectors) && l.sectors.length === 3);
+    if (!L.length) return;
+    const bestOf = i => L.reduce((m, l) => (!m || l.sectors[i] < m.sectors[i] ? l : m), null);
+    const bs = [0, 1, 2].map(bestOf), theo = bs.reduce((a, l, i) => a + l.sectors[i], 0), bl = best(L), split = L.some(l => l.splits);
+    const html = `<div id="secpanel"><div class="bh"><span>${split ? "Splits" : "Sectors"}</span><small>${split ? "thirds of the lap" : "best of every lap with sector times"}</small></div>
+      <div class="panel" style="margin-top:0"><div class="secg"><span></span><span>${split ? "1st" : "S1"}</span><span>${split ? "2nd" : "S2"}</span><span>${split ? "3rd" : "S3"}</span><span>lap</span>
+      <span>best lap</span>${bl.sectors.map(x => `<b>${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(bl.timeInMs)}</b>
+      <span>best</span>${bs.map((l, i) => `<b class="pu" title="${esc(l.car)}, ${esc(l.date)}">${(l.sectors[i] / 1000).toFixed(3)}</b>`).join("")}<b class="pu">${fmt(theo)}</b></div>
+      <p class="ls" style="margin:8px 0 0;color:var(--mu)">Theoretical best: <b style="color:var(--tx)">${fmt(theo)}</b>${bl.timeInMs > theo ? `, ${((bl.timeInMs - theo) / 1000).toFixed(3)} s quicker than your best lap with sector times` : ""}.</p></div></div>`;
+    const sb = [...document.querySelectorAll("#app .bh")].find(n => /^Scoreboard/.test(n.textContent.trim()));
+    if (sb) sb.insertAdjacentHTML("beforebegin", html);
   }
 
   // ---------- overlay data: what the in-game overlay shows ----------
@@ -461,7 +576,9 @@
       });
     } else if (isFz(G)) Object.assign(lap, { weather: "", condition: "", tire: "", season: "", notes: [l.carClass, "auto"].filter(Boolean).join(" · ") });
     else Object.assign(lap, { weather: "", condition: "", tire: "", notes: "auto" });
+    if (Array.isArray(l.sectors) && l.sectors.length === 3) { lap.sectors = l.sectors.map(x => Math.round(x)); if (l.splits) lap.splits = true; }
     D.lapTimes.push(lap);
+    sessionLap(G, lap, l.valid !== false);
     if (!D.tracks[G].includes(l.track)) D.tracks[G].push(l.track);
     if (!D.cars[G].includes(l.car)) D.cars[G].push(l.car);
     LAST = { g: G, t: l.track };
