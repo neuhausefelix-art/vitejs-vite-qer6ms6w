@@ -1,15 +1,25 @@
-# Lapbook für Windows – Anleitung (Version 1.1.0)
+# Lapbook für Windows – Anleitung (Version 1.2.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
-- **Live-Tracking für F1 25:** Jede gefahrene Runde wird automatisch gespeichert, mit Strecke, Team, Zeit, Reifen, Wetter und Temperaturen.
+- **Live-Tracking für F1 25 und Assetto Corsa:** Jede gefahrene Runde wird automatisch gespeichert. Bei F1 25 kommen Strecke, Auto, Zeit, Reifen, Wetter und Temperaturen mit, bei Assetto Corsa Strecke, Auto und Zeit.
+- **Breites Layout** für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
 
-Die App liest nur die offizielle Telemetrie, die F1 25 selbst sendet. Sie greift nicht ins Spiel ein.
+Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst senden. Sie greift nicht ins Spiel ein.
 
 ---
 
-## 1. Installieren
+## 0. Update von 1.1.0 auf 1.2.0
+
+Du hast Lapbook 1.1.0 schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.2.0.lapbook-update`**:
+1. Starte Lapbook.
+2. Ziehe die Datei ins Lapbook-Fenster.
+3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
+
+---
+
+## 1. Installieren (neu)
 
 1. Entpacke **`Lapbook-1.1.0-portable.zip`**: Rechtsklick → **„Alle extrahieren…“**. Wähle einen festen Ordner, z. B. `C:\Spiele\Lapbook`.
 2. Öffne den Ordner und starte **`Lapbook.exe`**.
@@ -50,13 +60,42 @@ Danach:
 
 ---
 
+## 2b. Assetto Corsa (über Content Manager)
+
+Im Spiel musst du **nichts einstellen**. Assetto Corsa hat eine eingebaute Telemetrie-Schnittstelle (UDP-Port 9996), mit der sich Lapbook von selbst verbindet.
+
+1. Starte Lapbook.
+2. Starte eine Session in Assetto Corsa, z. B. über Content Manager: Übungsfahrt, Hotlap oder Rennen.
+3. Sobald du auf der Strecke bist, zeigt Lapbook **„● Live · Assetto Corsa“** mit Strecke und Auto.
+4. Jede fertige Runde wird automatisch gespeichert.
+
+**Echte Namen für Autos und Strecken:** Lapbook sucht deinen Assetto-Corsa-Ordner von selbst, z. B. `C:\Program Files (x86)\Steam\steamapps\common\assettocorsa`, und liest dort die Namen, also „Ferrari 488 GT3“ statt `ks_ferrari_488_gt3`. Findet es den Ordner nicht, klicke in der Live-Karte oder in den Einstellungen auf **„Choose folder“** und wähle den Ordner `assettocorsa`.
+
+**Gut zu wissen:**
+- Assetto Corsa sendet nicht mit, ob eine Runde ungültig war, z. B. wegen Abkürzen. Lapbook speichert deshalb alle Runden.
+- Reifen und Wetter sendet AC über diese Schnittstelle nicht.
+- Ein anderes Programm, das gleichzeitig mit AC über Port 9996 spricht, kann sich mit Lapbook in die Quere kommen.
+
+---
+
+## 2c. F1 25: Autonamen
+
+- Die Autos der Saison 2025 heißen z. B. „McLaren F1 25“, die der Saison 2026 z. B. „McLaren 2026“.
+- Kennt Lapbook ein Auto nicht, z. B. Fantasie-Teams oder F2, fragt die Live-Karte **„Which car is this?“**. Gib den Namen einmal ein, ab dann erkennt Lapbook das Auto.
+- Runden, die schon unter einem Namen wie „F1 25 car (team 228)“ gespeichert sind, werden dabei **automatisch umbenannt**.
+- Namen ändern kannst du jederzeit unter **Live → Settings → F1 25 car names**.
+
+---
+
 ## 3. Einstellungen
 
 Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**. Dort kannst du:
 - den **Port** ändern,
 - **ungültige Runden** mitspeichern,
 - einstellen, ob F1 25 auf **einem anderen Gerät** läuft (PlayStation, Xbox oder ein zweiter PC). Dann trägst du im Spiel statt 127.0.0.1 die IP-Adresse deines PCs ein.
-- den **Backup-Ordner** öffnen.
+- den **Backup-Ordner** öffnen,
+- F1-25-**Autonamen** vergeben oder ändern,
+- Assetto Corsa **ein- oder ausschalten** und den **AC-Ordner** wählen.
 
 ---
 
@@ -103,6 +142,8 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 | „Live tracking needs attention“ | Die Karte nennt den Grund. Meistens hilft „Settings“ → anderen Port wählen, z. B. 20790, und denselben im Spiel eintragen. |
 | Eine Runde fehlt | Sie war wahrscheinlich ungültig. In den Einstellungen auf „Save them too“ stellen. |
 | Windows blockiert den Start | „Weitere Informationen“ → „Trotzdem ausführen“. |
+| Assetto Corsa: „Live“ erscheint nicht | Du musst auf der Strecke sein, im Menü sendet AC nichts. Prüfe in den Einstellungen, ob Assetto Corsa auf „On“ steht. |
+| AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Choose folder“ und den `assettocorsa`-Ordner wählen. |
 | Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
 
 ---
@@ -123,6 +164,7 @@ Aufbau:
 - `updates.js`: Update-Pakete lesen, prüfen, installieren und zurücksetzen
 - `main.js`: Fenster, UDP-Empfang (mit automatischem Port-Ausweichen) und Sicherung
 - `f1-25.js`: liest die F1-25-Pakete
+- `ac.js`, `acnames.js`: Assetto-Corsa-Telemetrie und echte Namen aus dem AC-Ordner
 - `preload.js`: sichere Brücke zur Oberfläche
 - `app/lapbook.html`: die unveränderte Lapbook-Seite
 - `app/desktop-bridge.js`: Live-Karte, Update-Fenster, Drag & Drop, Eintragen der Runden

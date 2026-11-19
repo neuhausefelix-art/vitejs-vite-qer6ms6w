@@ -19,5 +19,9 @@ contextBridge.exposeInMainWorld("lapbridge", {
   checkUpdate: file => ipcRenderer.invoke("update:check", file),
   installUpdate: file => ipcRenderer.invoke("update:install", file),
   rollback: () => ipcRenderer.invoke("update:rollback"),
+  knownCars: () => ipcRenderer.invoke("cars:known"),
+  nameCar: (teamId, name) => ipcRenderer.invoke("cars:name", teamId, name),
+  setACFolder: dir => ipcRenderer.invoke("ac:folder", dir),
+  pickACFolder: () => ipcRenderer.invoke("ac:pick"),
   onOpenUpdate: cb => ipcRenderer.on("update:open", (e, file) => cb(file)),
 });

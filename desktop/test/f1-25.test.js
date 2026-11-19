@@ -69,3 +69,19 @@ test("ignores packets from other games or years", () => {
   t.handle(Buffer.alloc(5));
   assert.deepStrictEqual(bad, [2023]);
 });
+
+test("2026 McLaren (team 228) and your own names", () => {
+  const { carName, unknownCar } = require("../f1-25.js");
+  assert.strictEqual(carName(228), "McLaren 2026");
+  assert.strictEqual(carName(8), "McLaren F1 25");
+  assert.strictEqual(carName(250), unknownCar(250));
+  assert.strictEqual(carName(250, { 250: "Konnersport" }), "Konnersport");
+  const t = new F1Telemetry(), got = [];
+  t.names = { 251: "APXGP" };
+  t.on("lap", l => got.push(l));
+  t.handle(session({}));
+  t.handle(participants({}, 251));
+  t.handle(history({}, [[90000, true]], [[255, 16]]));
+  assert.strictEqual(got[0].car, "APXGP");
+  assert.strictEqual(got[0].teamId, 251);
+});

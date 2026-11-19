@@ -5,11 +5,13 @@ const { app, BrowserWindow, ipcMain, shell, dialog } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const dgram = require("dgram");
-const { F1Telemetry } = require("./f1-25.js");
+const { F1Telemetry, knownCars, unknownCar } = require("./f1-25.js");
+const { ACTelemetry } = require("./ac.js");
+const { ACNames } = require("./acnames.js");
 const updates = require("./updates.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
-const DEFAULTS = { port: 20777, saveInvalid: false, network: false };
+const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
 let sock = null;
@@ -17,6 +19,8 @@ let settings = { ...DEFAULTS };
 let status = { listening: false, port: DEFAULTS.port, error: "", movedFrom: 0, lastLap: null, lapsSaved: 0 };
 let pendingUpdate = "";
 const f1 = new F1Telemetry();
+const acNames = new ACNames();
+const ac = new ACTelemetry({ names: acNames });
 
 const settingsFile = () => path.join(app.getPath("userData"), "settings.json");
 const backupDir = () => path.join(app.getPath("documents"), "Lapbook");
@@ -32,6 +36,9 @@ function loadSettings() {
     settings = { ...DEFAULTS };
   }
   settings.port = clampPort(settings.port);
+  if (!settings.carNames || typeof settings.carNames !== "object") settings.carNames = {};
+  f1.names = settings.carNames;
+  acNames.setFolder(settings.acPath);
 }
 function saveSettings() {
   try {
@@ -43,7 +50,7 @@ function send(channel, data) {
   if (win && !win.isDestroyed()) win.webContents.send(channel, data);
 }
 function pushStatus() {
-  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings });
+  send("telemetry:status", { ...status, lastPacket: f1.lastPacket, format: f1.format, info: f1.info(), settings, ac: { ...ac.info(), on: settings.acOn, folder: acNames.folder } });
 }
 
 // Opens the UDP port. If another program already uses it, the next free port
@@ -93,6 +100,13 @@ f1.on("lap", lap => {
   send("telemetry:lap", lap);
   pushStatus();
 });
+
+ac.on("lap", lap => {
+  send("telemetry:lap", lap);
+  pushStatus();
+});
+ac.on("session", pushStatus);
+ac.on("error", () => {});
 
 // ---- automatic backup into Documents\Lapbook ----
 let lastBackup = "";
@@ -172,14 +186,47 @@ ipcMain.handle("settings:get", () => settings);
 ipcMain.handle("settings:set", (e, next) => {
   const before = { ...settings };
   settings = {
+    ...settings,
     port: clampPort(next && next.port),
     saveInvalid: !!(next && next.saveInvalid),
     network: !!(next && next.network),
+    acOn: next && next.acOn !== undefined ? !!next.acOn : settings.acOn,
   };
   saveSettings();
   if (before.port !== settings.port || before.network !== settings.network) listen();
+  if (settings.acOn) ac.start();
+  else ac.stop();
   pushStatus();
   return settings;
+});
+// F1 25 car names: the built-in list plus your own names for unknown team IDs
+ipcMain.handle("cars:known", () => {
+  const all = { ...knownCars() };
+  for (const [id, n] of Object.entries(settings.carNames)) all[id] = n;
+  return { names: all, placeholder: Object.fromEntries(Object.keys(all).map(id => [id, unknownCar(id)])) };
+});
+ipcMain.handle("cars:name", (e, teamId, name) => {
+  const id = String(Math.round(Number(teamId)));
+  const n = String(name || "").trim().slice(0, 60);
+  if (!/^\d+$/.test(id)) return { ok: false };
+  if (n) settings.carNames[id] = n;
+  else delete settings.carNames[id];
+  f1.names = settings.carNames;
+  saveSettings();
+  pushStatus();
+  return { ok: true, id, name: n };
+});
+// Assetto Corsa folder for real car and track names
+ipcMain.handle("ac:folder", (e, dir) => {
+  settings.acPath = String(dir || "");
+  saveSettings();
+  const found = acNames.setFolder(settings.acPath);
+  pushStatus();
+  return found;
+});
+ipcMain.handle("ac:pick", async () => {
+  const r = await dialog.showOpenDialog(win, { title: "Choose your Assetto Corsa folder (the one with content\\cars inside)", properties: ["openDirectory"] });
+  return r.canceled ? "" : r.filePaths[0] || "";
 });
 ipcMain.on("backup:write", (e, json) => writeBackup(json));
 ipcMain.handle("backup:open", async () => {
@@ -244,6 +291,7 @@ if (!app.requestSingleInstanceLock()) {
     loadSettings();
     createWindow();
     listen();
+    if (settings.acOn) ac.start();
     offerUpdate(updateArg(process.argv));
     setInterval(pushStatus, 2000);
   });

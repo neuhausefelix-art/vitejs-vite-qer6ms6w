@@ -23,6 +23,12 @@ const TEAMS = {
   0: "Mercedes", 1: "Ferrari", 2: "Red Bull Racing", 3: "Williams", 4: "Aston Martin", 5: "Alpine",
   6: "Racing Bulls", 7: "Haas", 8: "McLaren", 9: "Kick Sauber", 41: "F1 Generic", 104: "My Team",
 };
+// 2026 season cars. 228 is confirmed as the 2026 McLaren; the others follow the
+// same order as the 2025 teams and can be renamed in Lapbook if one is off.
+const TEAMS_2026 = {
+  220: "Mercedes", 221: "Ferrari", 222: "Red Bull Racing", 223: "Williams", 224: "Aston Martin", 225: "Alpine",
+  226: "Racing Bulls", 227: "Haas", 228: "McLaren", 229: "Audi", 230: "Cadillac",
+};
 const SESSIONS = {
   1: "Practice 1", 2: "Practice 2", 3: "Practice 3", 4: "Short Practice", 5: "Q1", 6: "Q2", 7: "Q3",
   8: "Short Qualifying", 9: "One-Shot Qualifying", 10: "Sprint Shootout 1", 11: "Sprint Shootout 2",
@@ -35,7 +41,16 @@ const WEATHER = { 0: "sun", 1: "light_cloud", 2: "cloud", 3: "light_rain", 4: "r
 const TYRES = { 16: "soft", 17: "medium", 18: "hard", 7: "inter", 8: "wet" };
 
 const trackName = id => TRACKS[id] || `Track ${id}`;
-const carName = id => (TEAMS[id] ? `${TEAMS[id]} F1 25` : `F1 25 car (team ${id})`);
+const unknownCar = id => `F1 25 car (team ${id})`;
+// own names (set in Lapbook) win over the built-in list
+const carName = (id, own = {}) =>
+  own[id] ? String(own[id]) : TEAMS[id] ? `${TEAMS[id]} F1 25` : TEAMS_2026[id] ? `${TEAMS_2026[id]} 2026` : unknownCar(id);
+const knownCars = () => {
+  const o = {};
+  for (const id of Object.keys(TEAMS)) o[id] = carName(Number(id));
+  for (const id of Object.keys(TEAMS_2026)) o[id] = carName(Number(id));
+  return o;
+};
 
 class F1Telemetry extends EventEmitter {
   constructor() {
@@ -46,13 +61,16 @@ class F1Telemetry extends EventEmitter {
     this.sent = new Set(); // "<sessionUID>:<lapNum>"
     this.lastPacket = 0;
     this.format = 0;
+    this.names = {}; // your own names for team IDs
   }
 
   // what is being driven right now, for the live card
   info() {
     return {
       track: this.session ? trackName(this.session.trackId) : "",
-      car: this.teamId === null ? "" : carName(this.teamId),
+      car: this.teamId === null ? "" : carName(this.teamId, this.names),
+      teamId: this.teamId,
+      known: this.teamId === null || this.teamId in TEAMS || this.teamId in TEAMS_2026 || this.teamId in this.names,
       session: this.session ? SESSIONS[this.session.type] || "" : "",
     };
   }
@@ -116,7 +134,8 @@ class F1Telemetry extends EventEmitter {
       this.emit("lap", {
         game: "F1 25",
         track: trackName(this.session.trackId),
-        car: carName(this.teamId),
+        car: carName(this.teamId, this.names),
+        teamId: this.teamId,
         timeInMs: ms,
         valid: (flags & 1) === 1,
         lapNum: i + 1,
@@ -139,4 +158,4 @@ class F1Telemetry extends EventEmitter {
   }
 }
 
-module.exports = { F1Telemetry, TRACKS, TEAMS, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };
+module.exports = { F1Telemetry, TRACKS, TEAMS, TEAMS_2026, carName, unknownCar, knownCars, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };

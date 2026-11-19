@@ -8,7 +8,7 @@ const { build } = require("../updates.js");
 
 const root = path.join(__dirname, "..");
 const pkg = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
-const FILES = ["main.js", "preload.js", "f1-25.js", "updates.js", "app/lapbook.html", "app/desktop-bridge.js", "build/icon.png"];
+const FILES = ["main.js", "preload.js", "f1-25.js", "ac.js", "acnames.js", "updates.js", "app/lapbook.html", "app/desktop-bridge.js", "build/icon.png"];
 // files the update needs from the full app (boot.js is part of the full app only)
 const MIN_SHELL = "1.1.0";
 const notes = process.argv.slice(2);
