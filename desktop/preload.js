@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("lapbridge", {
   onLap: cb => ipcRenderer.on("telemetry:lap", (e, lap) => cb(lap)),
   onSkipped: cb => ipcRenderer.on("telemetry:skipped", (e, lap) => cb(lap)),
   onRace: cb => ipcRenderer.on("telemetry:race", (e, r) => cb(r)),
+  onClassification: cb => ipcRenderer.on("telemetry:classification", (e, r) => cb(r)),
   onStatus: cb => ipcRenderer.on("telemetry:status", (e, s) => cb(s)),
   getSettings: () => ipcRenderer.invoke("settings:get"),
   setSettings: s => ipcRenderer.invoke("settings:set", s),

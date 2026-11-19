@@ -138,6 +138,11 @@
    .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
    .md{max-width:760px}
   }
+  /* F1 25 career: sessions of a round */
+  .csess{max-width:720px;display:flex;flex-direction:column;gap:4px;margin-top:10px;border-top:1px solid var(--ln);padding-top:8px}
+  .csess summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;font-size:14px;padding:4px 0}.csess summary span{color:var(--mu)}
+  .cst{max-width:720px;display:grid;grid-template-columns:28px minmax(0,1fr) 84px 70px 34px;gap:4px 10px;font-size:13px;font-variant-numeric:tabular-nums;padding:6px 0 10px;align-items:baseline}
+  .cst small{display:block;color:var(--mu);font-size:11.5px}.cst .me{color:var(--pu);font-weight:600}.cst>b{text-align:right}.cst>span:nth-child(5n+3),.cst>span:nth-child(5n+4){color:var(--mu);text-align:right}
   /* overlay on/off switch */
   .sw{position:relative;flex:none;width:34px;height:20px;border-radius:999px;background:var(--ln);cursor:pointer;transition:background .15s;display:inline-block;vertical-align:middle}
   .sw:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
@@ -396,8 +401,9 @@
     ["Live delta", "in the overlay", { F1: "y", AC: "y", ACC: "y", LMU: "y", PC2: "y", FZ: "y" }],
     ["Race position", "in the overlay", { F1: "y", AC: "n", ACC: "y", LMU: "y", PC2: "y", FZ: "n" }],
     ["Race results", "for your rating", { F1: "y", AC: "n", ACC: "n", LMU: "n", PC2: "n", FZ: "n" }],
+    ["Championship", "career: all sessions, points", { F1: "y", AC: "n", ACC: "n", LMU: "n", PC2: "n", FZ: "n" }],
   ];
-  const READ_TIPS = { "AC|Sectors": "Assetto Corsa sends no sectors, Lapbook uses thirds of the lap", "FZ|Lap times": "time trials and drag runs that you mark once", "FZ|Car and circuit": "you name a car once, the game sends only a number", "LMU|Invalid laps": "only if the game's interface reports it", "FZ|Live delta": "in time trials and drag runs" };
+  const READ_TIPS = { "AC|Sectors": "Assetto Corsa sends no sectors, Lapbook uses thirds of the lap", "FZ|Lap times": "time trials and drag runs that you mark once", "FZ|Car and circuit": "you name a car once, the game sends only a number", "LMU|Invalid laps": "only if the game's interface reports it", "F1|Championship": "F1 25 career (Driver Career and My Team): practice, qualifying, sprint and race of every driver, points as in the game", "FZ|Live delta": "in time trials and drag runs" };
   function readsCard() {
     const cols = [["F1", "F1 25"], ["AC", "AC"], ["ACC", "ACC"], ["LMU", "LMU"], ["PC2", "PC2"], ["FZ", "FH5/6"]];
     const cell = (k, f, v) => `<td title="${esc(READ_TIPS[k + "|" + f] || (v === "y" ? "yes" : v === "p" ? "partly" : "no"))}"><span class="${v}"></span></td>`;
@@ -439,6 +445,7 @@
             <div class="gg">${(moreGames ? gs : shown).map(tile).join("")}</div></section>
         </div>
         <div class="hcol">
+          ${careerCard()}
           <section class="card"><div class="kpi">
             <div><b>${D.lapTimes.length}</b><span>laps</span></div><div><b>${nTr}</b><span>circuits</span></div><div><b>${nCar}</b><span>cars</span></div>
             <button data-act="driver"><b>${Math.round(h.R)}</b><span>rating ›</span></button></div>
@@ -706,7 +713,7 @@
   render = function () {
     if (S.v === "live") { AS = asum(); $("#app").innerHTML = livePage(); }
     else baseRender();
-    try { tidy(); sectorPanel(); sidebar(); wide(); document.getElementById("app").dataset.v = S.v; placeCard.last = ""; placeCard(); } catch (e) { console.error(e); }
+    try { tidy(); sectorPanel(); careerExtras(); sidebar(); wide(); document.getElementById("app").dataset.v = S.v; placeCard.last = ""; placeCard(); } catch (e) { console.error(e); }
   };
 
   // ---------- settings ----------
@@ -857,14 +864,156 @@
     if (D.races.some(x => x.game === G && x.track === r.track && x.date === day && x.start === r.start && x.finish === (r.dnf ? r.field + 2 : r.finish) && x.laps === r.laps)) return;
     const h0 = ratingHist().R;
     const field = Math.max(1, r.field), start = Math.min(Math.max(1, r.start || 1), field + 1), finish = r.dnf ? field + 1 : Math.min(Math.max(1, r.finish), field + 1);
-    D.races.push({ id: uid(), game: G, track: r.track, date: day, car: r.car, laps: r.laps || 1, start, finish, field, strength: 0, weather: r.weather || "sun", condition: { rain: "wet", storm: "wet", light_rain: "damp" }[r.weather] || "green", tire: "", dnf: !!r.dnf, notes: [r.session, r.pits ? r.pits + " stop" + (r.pits > 1 ? "s" : "") : "", "auto"].filter(Boolean).join(" · ") });
+    const rec = { id: uid(), game: G, track: r.track, date: day, car: r.car, laps: r.laps || 1, start, finish, field, strength: 0, weather: r.weather || "sun", condition: { rain: "wet", storm: "wet", light_rain: "damp" }[r.weather] || "green", tire: "", dnf: !!r.dnf, notes: [r.career && KIND[r.career.kind] && /^Race/.test(r.session) ? KIND[r.career.kind] : r.session, r.pits ? r.pits + " stop" + (r.pits > 1 ? "s" : "") : "", "auto"].filter(Boolean).join(" · ") };
+    // a career race belongs to its round, so the rating uses the real opponents
+    const cr = r.career && (r.career.kind === "race" || r.career.kind === "sprint") ? careerOf(r.career.season) : null;
+    const crd = cr && cr.calendar.find(x => x.auto === roundKey(r.career));
+    if (crd) { rec.champ = cr.id; rec.round = crd.id; crd.raceId = rec.id; }
+    D.races.push(rec);
     if (!D.tracks[G].includes(r.track)) D.tracks[G].push(r.track);
     if (!D.cars[G].includes(r.car)) D.cars[G].push(r.car);
     save();
     refresh();
     const d = ratingHist().R - h0;
-    toast(`Race saved: ${r.dnf ? "DNF" : "P" + finish} from P${start} at ${r.track}, rating ${d >= 0 ? "+" : ""}${d.toFixed(1)}`);
+    if (crd) {
+      const st2 = standings(cr), me = st2.ds.findIndex(x => x.d.me);
+      toast(`${r.career.kind === "sprint" ? "Sprint" : "Race"} saved: ${r.dnf ? "DNF" : "P" + finish} at ${r.track} · P${me + 1} in the championship with ${me >= 0 ? st2.ds[me].pts : 0} pts · rating ${d >= 0 ? "+" : ""}${d.toFixed(1)}`);
+    } else toast(`Race saved: ${r.dnf ? "DNF" : "P" + finish} from P${start} at ${r.track}, rating ${d >= 0 ? "+" : ""}${d.toFixed(1)}`);
   });
+
+  // ---------- F1 25 career: the season builds itself from the game's results ----------
+  // F1 25 sends the full result of every session (all cars, with the points of that
+  // session). One championship per career season, one round per race weekend, the
+  // sprint as its own round. The standings add up the game's own points.
+  const KIND = { practice: "Practice", qualifying: "Qualifying", sprintShootout: "Sprint Shootout", sprint: "Sprint", race: "Race" };
+  const KIND_ORDER = ["practice", "sprintShootout", "sprint", "qualifying", "race"];
+  const careerOf = season => D.championships.find(c => c.auto && c.auto.season === season);
+  const careers = () => D.championships.filter(c => c.auto && c.auto.season);
+  const roundKey = m => String(m.weekend) + (m.kind === "sprint" || m.kind === "sprintShootout" ? ":S" : "");
+  const idOf = (c, key) => { const x = alld(c).find(y => y.d.auto === key); return x ? x.d.id : ""; };
+  function careerChamp(m) {
+    let c = careerOf(m.season), fresh = false;
+    if (!c) {
+      c = { id: uid(), name: `F1 25 ${m.mode} · ${new Date().toLocaleDateString(undefined, { month: "short", year: "numeric" })}`, type: "team", game: F1, pts: "f1", calendar: [], results: {}, points: {}, teams: [], auto: { season: m.season, mode: m.mode, started: today() } };
+      D.championships.push(c);
+      fresh = true;
+    }
+    c.points = c.points || {};
+    for (const r of m.cars) {
+      let t = c.teams.find(x => x.auto === r.teamId);
+      if (!t) { t = { id: uid(), name: r.team || "Team", cars: [], drivers: [], auto: r.teamId }; c.teams.push(t); }
+      if (r.car && !t.cars.includes(r.car)) t.cars.push(r.car);
+      if (r.car && !D.cars[F1].includes(r.car)) D.cars[F1].push(r.car);
+      let x = alld(c).find(y => y.d.auto === r.key);
+      // you keep one entry even if your name in the game changes
+      if (!x && r.me) { x = alld(c).find(y => y.d.me); if (x) x.d.auto = r.key; }
+      if (!x) t.drivers.push({ id: uid(), name: r.name || (r.me ? "You" : "Driver"), car: r.car, rating: RSTART, auto: r.key, me: !!r.me });
+      else { if (r.car) x.d.car = r.car; if (!r.me && r.name) x.d.name = r.name; }
+      if (r.me) t.mine = true;
+    }
+    return { c, fresh };
+  }
+  function careerRound(c, m) {
+    const key = roundKey(m), sprint = key.endsWith(":S");
+    let rd = c.calendar.find(x => x.auto === key);
+    if (!rd) {
+      rd = { id: uid(), track: m.track, date: today(), laps: "", auto: key, sessions: {} };
+      if (sprint) rd.sprint = true;
+      // the sprint goes in front of its Grand Prix
+      const gp = sprint ? c.calendar.findIndex(x => x.auto === String(m.weekend)) : -1;
+      if (gp >= 0) c.calendar.splice(gp, 0, rd); else c.calendar.push(rd);
+    }
+    return rd;
+  }
+  function onCareer(m) {
+    if (!m || !Array.isArray(m.cars) || !m.cars.length || !m.season || !KIND[m.kind]) return;
+    const { c, fresh } = careerChamp(m), rd = careerRound(c, m);
+    rd.sessions = rd.sessions || {};
+    rd.sessions[m.kind === "race" || m.kind === "sprint" ? KIND[m.kind] : m.session || KIND[m.kind]] = { kind: m.kind, at: Date.now(), source: m.source, rows: m.cars.map(r => ({ id: idOf(c, r.key), pos: r.position, grid: r.grid, pts: r.points, best: r.best, status: r.status })) };
+    if (m.kind === "race" || m.kind === "sprint") {
+      const res = (c.results[rd.id] = {}), pts = (c.points[rd.id] = {});
+      m.cars.forEach(r => { const id = idOf(c, r.key); if (id) { res[id] = r.position; pts[id] = r.points; } });
+      const me = m.cars.find(r => r.me);
+      if (me) rd.laps = me.laps || rd.laps;
+    }
+    if (!D.tracks[F1].includes(m.track)) D.tracks[F1].push(m.track);
+    save();
+    refresh();
+    if (fresh) askStart(c);
+    else if (m.kind !== "race" && m.kind !== "sprint") { const me = m.cars.find(r => r.me); if (me) toast(`${m.session || KIND[m.kind]} saved: P${me.position} at ${m.track}`); }
+  }
+  if (B.onClassification) B.onClassification(onCareer);
+
+  // a season that was already running: copy the points from the game once
+  function askStart(c) {
+    if (c.base || $("#modal").innerHTML) { toast("New F1 25 career season found: " + c.name); return; }
+    $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>New F1 25 career season</h3>
+      <p class="ls" style="color:var(--mu);margin:0 0 12px">Lapbook builds the championship from every session you drive: practice, qualifying, sprint and race, with the points from the game. Is this the first race weekend of the season?</p>
+      <div class="dgrid"><button class="b" data-desk="cstart" data-id="${esc(c.id)}"><b>Yes, start at zero</b><small>The table starts empty</small></button>
+      <button class="b" data-desk="cbase" data-id="${esc(c.id)}"><b>No, the season is running</b><small>Copy the current points from the game once</small></button></div>
+      <div class="acts" style="margin-top:14px"><button class="b ghost" data-act="closem">Later</button></div></div></div>`;
+  }
+  function openBase(c) {
+    const b = c.base || {}, rows = c.teams.flatMap(t => t.drivers.map(d => ({ d, t })));
+    $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Standings before Lapbook</h3>
+      <p class="ls" style="color:var(--mu);margin:0 0 12px">Type in the points every driver had in the game before Lapbook started counting (Career → Standings in F1 25). Leave a field empty for 0. Lapbook adds every new session on top.</p>
+      <div class="cn" style="grid-template-columns:1fr 1fr 80px">${rows.map(({ d, t }) => `<span${d.me ? ' style="color:var(--pu);font-weight:600"' : ""}>${esc(d.name)}</span><span class="mu" style="font-size:13px">${esc(t.name)}</span><input data-base="${esc(d.id)}" inputmode="numeric" value="${b[d.id] ? esc(b[d.id]) : ""}" placeholder="0">`).join("")}</div>
+      <label style="margin-top:10px">Rounds already driven before Lapbook<input id="cdone" inputmode="numeric" value="${esc((c.auto && c.auto.before) || "")}" placeholder="0"></label>
+      <div class="acts" style="margin-top:14px"><button class="b pri" data-desk="cbasesave" data-id="${esc(c.id)}">Save standings</button><button class="b ghost" data-act="closem">Cancel</button></div></div></div>`;
+  }
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-desk]");
+    if (!t) return;
+    const k = t.dataset.desk, c = t.dataset.id && cc2(t.dataset.id);
+    if (k === "cstart" && c) { c.base = {}; save(); $("#modal").innerHTML = ""; toast("Championship started. Every session is added by itself."); refresh(); }
+    if (k === "cbase" && c) openBase(c);
+    if (k === "cbasesave" && c) {
+      const b = {};
+      document.querySelectorAll("[data-base]").forEach(i => { const v = Math.round(Number(i.value)); if (v > 0) b[i.dataset.base] = v; });
+      c.base = b;
+      c.auto.before = Math.max(0, Math.round(Number(($("#cdone") || {}).value) || 0));
+      save(); $("#modal").innerHTML = ""; refresh();
+      const st2 = standings(c), me = st2.ds.findIndex(x => x.d.me);
+      toast(`Standings saved${me >= 0 ? `: you are P${me + 1} with ${st2.ds[me].pts} pts` : ""}`);
+    }
+  });
+
+  // overview: where you stand in the season
+  function careerCard() {
+    const c = careers().sort((a, b) => (b.auto.started || "").localeCompare(a.auto.started || ""))[0];
+    if (!c) return "";
+    const st2 = standings(c), i = st2.ds.findIndex(x => x.d.me), me = st2.ds[i], lead = st2.ds[0];
+    const done = c.calendar.filter(rd => c.results[rd.id] && !rd.sprint).length + ((c.auto && c.auto.before) || 0), last = [...c.calendar].reverse().find(rd => rd.sessions && Object.keys(rd.sessions).length);
+    const gap = me && lead && lead !== me ? lead.pts - me.pts : 0;
+    return `<section class="card"><div class="ch"><h2>F1 25 Career</h2><button class="b ghost sm" data-act="champ" data-v="${esc(c.id)}">Standings ›</button></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px"><b style="font-size:34px;line-height:1">${me ? "P" + (i + 1) : "–"}</b><span style="text-align:right"><b style="font-size:22px">${me ? me.pts : 0}</b> <span class="mu">pts</span><br><span class="mu" style="font-size:13px">${me && lead && lead !== me ? `${gap} behind ${esc(lead.d.name)}` : me ? "leading the championship" : ""}</span></span></div>
+      <div class="mu" style="font-size:13px;margin-top:8px">${esc(c.auto.mode || "")} · ${done} race${done === 1 ? "" : "s"}${last ? ` · last: ${esc(last.track)}${last.sprint ? " sprint" : ""}` : ""}</div>
+      ${c.base ? "" : `<button class="b sm" data-desk="cbase" data-id="${esc(c.id)}" style="margin-top:10px">Enter the current standings</button>`}</section>`;
+  }
+  // championship page: a note and the sessions of every round
+  const NICE_KIND = { practice: "FP", qualifying: "Q", sprintShootout: "SQ", sprint: "Sprint", race: "Race" };
+  function careerExtras() {
+    if (S.v !== "champ") return;
+    const c = cc2(S.cid), app = document.getElementById("app");
+    if (!c || !c.auto || !app || app.querySelector("#cauto")) return;
+    const tabs = app.querySelector(".tabs");
+    if (tabs) tabs.insertAdjacentHTML("afterend", `<div id="cauto" class="panel" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><span class="mu" style="font-size:14px"><b style="color:var(--tx)">Filled in by F1 25.</b> Practice, qualifying, sprint and race results come in by themselves, points as in the game.${c.auto.before ? ` Includes your standings from ${c.auto.before} earlier round${c.auto.before === 1 ? "" : "s"}.` : ""}</span><button class="b ghost sm" data-desk="cbase" data-id="${esc(c.id)}">${c.base && Object.keys(c.base).length ? "Edit starting standings" : "Enter starting standings"}</button></div>`);
+    if (S.ctab !== "calendar") return;
+    const names = {};
+    alld(c).forEach(x => (names[x.d.id] = x));
+    [...app.querySelectorAll(".ac")].forEach((el, i) => {
+      const rd = c.calendar[i];
+      if (!rd || !rd.sessions || !Object.keys(rd.sessions).length) return;
+      const list = Object.entries(rd.sessions).sort((a, b) => KIND_ORDER.indexOf(a[1].kind) - KIND_ORDER.indexOf(b[1].kind) || a[1].at - b[1].at);
+      const ah = el.querySelector(".ah span");
+      if (ah && rd.sprint) ah.textContent += " · Sprint";
+      el.insertAdjacentHTML("beforeend", `<div class="csess">${list.map(([n, x]) => {
+        const mine = x.rows.find(r => names[r.id] && names[r.id].d.me);
+        return `<details><summary><b>${esc(n)}</b>${mine ? `<span>P${mine.pos}${x.kind === "race" || x.kind === "sprint" ? ` · ${mine.pts} pts` : ""}</span>` : ""}</summary>
+          <div class="cst">${x.rows.map(r => { const w = names[r.id]; return `<span class="${w && w.d.me ? "me" : ""}">${r.pos}</span><span class="${w && w.d.me ? "me" : ""}">${esc(w ? w.d.name : "?")}<small>${esc(w ? w.t.name : "")}</small></span><span>${r.best ? fmt(r.best) : "–"}</span><span>${x.kind === "race" || x.kind === "sprint" ? (r.status || (r.grid ? "from P" + r.grid : "")) : ""}</span><b>${x.kind === "race" || x.kind === "sprint" ? r.pts : ""}</b>`; }).join("")}</div></details>`;
+      }).join("")}</div>`);
+    });
+  }
 
   // ---------- best sectors on the circuit page ----------
   function sectorPanel() {

@@ -80,3 +80,35 @@ function final(opt, { finish = 3, laps = 10, start = 7, status = 4, cars = 20, b
   return b;
 }
 module.exports.final = final;
+
+// ---- career weekend: session with season/weekend ids, all drivers, full results ----
+function careerSession(opt, { type = 15, trackId = 11, season = 777, weekend = 1, link = 1, mode = 28, structure = [1, 2, 3, 5, 6, 7, 15] } = {}) {
+  const b = session(opt, { type, trackId });
+  b.writeUInt32LE(season, 670); b.writeUInt32LE(weekend, 674); b.writeUInt32LE(link, 678);
+  b.writeUInt8(mode, 694); b.writeUInt8(structure.length, 732);
+  structure.forEach((t, i) => b.writeUInt8(t, 733 + i));
+  return b;
+}
+// grid: [{ name, teamId, driverId, number }]
+function participantsAll(opt, grid) {
+  const stride = 57, b = header(PACKET.PARTICIPANTS, opt, HEADER + 1 + 22 * stride);
+  b.writeUInt8(grid.length, HEADER);
+  grid.forEach((g, i) => {
+    const o = HEADER + 1 + i * stride;
+    b.writeUInt8(g.ai === false ? 0 : 1, o); b.writeUInt8(g.driverId, o + 1); b.writeUInt8(g.teamId, o + 3); b.writeUInt8(g.number || i + 1, o + 5);
+    b.write(g.name, o + 7, 31, "utf8");
+  });
+  return b;
+}
+// rows: [{ position, grid, points, status, best, laps }] in car order
+function finalAll(opt, rows) {
+  const stride = 46, b = header(PACKET.FINAL_CLASSIFICATION, opt, HEADER + 1 + 22 * stride);
+  b.writeUInt8(rows.length, HEADER);
+  rows.forEach((r, i) => {
+    const o = HEADER + 1 + i * stride;
+    b.writeUInt8(r.position, o); b.writeUInt8(r.laps || 10, o + 1); b.writeUInt8(r.grid || r.position, o + 2); b.writeUInt8(r.points || 0, o + 3);
+    b.writeUInt8(r.pits || 1, o + 4); b.writeUInt8(r.status || 4, o + 5); b.writeUInt8(0, o + 6); b.writeUInt32LE(r.best || 80000 + i * 100, o + 7); b.writeDoubleLE(r.time || 3600 + i, o + 11);
+  });
+  return b;
+}
+Object.assign(module.exports, { careerSession, participantsAll, finalAll });

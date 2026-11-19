@@ -292,7 +292,14 @@ function lapDone(game, lap) {
   if (Array.isArray(lap.sectors)) lastSectors = { game, list: lap.sectors.map((t, i) => ({ t, c: lap.valid ? delta.colour(k, i, t) : "invalid" })), at: Date.now() };
   delta.finish(k, lap.timeInMs, lap.valid, lap.sectors);
 }
-f1.on("race", race => send("telemetry:race", race));
+// results of whole sessions (career): kept back while the page is loading, so none is lost
+let pendingCls = [];
+function sendKept(channel, x) {
+  if (win && !win.isDestroyed() && !win.webContents.isLoading()) win.webContents.send(channel, x);
+  else pendingCls.push([channel, x]);
+}
+f1.on("classification", x => sendKept("telemetry:classification", x));
+f1.on("race", race => sendKept("telemetry:race", race));
 f1.on("lap", lap => {
   lapDone("F1 25", lap);
   if (!lap.valid && !settings.saveInvalid) {
@@ -557,6 +564,8 @@ function createWindow() {
   win.loadFile(path.join(__dirname, "app", "lapbook.html"));
   win.webContents.on("did-finish-load", () => {
     pushStatus();
+    const q = pendingCls; pendingCls = [];
+    q.forEach(([c, x]) => sendKept(c, x));
     if (pendingUpdate) {
       send("update:open", pendingUpdate);
       pendingUpdate = "";

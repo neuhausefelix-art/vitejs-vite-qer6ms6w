@@ -1,9 +1,10 @@
-# Lapbook für Windows – Anleitung (Version 2.0.0)
+# Lapbook für Windows – Anleitung (Version 2.1.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
 - **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen. Mit einem Schalter in der Seitenleiste an und aus.
 - **Sektorzeiten, Rennen automatisch, Session-Rückblick.**
+- **F1 25 Karriere-WM automatisch:** Training, Qualifying, Sprint und Rennen aller Fahrer, WM-Stand für Fahrer und Teams mit den Punkten aus dem Spiel.
 - **Aufgeräumtes Layout mit Seitenleiste**, ausgelegt für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
@@ -12,9 +13,9 @@ Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten
 
 ---
 
-## 0. Update auf 2.0.0
+## 0. Update auf 2.1.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.0.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.1.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -317,6 +318,34 @@ Gelesen werden: Rundenzeit, Sektoren, ungültige Runden, Auto, Strecke mit Varia
 
 ---
 
+## 2k. F1 25 Karriere-WM
+
+In der **Karriere** (Driver Career und My Team) baut Lapbook die ganze Saison selbst auf. Andere Modi (Grand Prix, Zeitfahren, Online) landen wie bisher nur im Rennprotokoll.
+
+**Was übernommen wird:**
+- Jede Session des Wochenendes: **Training, Qualifying (Q1, Q2, Q3), Sprint Shootout, Sprint und Rennen**, mit der Ergebnisliste **aller Fahrer** (Position, beste Runde, Startplatz, Punkte, DNF).
+- Der **WM-Stand für Fahrer und Teams**, mit den Punkten, die das Spiel vergibt. Der Sprint zählt also richtig.
+- Deine Rennen und Sprints kommen ins Rennprotokoll und in die **Fahrerwertung**, gegen die echten Gegner des Rennens.
+
+**So sieht es aus:**
+- **Overview:** rechts die Karte **„F1 25 Career“** mit deiner WM-Position, deinen Punkten und dem Abstand zum Führenden.
+- **F1 25 → Championships → deine Saison:**
+  - **Standings:** die Tabelle der Fahrer und Teams.
+  - **Calendar:** jede Runde. Jede Session lässt sich aufklappen und zeigt die ganze Ergebnisliste. Ein Sprint ist eine eigene Runde vor seinem Grand Prix.
+
+**Eine Saison läuft schon?** F1 25 schickt keine fertige WM-Tabelle, nur die Ergebnisse der Sessions, die du mit Lapbook fährst. Bei der ersten Session einer neuen Saison fragt Lapbook deshalb nach:
+- **„Yes, start at zero“:** Die Saison beginnt gerade.
+- **„No, the season is running“:** Trag einmal die aktuellen Punkte aus dem Spiel ein (Karriere → Wertung), dazu die Zahl der schon gefahrenen Rennen. Danach zählt Lapbook automatisch weiter.
+
+Ändern kannst du das später mit **„Edit starting standings“** auf der Seite der Saison.
+
+**Gut zu wissen:**
+- Eine **Session musst du zu Ende fahren** (oder vorspulen lassen), damit das Spiel das Ergebnis schickt.
+- Fehlt beim Training einmal das Endergebnis, nimmt Lapbook die letzte Reihenfolge auf der Strecke.
+- Fährst du ein Rennen ohne Lapbook, fehlt es in der Tabelle. Dann gleichst du den Stand mit „Edit starting standings“ wieder an.
+
+---
+
 ## 3. Einstellungen
 
 Klicke auf der Seite **„Live tracking“** oben rechts auf **„Settings“**. Dort kannst du:
@@ -334,7 +363,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-2.0.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.1.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.

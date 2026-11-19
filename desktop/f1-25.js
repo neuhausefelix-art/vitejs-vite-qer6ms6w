@@ -7,6 +7,12 @@ const { EventEmitter } = require("events");
 const HEADER = 29;
 const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, FINAL_CLASSIFICATION: 8, SESSION_HISTORY: 11 };
 const RACES = new Set([15, 16, 17]); // session types that are races
+// game modes (m_gameMode) that are a career season
+const CAREER = { 27: "My Team Career", 28: "Driver Career", 29: "Career Online" };
+const kindOf = type => (type >= 1 && type <= 4 ? "practice" : type >= 5 && type <= 9 ? "qualifying" : type >= 10 && type <= 14 ? "sprintShootout" : RACES.has(type) ? "race" : "");
+// driver names come in capitals from some modes: "MAX VERSTAPPEN" -> "Max Verstappen"
+const nice = n => (/[a-z]/.test(n) ? n : n.toLowerCase().replace(/(^|[\s'-])\p{L}/gu, c => c.toUpperCase()));
+const teamName = id => TEAMS[id] || TEAMS_2026[id] || `Team ${id}`;
 const LAP_SIZE = 14; // LapHistoryData
 const MAX_LAPS = 100;
 const STINT_SIZE = 3; // TyreStintHistoryData
@@ -73,6 +79,9 @@ class F1Telemetry extends EventEmitter {
     this.format = 0;
     this.names = {}; // your own names for team IDs
     this.live = null; // { current, last, lapNum, invalid, at } for the overlay
+    this.drivers = []; // all cars of the session (participants packet)
+    this.order = []; // live position of every car, for sessions without a final result
+    this.bests = []; // best lap of every car (session history)
   }
 
   // what is being driven right now, for the live card
@@ -101,9 +110,14 @@ class F1Telemetry extends EventEmitter {
     const id = buf.readUInt8(6);
     const uid = buf.readBigUInt64LE(7).toString();
     const player = buf.readUInt8(27);
+    this.player = player;
     if (uid !== this.uid) {
       // a new session started: forget the old track and car
+      this.flushSnapshot();
       this.uid = uid;
+      this.drivers = [];
+      this.order = [];
+      this.bests = [];
       this.session = null;
       this.teamId = null;
       this.live = null;
@@ -126,12 +140,35 @@ class F1Telemetry extends EventEmitter {
       trackId: buf.readInt8(36),
       trackLength: buf.readUInt16LE(33),
     };
+    // career season: which season, which weekend, and how the weekend is built
+    if (buf.length >= 753) {
+      const n = Math.min(buf.readUInt8(732), 12), structure = [];
+      for (let i = 0; i < n; i++) structure.push(buf.readUInt8(733 + i));
+      Object.assign(this.session, {
+        season: buf.readUInt32LE(670), weekend: buf.readUInt32LE(674), link: buf.readUInt32LE(678),
+        gameMode: buf.readUInt8(694), structure,
+      });
+    }
+  }
+  // what kind of session this is inside a career weekend
+  career() {
+    const s = this.session;
+    if (!s || !CAREER[s.gameMode] || !s.season) return null;
+    let kind = kindOf(s.type);
+    const st = s.structure || [], sprintWeekend = st.some(t => t >= 10 && t <= 14);
+    // in a sprint weekend the first race is the sprint, the last one the Grand Prix
+    if (kind === "race" && sprintWeekend) {
+      const races = st.filter(t => RACES.has(t));
+      if (races.length > 1 && s.type !== races[races.length - 1]) kind = "sprint";
+    }
+    return { season: s.season, weekend: s.weekend, link: s.link, mode: CAREER[s.gameMode], kind, sprintWeekend };
   }
 
   // running lap time of your car (Lap Data packet: 22 cars, then 2 time-trial bytes)
   onLapData(buf, player) {
     const stride = (buf.length - HEADER - 2) / 22;
     if (!Number.isInteger(stride) || stride < 38 || player >= 22) return;
+    for (let i = 0; i < 22; i++) this.order[i] = buf.readUInt8(HEADER + i * stride + 32);
     const o = HEADER + player * stride;
     const inv = buf.readUInt8(o + 37);
     const sec = (ms, min) => buf.readUInt16LE(o + ms) + buf.readUInt8(o + min) * 60000;
@@ -156,13 +193,62 @@ class F1Telemetry extends EventEmitter {
     if (!Number.isInteger(stride) || stride < 8 || player >= 22) return;
     this.teamId = buf.readUInt8(HEADER + 1 + player * stride + 3);
     this.numCars = buf.readUInt8(HEADER);
+    // every driver: F1 25 names are 32 bytes, F1 24 had 48
+    const nameLen = stride >= 60 ? 48 : 32;
+    this.drivers = [];
+    for (let i = 0; i < 22; i++) {
+      const o = HEADER + 1 + i * stride;
+      if (stride < 7 + nameLen) break;
+      const raw = buf.toString("utf8", o + 7, o + 7 + nameLen), name = nice(raw.slice(0, (raw.indexOf("\0") + 1 || raw.length + 1) - 1).trim());
+      this.drivers.push({ ai: buf.readUInt8(o) === 1, driverId: buf.readUInt8(o + 1), teamId: buf.readUInt8(o + 3), myTeam: buf.readUInt8(o + 4) === 1, number: buf.readUInt8(o + 5), name });
+    }
+  }
+  // the same driver in every session: by the game's driver id, players by name
+  driverKey(i) {
+    const d = this.drivers[i];
+    if (!d) return "car" + i;
+    return d.driverId !== 255 ? "d" + d.driverId : "n:" + d.name;
+  }
+  row(i, player, extra) {
+    const d = this.drivers[i] || {}, teamId = d.teamId !== undefined ? d.teamId : null;
+    return { key: this.driverKey(i), name: d.name || (i === player ? "You" : `Car ${i + 1}`), number: d.number || 0, teamId, team: teamId === null ? "" : teamName(teamId), car: teamId === null ? "" : carName(teamId, this.names), ai: !!d.ai, me: i === player, ...extra };
+  }
+  // the whole result of a session, for the championship
+  classification(rows, source) {
+    const c = this.career(), s = this.session;
+    if (!c || !c.kind || !rows.length) return;
+    const key = "cls:" + s.uid;
+    if (this.sent.has(key)) return;
+    this.sent.add(key);
+    this.emit("classification", { game: "F1 25", ...c, uid: s.uid, type: s.type, session: SESSIONS[s.type] || "", track: trackName(s.trackId), source, cars: rows.sort((a, b) => a.position - b.position) });
+  }
+  // practice and qualifying: if the game sent no final result, use the last live order
+  flushSnapshot() {
+    const s = this.session, player = this.player;
+    if (!s || !this.order.length || !this.drivers.length || RACES.has(s.type)) return;
+    const n = this.numCars || this.drivers.length, rows = [];
+    for (let i = 0; i < Math.min(22, this.drivers.length); i++) if (this.order[i] > 0 && this.order[i] <= n) rows.push(this.row(i, player, { position: this.order[i], grid: 0, laps: 0, points: 0, pits: 0, status: "", best: this.bests[i] || 0, time: 0 }));
+    this.classification(rows, "live");
   }
 
   // end of a race: your result, for the automatic race log
   onFinal(buf, uid, player) {
     const stride = (buf.length - HEADER - 1) / 22;
     if (!Number.isInteger(stride) || stride < 20 || player >= 22) return;
-    if (!this.session || this.teamId === null || !RACES.has(this.session.type)) return;
+    if (!this.session) return;
+    // F1 25 added m_resultReason after the status, so later fields moved one byte
+    const r = stride >= 46 ? 1 : 0, STATUS = { 3: "", 4: "", 5: "DNF", 6: "DSQ", 7: "NC", 8: "Retired" };
+    const n = buf.readUInt8(HEADER), rows = [];
+    for (let i = 0; i < Math.min(22, n || 22); i++) {
+      const o = HEADER + 1 + i * stride, pos = buf.readUInt8(o);
+      if (!pos) continue;
+      rows.push(this.row(i, player, {
+        position: pos, laps: buf.readUInt8(o + 1), grid: buf.readUInt8(o + 2), points: buf.readUInt8(o + 3), pits: buf.readUInt8(o + 4),
+        status: STATUS[buf.readUInt8(o + 5)] || "", best: buf.readUInt32LE(o + 6 + r), time: Math.round(buf.readDoubleLE(o + 10 + r) * 1000),
+      }));
+    }
+    this.classification(rows, "final");
+    if (this.teamId === null || !RACES.has(this.session.type)) return;
     const key = "race:" + uid;
     if (this.sent.has(key)) return;
     const o = HEADER + 1 + player * stride;
@@ -179,9 +265,10 @@ class F1Telemetry extends EventEmitter {
       pits: buf.readUInt8(o + 4),
       dnf: status >= 5,
       field: Math.max(0, cars - 1),
-      bestLap: buf.readUInt32LE(o + 6),
+      bestLap: buf.readUInt32LE(o + 6 + r),
       weather: WEATHER[this.session.weather] || "sun",
       session: SESSIONS[this.session.type] || "Race",
+      career: this.career(),
     });
   }
 
@@ -189,7 +276,12 @@ class F1Telemetry extends EventEmitter {
     const base = HEADER + 7;
     const stints = base + MAX_LAPS * LAP_SIZE;
     if (buf.length < stints + 8 * STINT_SIZE) return;
-    if (buf.readUInt8(HEADER) !== player) return; // only your own car
+    const car = buf.readUInt8(HEADER);
+    if (car < 22) {
+      const bl = buf.readUInt8(HEADER + 3);
+      if (bl >= 1 && bl <= MAX_LAPS) this.bests[car] = buf.readUInt32LE(base + (bl - 1) * LAP_SIZE);
+    }
+    if (car !== player) return; // laps only of your own car
     if (!this.session || this.teamId === null) return; // wait until we know track and car
     const numLaps = Math.min(buf.readUInt8(HEADER + 1), MAX_LAPS);
     const numStints = Math.min(buf.readUInt8(HEADER + 2), 8);
@@ -231,4 +323,4 @@ class F1Telemetry extends EventEmitter {
   }
 }
 
-module.exports = { F1Telemetry, TRACKS, TEAMS, TEAMS_2026, CHASSIS, carName, unknownCar, oldNames, knownCars, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };
+module.exports = { CAREER, kindOf, F1Telemetry, TRACKS, TEAMS, TEAMS_2026, CHASSIS, carName, unknownCar, oldNames, knownCars, HEADER, LAP_SIZE, MAX_LAPS, STINT_SIZE, PACKET };
