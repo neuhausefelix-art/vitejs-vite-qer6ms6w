@@ -1,7 +1,7 @@
 {
   "name": "lapbook-desktop",
   "productName": "Lapbook",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Lapbook for Windows: logs your F1 25 laps automatically from the game's UDP telemetry.",
   "main": "boot.js",
   "type": "commonjs",

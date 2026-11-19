@@ -57,10 +57,58 @@
   .unotes{margin:6px 0 0;padding-left:18px;color:var(--mu);font-size:14px}
   .md h4{margin:16px 0 6px;font-size:14px}
   .cn{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;align-items:center;font-size:14px}
+  /* ---- desktop shell: sidebar + content ---- */
+  body.desk .top{display:none}
+  body.desk #app.wrap{margin:0 0 0 236px;max-width:none;padding:28px clamp(20px,3vw,48px) 90px}
+  #sb{position:fixed;left:0;top:0;bottom:0;width:236px;background:var(--sf);border-right:1px solid var(--ln);display:flex;flex-direction:column;padding:20px 12px 14px;z-index:7;overflow-y:auto;scrollbar-width:thin}
+  .sbl{display:flex;align-items:center;gap:10px;padding:0 10px 18px}.sbl b{font-size:20px;letter-spacing:.06em;font-weight:700}.sbl i{width:16px;height:8px;background:var(--rd);transform:skewX(-20deg)}
+  #sb nav{display:flex;flex-direction:column;gap:2px}
+  #sb h6{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--mu);margin:18px 10px 6px}
+  .ni{display:flex;align-items:center;gap:11px;width:100%;min-height:38px;padding:7px 10px;border:0;background:none;border-radius:8px;color:var(--mu);font-weight:600;font-size:14.5px;cursor:pointer;text-align:left;white-space:nowrap}
+  .ni:hover{background:var(--sf2);color:var(--tx)}.ni.on{background:var(--sf2);color:var(--tx);box-shadow:inset 3px 0 0 var(--rd)}
+  .ni svg{width:18px;height:18px;flex:none}.ni span{overflow:hidden;text-overflow:ellipsis}
+  .ni small{margin-left:auto;font-size:12px;color:var(--mu);font-weight:500}
+  .ni em.sdot{margin-left:auto;width:8px;height:8px;border-radius:50%;background:var(--ln);flex:none}.ni em.sdot.on{background:var(--gr);box-shadow:0 0 0 3px color-mix(in srgb,var(--gr) 25%,transparent)}.ni em.sdot.err{background:var(--dn)}
+  .ni i.ab{flex:none;width:28px;height:18px;margin:0 -5px;border-radius:4px;background:var(--sf2);font-style:normal;font-size:10px;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;color:var(--tx)}
+  .ni.on i.ab{background:var(--rd);color:#fff}
+  .ni.more{min-height:30px;font-size:13px;font-weight:500;padding-left:39px}
+  .sbf{margin-top:auto;padding-top:12px;border-top:1px solid var(--ln);display:flex;flex-direction:column;gap:2px}.sbf p{font-size:11.5px;color:var(--mu);margin:8px 10px 0}
+  @media (max-width:1000px){#sb{width:64px;padding:16px 8px}.ni span,.ni small,#sb h6,.sbf p,.sbl b,.ni.more{display:none}.ni{justify-content:center}.sbl{justify-content:center}body.desk #app.wrap{margin-left:64px;padding:20px 18px 90px}}
+  .ph{display:flex;align-items:baseline;gap:14px;margin:0 0 22px;flex-wrap:wrap}.ph h1{font-size:28px;margin:0}.ph .sp{flex:1}.ph .mu{font-size:14px}
+  .card{background:var(--sf);border:1px solid var(--ln);border-radius:12px;padding:18px 20px;margin:0 0 20px}
+  .ch{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 14px}.ch h2{margin:0}
+  .b.sm{padding:4px 10px;font-size:13px}
+  .hg{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,420px);gap:0 22px;align-items:start}
+  @media (max-width:1150px){.hg{grid-template-columns:1fr}}
+  .gg{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+  #app .gg>.gcov{height:128px;margin:0;font-size:24px;padding:0 24px}#app .gg>.gcov small{font-size:13px}
+  .kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .kpi>*{background:var(--sf2);border:0;border-radius:8px;padding:10px 12px;text-align:left;color:inherit;font:inherit;cursor:default}
+  .kpi>button{cursor:pointer}.kpi>button:hover{outline:1px solid var(--ln)}
+  .kpi b{display:block;font-size:22px;font-variant-numeric:tabular-nums;line-height:1.15}.kpi span{font-size:12px;color:var(--mu)}
+  .rank{display:block;width:100%;margin-top:12px;background:none;border:0;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.rank>span{font-size:14px;color:var(--mu)}.rank b{color:var(--tx)}.rank .pr{margin:6px 0 0}
+  .rrow{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:9px 4px;border:0;border-top:1px solid var(--ln);background:none;color:inherit;font:inherit;text-align:left;cursor:pointer}
+  .rrow:first-of-type{border-top:0}.rrow:hover{background:var(--sf2)}
+  .rrow b{display:block;font-weight:600;font-size:15px}.rrow small{display:block;color:var(--mu);font-size:12.5px}
+  .rrow .tm{font-size:17px;min-width:0}.rrow .tm small{text-align:right}
+  .rrow.cont{background:var(--sf2);border-radius:8px;padding:10px 12px;margin-bottom:6px}
+  .gsl{display:flex;gap:8px;flex-wrap:wrap}
+  .gs{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--mu);background:var(--sf2);border-radius:999px;padding:4px 11px}
+  .gs i{width:7px;height:7px;border-radius:50%;background:var(--ln)}.gs.ready i{background:var(--pu)}.gs.live i{background:var(--gr)}.gs.live{color:var(--tx)}
+  .lgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px;align-items:start}.lgrid .card{margin:0}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.dgrid .b{text-align:left;padding:12px 14px}.dgrid b{display:block}.dgrid small{display:block;color:var(--mu);font-size:12px;font-weight:400}
+  body.desk #app .ban{height:84px}body.desk #app .ban h1{font-size:28px}
+  body.desk #app .back{margin-bottom:12px}
+  .cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .cc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:12px 14px;background:var(--sf2);border:1px solid transparent;border-radius:10px;color:inherit;font:inherit;text-align:left;cursor:pointer;min-width:0}
+  .cc:hover{border-color:var(--ln)}.cc b{font-size:16px;font-weight:600;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}.cc small{color:var(--mu);font-size:12px;overflow:hidden;text-overflow:ellipsis;max-width:100%;white-space:nowrap}.cc .tm{font-size:20px;text-align:left;min-width:0;margin:2px 0}
+  .kpi span{white-space:nowrap}
+  #app .add.addnew{max-width:720px;opacity:.85}#app .add.addnew input{min-width:220px}
+  body.desk #app[data-v=track] .b.wide[data-act=addtoggle]{width:auto;display:inline-block;padding:9px 22px;margin:0 0 6px !important}
+  body.desk #app[data-v=game] .list>.row{min-height:64px}
   /* ---- wide screens: more room, several columns ---- */
   @media (min-width:1200px){
-   .wrap{max-width:min(2600px,96vw)}
-   .fab{right:calc((100vw - min(2600px,96vw)) / 2 + 16px)}
+   .fab{right:32px}
    .wd{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,30%);gap:0 28px;align-items:start}
    .wd>.c2{position:sticky;top:76px;max-height:calc(100vh - 90px);overflow:auto}
    .wd.hm>.c2{order:2}
@@ -84,33 +132,84 @@
   const port = () => st.port || st.settings.port;
   const ovOn = () => !!(st.settings.overlay && st.settings.overlay.on);
 
-  // ---------- header buttons ----------
-  function header() {
-    const a = document.querySelector(".top .acts");
-    if (!a) return;
-    let b = document.getElementById("tele");
-    if (!b) {
-      b = document.createElement("button");
-      b.id = "tele"; b.className = "b"; b.type = "button";
-      b.addEventListener("click", e => { e.stopPropagation(); openPanel(); });
-      a.insertBefore(b, a.firstChild);
-      const u = document.createElement("button");
-      u.id = "upd"; u.className = "b"; u.type = "button"; u.textContent = "Update";
-      u.title = "Install a Lapbook update file";
-      u.addEventListener("click", e => { e.stopPropagation(); openUpdate(""); });
-      a.insertBefore(u, b.nextSibling);
-      const o = document.createElement("button");
-      o.id = "ovb"; o.className = "b"; o.type = "button";
-      o.title = "In-game overlay (Ctrl+Shift+O)";
-      o.addEventListener("click", e => { e.stopPropagation(); openOverlayPanel(); });
-      a.insertBefore(o, u);
+  // ---------- desktop shell: sidebar navigation ----------
+  const NI = {
+    home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/>',
+    live: '<circle cx="12" cy="12" r="2.2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
+    overlay: '<rect x="3" y="5" width="18" height="14" rx="2"/><rect x="12.5" y="8" width="6" height="4" rx="1"/>',
+    flag: '<path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/>',
+    prog: '<path d="M3 17l5-5 4 3 8-9"/><path d="M15 6h5v5"/>',
+    duel: '<path d="M5 4l9 9M14 13l-2 2 3 3 2-2-3-3M19 4l-9 9M10 13l2 2-3 3-2-2 3-3"/>',
+    strat: '<circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/>',
+    driver: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/>',
+    trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5v1a3 3 0 0 0 3 3M16 6h3v1a3 3 0 0 1-3 3M12 13v4M8.5 20h7"/>',
+    data: '<ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12v6c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-6"/>',
+    update: '<path d="M12 4v11M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19h14"/>',
+  };
+  const nic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${NI[k]}</svg>`;
+  const MAIN_GAMES = [F1, AC, "Forza Horizon 6"];
+  let moreGames = false;
+  function sidebar() {
+    let sb = document.getElementById("sb");
+    if (!sb) {
+      sb = document.createElement("aside");
+      sb.id = "sb";
+      document.body.prepend(sb);
+      document.body.classList.add("desk");
     }
-    const ob = document.getElementById("ovb");
-    if (ob) { ob.textContent = ovOn() ? "Overlay ✓" : "Overlay"; ob.style.color = ovOn() ? "var(--gr)" : ""; }
-    const on = [f1Live() && "F1 25", acLive() && "AC", fzLive() && "Forza"].filter(Boolean);
-    b.textContent = st.error ? "Live: problem" : on.length ? "● Live · " + on.join(" + ") : "○ Live";
-    b.style.color = st.error ? "var(--dn)" : on.length ? "var(--gr)" : "var(--mu)";
-    b.title = st.error || (on.length ? "Receiving telemetry" : "Waiting for F1 25, Assetto Corsa or Forza");
+    const v = S.v, inGame = ["game", "track", "champ"].includes(v);
+    const item = (attrs, icon, label, on, extra = "") => `<button class="ni ${on ? "on" : ""}" ${attrs} title="${label}">${nic(icon)}<span>${label}</span>${extra}</button>`;
+    const liveOn = f1Live() || acLive() || fzLive();
+    const gs = gl(), main = gs.filter(g => MAIN_GAMES.includes(g) || laps(g).length), rest = gs.filter(g => !main.includes(g));
+    const ab = g => ({ "F1 25": "F1", "Assetto Corsa": "AC", "Assetto Corsa Competizione": "ACC", "Le Mans Ultimate": "LMU", "Forza Horizon 5": "FH5", "Forza Horizon 6": "FH6", "Project CARS 2": "PC2" }[g] || g.slice(0, 3).toUpperCase());
+    const gameItem = g => `<button class="ni ${inGame && S.g === g ? "on" : ""}" data-act="game" data-v="${esc(g)}" title="${esc(g)}"><i class="ab">${esc(ab(g))}</i><span>${esc(g)}</span>${laps(g).length ? `<small>${laps(g).length}</small>` : ""}</button>`;
+    const html = `<div class="sbl"><b>LAPBOOK</b><i></i></div>
+      <nav>
+        ${item('data-act="home"', "home", "Overview", v === "home")}
+        ${item('data-desk="live"', "live", "Live tracking", v === "live", `<em class="sdot ${st.error ? "err" : liveOn ? "on" : ""}"></em>`)}
+        ${item('data-desk="overlay"', "overlay", "Overlay", false, ovOn() ? '<em class="sdot on"></em>' : "")}
+        <h6>Games</h6>
+        ${main.map(gameItem).join("")}
+        ${rest.length ? (moreGames ? rest.map(gameItem).join("") + `<button class="ni more" data-desk="less"><span>Fewer games</span></button>` : `<button class="ni more" data-desk="more"><span>${rest.length} more games</span></button>`) : ""}
+        <h6>Analyse</h6>
+        ${item('data-act="tool" data-v="prog"', "prog", "Progress", v === "prog")}
+        ${item('data-act="tool" data-v="duel"', "duel", "Duel", v === "duel")}
+        ${item('data-act="tool" data-v="strat"', "strat", "Strategy", v === "strat")}
+        <h6>Career</h6>
+        ${item('data-act="driver"', "driver", "Driver & races", v === "driver")}
+        ${item('data-act="ach"', "trophy", "Achievements", v === "ach")}
+      </nav>
+      <div class="sbf">
+        ${item('data-desk="data"', "data", "Data & backup", false)}
+        ${item('data-desk="update"', "update", "Update", false)}
+        <p>Lapbook ${esc(info.version || "")} · ${esc(typeof CST === "string" ? CST : "")}</p>
+      </div>`;
+    if (sidebar.last !== html) { sb.innerHTML = html; sidebar.last = html; }
+  }
+  const header = sidebar; // status updates redraw the sidebar
+
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-desk]");
+    if (!t) return;
+    const k = t.dataset.desk;
+    if (k === "live") { S.v = "live"; render(); scrollTo(0, 0); }
+    if (k === "overlay") openOverlayPanel();
+    if (k === "update") openUpdate("");
+    if (k === "data") openDataPanel();
+    if (k === "more" || k === "less") { moreGames = k === "more"; sidebar(); }
+  });
+  function openDataPanel() {
+    $("#modal").innerHTML = `<div class="ov"><div class="md"><h3>Data &amp; backup</h3>
+      <p class="ls" style="color:var(--mu);margin:0 0 12px">Your laps are saved on this PC. A backup is written to Documents\\Lapbook every 30 seconds (one copy per day, last 14 days).</p>
+      <div class="dgrid">
+        <button class="b" data-act="dl"><b>Download backup</b><small>Save all your data as a file</small></button>
+        <button class="b" data-act="up"><b>Load a backup</b><small>Replaces the data in the app</small></button>
+        <button class="b" id="dfold"><b>Open backup folder</b><small>Documents\\Lapbook</small></button>
+        <button class="b" data-act="txt"><b>Copy as text</b><small>JSON or CSV</small></button>
+        ${UNDO.length ? `<button class="b" data-act="undo"><b>Undo</b><small>${UNDO.length} step${UNDO.length === 1 ? "" : "s"}</small></button>` : ""}
+      </div>
+      <div class="acts" style="margin-top:14px"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+    $("#dfold").onclick = () => B.openBackups();
   }
 
   // ---------- live card on the home page ----------
@@ -159,31 +258,108 @@
       ${askRoute ? `<div class="nm2"><span class="warn2">Name this race (${esc(r.name)}):</span><input id="fzroute" placeholder="for example Goliath" maxlength="80"><button class="b pri" data-live="fzroute" data-id="${esc(r.id)}">Save name</button></div>` : ""}
       ${f.unsupported ? `<p class="warn2" style="margin:0">Forza sends packets of ${esc(f.unsupported)} bytes, which Lapbook does not know yet. Tell Claude this number.</p>` : ""}</div>`;
   }
-  function liveCard() {
-    if (st.error) {
-      return `<section class="panel live err" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking needs attention</span><button class="b" data-live="set">Settings</button></div><p class="ls" style="margin:0;color:var(--dn)">${esc(st.error)}</p></section>`;
-    }
-    const a = f1Live(), c = acLive(), z = fzLive();
-    if (a || c || z) return `<section class="panel live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}${z ? fzLive_() : ""}</section>`;
-    if (ok && !showHow) {
-      return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking ready</span><span class="acts"><button class="b ghost" data-live="how">How to</button><button class="b" data-live="set">Settings</button></span></div><p class="ls" style="margin:0">Start F1 25, Assetto Corsa or Forza and drive. Every finished lap is saved automatically.</p>${moved()}${lastRecapRow()}</section>`;
-    }
-    const chips = `<div class="chips" style="margin:0">${[F1, AC, FZ].map(g => `<button class="chip ${tab === g ? "on" : ""}" data-live="tab" data-g="${g}">${g}</button>`).join("")}</div>`;
-    const body = tab === FZ
+  function setupBody(g) {
+    return g === FZ
       ? `<ol class="steps"><li class="${st.fz.listening ? "done" : ""}"><i>${st.fz.listening ? "✓" : "1"}</i><span>Lapbook is ready for Forza on port ${esc(st.fz.port || 5300)}</span></li>
          <li class="${fzWas ? "done" : ""}"><i>${fzWas ? "✓" : "2"}</i><span>Turn on Data Out in Forza with these settings:</span></li></ol>
          ${fzRows()}
-         <ol class="steps"><li class="${addedFz() ? "done" : ""}"><i>${addedFz() ? "✓" : "3"}</i><span>Record your first time trial: at the start press <b>Ctrl+Shift+T</b>, drive the run, press <b>Ctrl+Shift+T</b> at the finish. Standing still at the start makes it a drag run, timed from the launch. After that every run through the same start is timed by itself.</span></li></ol>
+         <ol class="steps"><li class="${addedFz() ? "done" : ""}"><i>${addedFz() ? "✓" : "3"}</i><span>Record a time trial: press <b>Ctrl+Shift+T</b> at the start, drive, press it again at the finish. Standing still at the start makes it a drag run. After that every run through the same start is timed by itself.</span></li></ol>
          ${st.fz.movedFrom ? `<p class="warn2" style="margin:0">Port ${st.fz.movedFrom} is used by another program, so Lapbook uses <b>${esc(st.fz.port)}</b>. Set that port in Forza.</p>` : ""}`
-      : tab === AC
+      : g === AC
       ? `<ol class="steps"><li class="done"><i>✓</i><span>Lapbook is ready for Assetto Corsa</span></li>
-         <li class="${acWas ? "done" : ""}"><i>${acWas ? "✓" : "2"}</i><span>Start a session in Assetto Corsa (for example through Content Manager). There is nothing to set in the game: Lapbook connects by itself once you are on track.</span></li>
-         <li class="${added[AC] ? "done" : ""}"><i>${added[AC] ? "✓" : "3"}</i><span>Drive one full lap. It is saved here by itself.</span></li></ol>${folderNote()}`
+         <li class="${acWas ? "done" : ""}"><i>${acWas ? "✓" : "2"}</i><span>Start a session (for example through Content Manager). Nothing to set in the game: Lapbook connects once you are on track.</span></li>
+         <li class="${added[AC] ? "done" : ""}"><i>${added[AC] ? "✓" : "3"}</i><span>Drive one full lap. It is saved by itself.</span></li></ol>${folderNote()}`
       : `<ol class="steps"><li class="${st.listening ? "done" : ""}"><i>${st.listening ? "✓" : "1"}</i><span>Lapbook is ready on port ${port()}</span></li>
          <li class="${wasLive ? "done" : ""}"><i>${wasLive ? "✓" : "2"}</i><span>Turn on UDP telemetry in F1 25 with these settings, then start a session:</span></li></ol>
          ${f1Rows()}
-         <ol class="steps"><li class="${added[F1] ? "done" : ""}"><i>${added[F1] ? "✓" : "3"}</i><span>Drive one full lap. It is saved here by itself.</span></li></ol>${moved()}`;
-    return `<section class="panel live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Set up live tracking</span>${ok ? `<button class="b ghost" data-live="hide">Hide</button>` : ""}</div>${chips}${body}</section>`;
+         <ol class="steps"><li class="${added[F1] ? "done" : ""}"><i>${added[F1] ? "✓" : "3"}</i><span>Drive one full lap. It is saved by itself.</span></li></ol>${moved()}`;
+  }
+  const gameLive = g => (g === F1 ? f1Live() : g === AC ? acLive() : fzLive());
+  const gameState = g => (gameLive(g) ? "live" : g === F1 ? (st.listening ? "ready" : "off") : g === AC ? (st.ac.on ? "ready" : "off") : st.fz.on && st.fz.listening ? "ready" : "off");
+  // the live card on the overview: what is going on right now, nothing more
+  function liveCard() {
+    if (st.error) {
+      return `<section class="card live err" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>Live tracking needs attention</span><button class="b" data-live="set">Settings</button></div><p class="ls" style="margin:0;color:var(--dn)">${esc(st.error)}</p></section>`;
+    }
+    const a = f1Live(), c = acLive(), z = fzLive();
+    if (a || c || z) return `<section class="card live on" id="livecard">${a ? f1Live_() : ""}${c ? acLive_() : ""}${z ? fzLive_() : ""}</section>`;
+    const chips = [F1, AC, FZ].map(g => `<span class="gs ${gameState(g)}"><i></i>${g === FZ ? "Forza Horizon 6" : g}</span>`).join("");
+    return `<section class="card live" id="livecard"><div class="lh"><span class="lt"><span class="dot"></span>${ok ? "Live tracking is ready" : "Live tracking"}</span><button class="b ${ok ? "ghost" : "pri"}" data-desk="live">${ok ? "Details" : "Set up (2 min)"}</button></div>
+      <p class="ls" style="margin:0">${ok ? "Start a game and drive. Every finished lap is saved by itself." : "Lapbook can save your laps by itself while you drive. Set it up once per game."}</p>
+      <div class="gsl">${chips}</div>${moved()}${lastRecapRow()}</section>`;
+  }
+  // the live tracking page: one column per game with its setup and status
+  function livePage() {
+    const col = g => {
+      const name = g === FZ ? st.fz.game || "Forza Horizon 6" : g, live = gameLive(g);
+      const body = live ? (g === F1 ? f1Live_() : g === AC ? acLive_() : fzLive_()) : setupBody(g);
+      return `<section class="card live ${live ? "on" : ""}"><div class="lh"><span class="lt"><span class="dot"></span>${esc(name)}</span><span class="gs ${gameState(g)}"><i></i>${live ? "live" : gameState(g) === "ready" ? "waiting for the game" : "off"}</span></div>${body}</section>`;
+    };
+    return `<div class="ph"><h1>Live tracking</h1><span class="mu">Laps are saved by themselves while you drive. Set up each game once.</span><span class="sp"></span><button class="b" data-desk="overlay">Overlay</button><button class="b" data-live="set">Settings</button></div>
+      <div class="lgrid" id="livePage">${[F1, AC, FZ].map(col).join("")}</div>
+      ${st.error ? `<p class="warn2" style="color:var(--dn)">${esc(st.error)}</p>` : ""}
+      <div class="ph" style="margin-top:28px"><h2 style="margin:0">Session recaps</h2><span class="mu">a summary after every session</span></div>
+      <div class="card">${recaps.length ? recaps.map((r, i) => `<button class="rrow" data-live="recap" data-i="${i}"><span><b>${esc(r.track)}</b><small>${esc(r.game)} · ${esc(r.car)} · ${esc(r.date)} · ${r.laps} lap${r.laps === 1 ? "" : "s"}</small></span><span class="tm pb">${r.best ? fmt(r.best) : "–"}</span></button>`).join("") : `<p class="mu" style="margin:0">After your first session with live tracking, its recap shows up here.</p>`}</div>`;
+  }
+
+  // ---------- overview (home) ----------
+  function deskHome() {
+    const gs = gl(), nTr = gs.reduce((n, g) => n + D.tracks[g].length, 0), nCar = gs.reduce((n, g) => n + D.cars[g].length, 0), h = ratingHist(), a = AS;
+    const shown = gs.filter(g => MAIN_GAMES.includes(g) || laps(g).length), other = gs.filter(g => !shown.includes(g));
+    const tile = g => { const n = laps(g).length, t = D.tracks[g].length; return `<button class="gcov" style="background:${esc(cov(g))}" data-act="game" data-v="${esc(g)}">${esc(g)}<small>${n ? n + " lap" + (n === 1 ? "" : "s") + " · " + t + " circuit" + (t === 1 ? "" : "s") : "No laps yet"}</small></button>`; };
+    // recent laps, newest first; a lap that is the circuit record gets a badge
+    const recBest = {};
+    D.lapTimes.forEach(l => { const k = l.game + "|" + l.track; if (!recBest[k] || l.timeInMs < recBest[k]) recBest[k] = l.timeInMs; });
+    const recent = D.lapTimes.map((l, i) => [l, i]).sort((x, y) => (y[0].date || "").localeCompare(x[0].date || "") || y[1] - x[1]).slice(0, 9).map(x => x[0]);
+    const L = LAST && D.tracks[LAST.g] && D.tracks[LAST.g].includes(LAST.t) ? LAST : null;
+    return `<div class="ph"><h1>Overview</h1><span class="mu">${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</span></div>
+      <div class="hg">
+        <div class="hcol">
+          <div id="homeLive"></div>
+          ${circuitsCard()}
+          <section class="card"><div class="ch"><h2>Games</h2>${other.length ? `<button class="b ghost sm" data-desk="${moreGames ? "less" : "more"}" id="hmore">${moreGames ? "Show fewer" : other.length + " more"}</button>` : ""}</div>
+            <div class="gg">${(moreGames ? gs : shown).map(tile).join("")}</div></section>
+        </div>
+        <div class="hcol">
+          <section class="card"><div class="kpi">
+            <div><b>${D.lapTimes.length}</b><span>laps</span></div><div><b>${nTr}</b><span>circuits</span></div><div><b>${nCar}</b><span>cars</span></div>
+            <button data-act="driver"><b>${Math.round(h.R)}</b><span>rating ›</span></button></div>
+            <button class="rank" data-act="ach"><span><b>${esc(a.rank)}</b> · ${a.pts} points</span>${rankBar(a)}</button></section>
+          <section class="card"><div class="ch"><h2>Recent laps</h2><button class="b ghost sm" data-act="tool" data-v="prog">Progress ›</button></div>
+            ${L ? `<button class="rrow cont" data-act="resume"><span><b>Continue: ${esc(L.t)}</b><small>${esc(L.g)} · log your next lap</small></span><span class="mu">+ Lap</span></button>` : ""}
+            ${recent.map(l => { const rec = recBest[l.game + "|" + l.track] === l.timeInMs; return `<button class="rrow" data-act="gotrack" data-g="${esc(l.game)}" data-v="${esc(l.track)}"><span><b>${esc(l.track)}</b><small>${esc(l.car)}</small></span><span class="tm ${rec ? "pb" : ""}">${fmt(l.timeInMs)}<small>${rec ? "record · " : ""}${esc(shortDate(l.date))}</small></span></button>`; }).join("") || `<p class="mu" style="margin:0">No laps yet. Start a game with live tracking, or open a game and add a lap.</p>`}
+          </section>
+        </div>
+      </div>
+      ${L ? `<button class="fab" data-act="fab" title="Log a lap on ${esc(L.t)}"><b>+</b> Lap</button>` : ""}`;
+  }
+  home = deskHome;
+  const shortDate = d => { if (!d) return ""; if (d === today()) return "today"; const t = Date.parse(d); return isFinite(t) ? new Date(t).toLocaleDateString(undefined, { day: "numeric", month: "short" }) : d; };
+  // small layout fixes on Lapbook's own pages
+  function tidy() {
+    const app = document.getElementById("app");
+    if (!app) return;
+    // the sidebar replaces "← Games"
+    app.querySelectorAll(':scope > .back[data-act="home"]').forEach(b => b.remove());
+    if (S.v === "game") {
+      // search first, adding a circuit or car second
+      const adds = [...app.querySelectorAll(":scope > .add")];
+      if (adds.length >= 2 && adds[0].querySelector("#nt, #nc")) { adds[0].classList.add("addnew"); adds[1].after(adds[0]); }
+    }
+  }
+  // the circuits you drove most recently, one click away
+  function circuitsCard() {
+    const by = {};
+    D.lapTimes.forEach(l => {
+      const k = l.game + "|" + l.track, b = by[k] || (by[k] = { g: l.game, t: l.track, n: 0, best: Infinity, last: "", car: "" });
+      b.n++;
+      if (l.timeInMs < b.best) { b.best = l.timeInMs; b.car = l.car; }
+      if ((l.date || "") > b.last) b.last = l.date || "";
+    });
+    const list = Object.values(by).sort((a, b) => b.last.localeCompare(a.last) || b.n - a.n).slice(0, 8);
+    if (!list.length) return "";
+    return `<section class="card"><div class="ch"><h2>Your circuits</h2><span class="mu" style="font-size:13px">most recently driven</span></div>
+      <div class="cgrid">${list.map(c => `<button class="cc" data-act="gotrack" data-g="${esc(c.g)}" data-v="${esc(c.t)}"><small>${esc(c.g)}</small><b>${esc(c.t)}</b><span class="tm pb">${fmt(c.best)}</span><small>${esc(c.car)} · ${c.n} lap${c.n === 1 ? "" : "s"} · ${esc(shortDate(c.last))}</small></button>`).join("")}</div></section>`;
   }
 
   // ---------- wide layout: put the page into two columns ----------
@@ -194,11 +370,7 @@
     if (app.querySelector(":scope > .wd")) return;
     const kids = [...app.children].filter(n => !n.classList.contains("top") && !n.classList.contains("fab"));
     let side = [], main = [], cls = "";
-    if (S.v === "home") {
-      const g = kids.findIndex(n => n.tagName === "H2");
-      if (g < 0) return;
-      side = kids.slice(0, g); main = kids.slice(g);
-    } else if (S.v === "track") {
+    if (S.v === "track") {
       const k = kids.findIndex(n => n.classList.contains("bh") && /^(Compare|Progress|History)/.test(n.textContent.trim()));
       if (k < 0) return;
       main = kids.slice(0, k); side = kids.slice(k); cls = " tr";
@@ -210,24 +382,22 @@
     const wd = document.createElement("div"), c1 = document.createElement("div"), c2 = document.createElement("div");
     wd.className = "wd" + cls; c1.className = "c1"; c2.className = "c2";
     // home: live card and driver info on the right, games on the left
-    if (S.v === "home") { main.forEach(n => c1.appendChild(n)); side.forEach(n => c2.appendChild(n)); wd.append(c2, c1); wd.className += " hm"; }
-    else { main.forEach(n => c1.appendChild(n)); side.forEach(n => c2.appendChild(n)); wd.append(c1, c2); }
+    main.forEach(n => c1.appendChild(n)); side.forEach(n => c2.appendChild(n)); wd.append(c1, c2);
     const top = app.querySelector(":scope > .top");
     if (top) top.after(wd); else app.prepend(wd);
   }
 
   function placeCard() {
-    const old = document.getElementById("livecard");
-    if (S.v !== "home") { if (old) old.remove(); return; }
-    const html = liveCard();
-    if (old && placeCard.last === html) return;
-    if (old && old.contains(document.activeElement) && /^(cname|fzcar|fzroute|fzseg)$/.test(document.activeElement.id)) return; // typing a name
+    const typing = document.activeElement && /^(cname|fzcar|fzroute|fzseg)$/.test(document.activeElement.id);
+    if (typing) return; // do not redraw while a name is being typed
+    let html, host;
+    if (S.v === "home") { host = document.getElementById("homeLive"); html = liveCard(); }
+    else if (S.v === "live") { host = document.getElementById("livePage"); html = livePage(); }
+    else return;
+    if (!host || placeCard.last === html) return;
     placeCard.last = html;
-    if (old) { old.outerHTML = html; return; }
-    const host = document.querySelector("#app .wd > .c2") || document.querySelector("#app .top");
-    if (!host) return;
-    if (host.classList.contains("c2")) host.insertAdjacentHTML("afterbegin", html);
-    else host.insertAdjacentHTML("afterend", html);
+    if (S.v === "home") host.innerHTML = html;
+    else { const y = scrollY; $("#app").innerHTML = html; scrollTo(0, y); }
   }
 
   // rename a car in all laps and races of a game
@@ -318,7 +488,11 @@
 
   // keep our additions when Lapbook re-renders
   const baseRender = render;
-  render = function () { baseRender(); try { sectorPanel(); header(); wide(); placeCard.last = ""; placeCard(); } catch (e) { console.error(e); } };
+  render = function () {
+    if (S.v === "live") { AS = asum(); $("#app").innerHTML = livePage(); }
+    else baseRender();
+    try { tidy(); sectorPanel(); sidebar(); wide(); document.getElementById("app").dataset.v = S.v; placeCard.last = ""; placeCard(); } catch (e) { console.error(e); }
+  };
 
   // ---------- settings ----------
   async function openPanel() {
