@@ -48,6 +48,15 @@ class F1Telemetry extends EventEmitter {
     this.format = 0;
   }
 
+  // what is being driven right now, for the live card
+  info() {
+    return {
+      track: this.session ? trackName(this.session.trackId) : "",
+      car: this.teamId === null ? "" : carName(this.teamId),
+      session: this.session ? SESSIONS[this.session.type] || "" : "",
+    };
+  }
+
   handle(buf) {
     if (!Buffer.isBuffer(buf) || buf.length < HEADER) return;
     const format = buf.readUInt16LE(0);

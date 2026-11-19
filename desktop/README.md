@@ -1,94 +1,97 @@
-# Lapbook für Windows
+# Lapbook für Windows – Anleitung (Version 1.1.0)
 
-Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Dazu kommt: **Runden aus F1 25 werden automatisch gespeichert**, mit Strecke, Team, Rundenzeit, Reifen, Wetter sowie Luft- und Streckentemperatur.
+Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
+- **Live-Tracking für F1 25:** Jede gefahrene Runde wird automatisch gespeichert, mit Strecke, Team, Zeit, Reifen, Wetter und Temperaturen.
+- **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
+- **Automatische Sicherung** in `Dokumente\Lapbook`.
 
-Die App liest nur die offizielle UDP-Telemetrie, die F1 25 selbst sendet. Sie greift nicht ins Spiel ein und verändert keinen Speicher.
-
----
-
-## 1. App installieren
-
-Du hast zwei Möglichkeiten:
-
-### A) Portable Version (ohne Installation)
-1. Entpacke **`Lapbook-1.0.0-portable.zip`** in einen Ordner, z. B. `C:\Spiele\Lapbook`. Rechtsklick → „Alle extrahieren…“.
-2. Starte **`Lapbook.exe`**.
-3. Windows zeigt eventuell **„Der Computer wurde durch Windows geschützt“**, weil die App nicht kostenpflichtig signiert ist. Klicke auf **„Weitere Informationen“** und dann auf **„Trotzdem ausführen“**.
-4. Tipp: Rechtsklick auf `Lapbook.exe` → „Weitere Optionen anzeigen“ → „Senden an“ → „Desktop (Verknüpfung erstellen)“.
-
-### B) Installer (Setup mit Startmenü-Eintrag)
-Den Installer baut GitHub automatisch, sobald der Code im Repo liegt:
-1. Öffne auf GitHub das Repo → Reiter **Actions** → Workflow **„Lapbook Windows build“** → den neuesten grünen Lauf.
-2. Lade unten unter **Artifacts** die Datei **„Lapbook-Windows“** herunter und entpacke sie.
-3. Starte **`Lapbook-Setup-1.0.0.exe`**. Für den Windows-Hinweis gilt dasselbe wie oben.
-
-> Deine Daten liegen nicht im App-Ordner, sondern in deinem Windows-Benutzerprofil. Updates oder ein Wechsel des Ordners löschen also nichts.
+Die App liest nur die offizielle Telemetrie, die F1 25 selbst sendet. Sie greift nicht ins Spiel ein.
 
 ---
 
-## 2. F1 25 einstellen (einmalig)
+## 1. Installieren
 
-Im Spiel: **Einstellungen → Telemetrie-Einstellungen** (Settings → Telemetry Settings)
+1. Entpacke **`Lapbook-1.1.0-portable.zip`**: Rechtsklick → **„Alle extrahieren…“**. Wähle einen festen Ordner, z. B. `C:\Spiele\Lapbook`.
+2. Öffne den Ordner und starte **`Lapbook.exe`**.
+3. Zeigt Windows **„Der Computer wurde durch Windows geschützt“**: Klicke auf **„Weitere Informationen“** und dann auf **„Trotzdem ausführen“**. Die Meldung kommt nur, weil die App nicht kostenpflichtig signiert ist.
+4. Fragt die **Windows-Firewall** nach, klicke auf **„Zulassen“**.
+5. Für eine Desktop-Verknüpfung: Rechtsklick auf `Lapbook.exe` → **„Weitere Optionen anzeigen“** → **„Senden an“** → **„Desktop (Verknüpfung erstellen)“**.
 
-| Einstellung | Wert |
-|---|---|
-| UDP-Telemetrie | **Ein** |
-| UDP-Broadcast-Modus | **Aus** |
-| UDP-IP-Adresse | **127.0.0.1** |
-| UDP-Port | **20777** |
-| UDP-Senderate | **20 Hz** |
-| UDP-Format | **2025** |
-| Your Telemetry | **Public** (nur online wichtig) |
-
-Dann:
-1. **Erst Lapbook starten, dann F1 25.** Oben rechts in Lapbook steht **„○ F1 25 waiting“**.
-2. Fahre eine Session, egal ob Zeitfahren, Training, Qualifying oder Rennen. Sobald Daten kommen, steht dort **„● F1 25 live“** in Grün.
-3. Jede **fertige, gültige Runde** wird automatisch gespeichert. Unten erscheint z. B. „F1 25 · Monza: 01:21.200, new record by 0.300“.
-
-**Windows-Firewall:** Fragt Windows beim ersten Start, ob Lapbook kommunizieren darf, klicke auf **„Zulassen“**.
+**Du hast schon Version 1.0.0?** Lösche den Inhalt des alten Ordners und entpacke 1.1.0 dorthin, oder nimm einen neuen Ordner. **Deine Runden bleiben erhalten**, denn sie liegen nicht im App-Ordner, sondern in deinem Windows-Profil. Ab 1.1.0 brauchst du das nicht mehr, dann kommen Updates per Drag & Drop (siehe Punkt 4).
 
 ---
 
-## 3. Einstellungen in der App
+## 2. Live-Tracking einrichten (einmalig, ca. 2 Minuten)
 
-Klicke oben rechts auf **„F1 25 live / waiting“**. Dort kannst du:
-- den **UDP-Port** ändern. Das ist nötig, wenn ein anderes Programm wie SimHub schon Port 20777 nutzt. Stelle dann im Spiel denselben Port ein.
-- **ungültige Runden** mitspeichern. Standardmäßig werden sie übersprungen.
-- angeben, ob das Spiel auf **einem anderen Gerät** läuft, z. B. PlayStation, Xbox oder einem zweiten PC. Dann trägst du im Spiel die IP-Adresse deines PCs ein.
+Auf der Startseite von Lapbook steht oben die Karte **„Set up live tracking for F1 25“** mit drei Schritten, die sich von selbst abhaken:
+
+1. ✓ **Lapbook is ready on port 20777.** Das passiert automatisch.
+2. **In F1 25 einstellen:** Einstellungen → Telemetrie-Einstellungen (Settings → Telemetry Settings). Nimm die Werte genau so, wie Lapbook sie anzeigt:
+
+   | Einstellung | Wert |
+   |---|---|
+   | UDP Telemetry | **On** |
+   | UDP Broadcast Mode | **Off** |
+   | UDP IP Address | **127.0.0.1** |
+   | UDP Port | **20777** (oder die Zahl, die Lapbook anzeigt) |
+   | UDP Send Rate | **20Hz** |
+   | UDP Format | **2025** |
+
+3. **Eine Runde fahren.** Sie erscheint von selbst in Lapbook.
+
+Danach:
+- Während du fährst, zeigt die Karte **„● Live · F1 25“** mit Strecke, Auto, Session und deiner letzten Rundenzeit. Mit **„Open Monza“** (bzw. der aktuellen Strecke) springst du direkt zur Strecke.
+- Oben rechts zeigt **„● Live“** in Grün, dass Daten ankommen.
+- Ungültige Runden werden übersprungen. In den Einstellungen kannst du das ändern.
+
+**Port belegt?** Nutzt ein anderes Programm wie SimHub schon Port 20777, wechselt Lapbook **automatisch** auf den nächsten freien Port, z. B. 20778. Die Karte sagt dir dann, welchen Port du im Spiel eintragen musst.
+
+**Reihenfolge:** am besten erst Lapbook starten, dann F1 25.
+
+---
+
+## 3. Einstellungen
+
+Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**. Dort kannst du:
+- den **Port** ändern,
+- **ungültige Runden** mitspeichern,
+- einstellen, ob F1 25 auf **einem anderen Gerät** läuft (PlayStation, Xbox oder ein zweiter PC). Dann trägst du im Spiel statt 127.0.0.1 die IP-Adresse deines PCs ein.
 - den **Backup-Ordner** öffnen.
 
 ---
 
-## 4. Deine bisherigen Daten übernehmen
+## 4. Updates installieren
+
+Von mir bekommst du künftig eine Datei wie **`Lapbook-Update-1.2.0.lapbook-update`**.
+
+1. Starte Lapbook.
+2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du oben auf **„Update“** und dann auf **„Choose file“**.
+3. Lapbook zeigt die Version und was neu ist. Klicke auf **„Install and restart“**.
+4. Lapbook startet neu, fertig. **Deine Runden bleiben erhalten.**
+
+Sicherheit:
+- Lapbook prüft jede Datei mit Prüfsummen. Beschädigte oder fremde Dateien werden abgelehnt.
+- **Zurück zur vorherigen Version:** oben auf **„Update“** klicken, dann **„Back to version …“** (zum Bestätigen zweimal klicken).
+- Startet ein Update nicht richtig, geht Lapbook von selbst zur eingebauten Version zurück und sagt dir Bescheid.
+- Installiere nur Update-Dateien, die du von mir bekommen hast.
+
+---
+
+## 5. Bisherige Daten übernehmen
 
 Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 1. Öffne dort Lapbook → **Data → Download**. Du bekommst eine Datei `lapbook-JJJJ-MM-TT.json`.
 2. Öffne in der Windows-App **Data → Upload** und wähle diese Datei.
 
-**Achtung:** Upload **ersetzt** die Daten in der App. Mach das am besten direkt nach der Installation, bevor du die ersten Runden fährst.
+**Achtung:** Upload **ersetzt** die Daten in der App. Mach das also direkt am Anfang, bevor du die ersten Runden live aufzeichnest.
 
 ---
 
-## 5. Sicherung
+## 6. Sicherung
 
-- Die App speichert automatisch eine Sicherung in **`Dokumente\Lapbook`**: `lapbook-autosave.json` und eine Kopie pro Tag (die letzten 14 Tage).
+- Lapbook speichert automatisch nach **`Dokumente\Lapbook`**: `lapbook-autosave.json` und eine Kopie pro Tag (die letzten 14 Tage).
 - Wiederherstellen: **Data → Upload** und eine dieser Dateien wählen.
-- Die Synchronisierung zwischen Geräten über claude.ai gibt es in der Windows-App nicht. Oben steht deshalb „Saved on this PC“.
-
----
-
-## 6. Was automatisch erkannt wird
-
-| | |
-|---|---|
-| Strecke | ✅ alle F1-25-Strecken inkl. Reverse-Layouts |
-| Auto | ✅ als Team, z. B. „McLaren F1 25“, „Ferrari F1 25“. Bei „My Team“ steht „My Team F1 25“. |
-| Rundenzeit | ✅ inkl. Gültigkeit (ungültige werden übersprungen) |
-| Reifen | ✅ Soft / Medium / Hard / Intermediate / Wet |
-| Wetter, Temperaturen | ✅ |
-| Session | ✅ als Notiz, z. B. „Time Trial · auto“ |
-
-Doppelte Runden (gleiche Strecke, gleiches Auto, gleiche Zeit am selben Tag) werden nur einmal gespeichert.
+- Neuer PC oder Windows neu installiert? Kopiere vorher den Ordner `Dokumente\Lapbook` weg, oder nutze OneDrive.
 
 ---
 
@@ -96,10 +99,11 @@ Doppelte Runden (gleiche Strecke, gleiches Auto, gleiche Zeit am selben Tag) wer
 
 | Problem | Lösung |
 |---|---|
-| Bleibt bei „waiting“ | Prüfe die Telemetrie-Einstellungen im Spiel. Sie müssen **Ein**, **127.0.0.1** und den gleichen Port wie in Lapbook haben. |
-| „F1 25: error … port already used“ | Ein anderes Programm wie SimHub nutzt den Port. Nimm in Lapbook und im Spiel z. B. **20778**. Oder aktiviere in SimHub die UDP-Weiterleitung an Port 20778. |
-| Runden fehlen | Ungültige Runden werden übersprungen. Das lässt sich im Telemetrie-Fenster ändern. |
+| Karte bleibt bei Schritt 2 | Prüfe die Werte im Spiel: Telemetry **On**, IP **127.0.0.1**, **derselbe Port**, den Lapbook anzeigt. |
+| „Live tracking needs attention“ | Die Karte nennt den Grund. Meistens hilft „Settings“ → anderen Port wählen, z. B. 20790, und denselben im Spiel eintragen. |
+| Eine Runde fehlt | Sie war wahrscheinlich ungültig. In den Einstellungen auf „Save them too“ stellen. |
 | Windows blockiert den Start | „Weitere Informationen“ → „Trotzdem ausführen“. |
+| Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
 
 ---
 
@@ -108,16 +112,19 @@ Doppelte Runden (gleiche Strecke, gleiches Auto, gleiche Zeit am selben Tag) wer
 ```bash
 cd desktop
 npm install
-npm test        # Tests für den F1-25-Parser
-npm start       # App starten
-npm run dist    # Installer + portable ZIP bauen (unter Windows)
+npm test                     # Parser- und Update-Tests
+npm start                    # App starten
+npm run dist                 # Installer + portable ZIP bauen (unter Windows)
+npm run update -- "Neu: …"   # Update-Paket dist/Lapbook-Update-<version>.lapbook-update bauen
 ```
 
 Aufbau:
-- `main.js`: Fenster, UDP-Empfang und Sicherung
-- `f1-25.js`: liest die F1-25-Pakete (Session, Participants, Session History)
+- `boot.js`: startet ein installiertes Update oder die eingebaute Version (mit automatischem Zurückfallen)
+- `updates.js`: Update-Pakete lesen, prüfen, installieren und zurücksetzen
+- `main.js`: Fenster, UDP-Empfang (mit automatischem Port-Ausweichen) und Sicherung
+- `f1-25.js`: liest die F1-25-Pakete
 - `preload.js`: sichere Brücke zur Oberfläche
 - `app/lapbook.html`: die unveränderte Lapbook-Seite
-- `app/desktop-bridge.js`: trägt die Runden ein und zeigt den Telemetrie-Status
+- `app/desktop-bridge.js`: Live-Karte, Update-Fenster, Drag & Drop, Eintragen der Runden
 
-Den Installer baut GitHub Actions bei jedem Push (`.github/workflows/lapbook-windows.yml`).
+Update-Pakete enthalten nur die App-Dateien, nicht Electron selbst. Ein Electron-Update braucht weiterhin einmal die neue komplette App (`minShell` im Paket).
