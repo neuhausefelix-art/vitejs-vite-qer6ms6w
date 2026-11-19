@@ -1,23 +1,44 @@
-# Lapbook für Windows – Anleitung (Version 1.7.0)
+# Lapbook für Windows – Anleitung (Version 1.8.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für F1 25, Assetto Corsa und Forza Horizon:** Jede gefahrene Runde wird automatisch gespeichert.
 - **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen.
 - **Sektorzeiten, Rennen automatisch, Session-Rückblick.**
-- **Breites Layout** für große und Ultra-Wide-Monitore.
+- **Aufgeräumtes Layout mit Seitenleiste**, ausgelegt für große und Ultra-Wide-Monitore.
 - **Updates per Drag & Drop:** Update-Datei ins Fenster ziehen, fertig.
 - **Automatische Sicherung** in `Dokumente\Lapbook`.
 
-Die App liest nur die offizielle Telemetrie, die F1 25 und Assetto Corsa selbst senden. Sie greift nicht ins Spiel ein.
+Die App liest nur die offizielle Telemetrie, die F1 25, Assetto Corsa und Forza selbst senden. Sie greift nicht ins Spiel ein.
 
 ---
 
-## 0. Update auf 1.7.0
+## 0. Update auf 1.8.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.7.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-1.8.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
+
+---
+
+## So ist die App aufgebaut
+
+Links steht die **Seitenleiste**. Von dort erreichst du alles mit einem Klick:
+
+| Bereich | Was du dort findest |
+|---|---|
+| **Overview** | Startseite: Live-Status, deine zuletzt gefahrenen Strecken, deine Spiele, Kennzahlen (Runden, Strecken, Autos, Fahrerwertung) und die letzten Runden |
+| **Live tracking** | Einrichtung pro Spiel (F1 25, Assetto Corsa, Forza Horizon 6) mit Schritt-für-Schritt-Hinweisen, aktueller Status und alle **Session-Rückblicke** |
+| **Overlay** | Overlay ein- und ausschalten, Stil, Größe und Position |
+| **Games** | deine Spiele mit Rundenzahl. Darunter liegen Strecken, Autos, Rennen und Meisterschaften. Weitere Spiele klappst du mit „… more games“ auf. |
+| **Analyse** | **Progress** (Verbesserung über die Zeit), **Duel** (Auto gegen Auto), **Strategy** (Boxenstopp-Rechner) |
+| **Career** | **Driver & races** (Fahrerwertung, Rennen), **Achievements** (Erfolge und Ränge) |
+| **Data & backup** | Sicherung herunterladen, Sicherung laden, Backup-Ordner öffnen, als Text kopieren, Rückgängig |
+| **Update** | Update-Datei installieren oder zur vorherigen Version zurück |
+
+Unten in der Seitenleiste stehen die Versionsnummer und „Saved on this PC“. Ist das Fenster schmal, zeigt die Seitenleiste nur noch Symbole. Fährst du mit der Maus darüber, siehst du den Namen.
+
+Auf jeder Strecke findest du: Rekord, „Add lap“, Sektoren, Rangliste, Vergleich zweier Autos, Fortschrittskurve und den Verlauf aller Runden. Auf breiten Bildschirmen ist das in zwei Spalten aufgeteilt.
 
 ---
 
@@ -57,7 +78,7 @@ Deine Runden liegen nicht im App-Ordner, sondern in deinem Windows-Profil. Eine 
 
 ## 2. Live-Tracking einrichten (einmalig, ca. 2 Minuten)
 
-Auf der Startseite von Lapbook steht oben die Karte **„Set up live tracking for F1 25“** mit drei Schritten, die sich von selbst abhaken:
+Klicke in der Seitenleiste auf **„Live tracking“**. Dort hat jedes Spiel eine eigene Karte mit drei Schritten, die sich von selbst abhaken. Für F1 25:
 
 1. ✓ **Lapbook is ready on port 20777.** Das passiert automatisch.
 2. **In F1 25 einstellen:** Einstellungen → Telemetrie-Einstellungen (Settings → Telemetry Settings). Nimm die Werte genau so, wie Lapbook sie anzeigt:
@@ -74,8 +95,8 @@ Auf der Startseite von Lapbook steht oben die Karte **„Set up live tracking fo
 3. **Eine Runde fahren.** Sie erscheint von selbst in Lapbook.
 
 Danach:
-- Während du fährst, zeigt die Karte **„● Live · F1 25“** mit Strecke, Auto, Session und deiner letzten Rundenzeit. Mit **„Open Monza“** (bzw. der aktuellen Strecke) springst du direkt zur Strecke.
-- Oben rechts zeigt **„● Live“** in Grün, dass Daten ankommen.
+- Während du fährst, zeigt die Live-Karte in der Übersicht **„● Live · F1 25“** mit Strecke, Auto, Session und deiner letzten Rundenzeit. Mit **„Open Monza“** (bzw. der aktuellen Strecke) springst du direkt zur Strecke.
+- In der Seitenleiste zeigt ein **grüner Punkt** neben „Live tracking“, dass Daten ankommen.
 - Ungültige Runden werden übersprungen. In den Einstellungen kannst du das ändern.
 
 **Port belegt?** Nutzt ein anderes Programm wie SimHub schon Port 20777, wechselt Lapbook **automatisch** auf den nächsten freien Port, z. B. 20778. Die Karte sagt dir dann, welchen Port du im Spiel eintragen musst.
@@ -149,7 +170,7 @@ Best 1:21.000                   Last 1:21.150 +0.150
 - Der farbige Strich am linken Rand ist die **Teamfarbe** deines Autos.
 
 ### Einstellen
-Klicke oben in Lapbook auf **„Overlay“**. Es öffnet sich ein Fenster mit:
+Klicke in der Seitenleiste auf **„Overlay“**. Es öffnet sich ein Fenster mit:
 - **Turn on / Turn off** (oder **Strg+Umschalt+O**, auch im Spiel)
 - **Style:** Clean oder Compact
 - **Size:** S, M, L, XL
@@ -183,7 +204,7 @@ Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht
 - alle Runden als Balken, die beste in Lila, ungültige in Rot
 - beste Sektoren und theoretische Bestzeit
 
-Ältere Rückblicke findest du auf der Startseite in der Live-Karte unter **„View recap“** und dann **„Earlier sessions“**.
+Alle Rückblicke findest du auf der Seite **„Live tracking“** unten unter **„Session recaps“**.
 
 ---
 
@@ -197,7 +218,7 @@ Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht
 | Data Out IP Address | **127.0.0.1** |
 | Data Out IP Port | **5300** (oder die Zahl, die Lapbook anzeigt) |
 
-**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke in der Live-Karte im Reiter „Forza“ einmal auf **„Allow Forza“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte Forza neu. Die **Steam-Version** braucht das nicht.
+**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke auf der Seite **„Live tracking“** in der Forza-Karte einmal auf **„Allow Forza“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte Forza neu. Die **Steam-Version** braucht das nicht.
 
 ### Warum eigene Zeitfahren?
 Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Trailblazer, Drag-Strip und freies Fahren gleich aus. Deshalb legst du deine Zeitfahren **einmal selbst an**. Danach misst Lapbook sie automatisch, ähnlich wie Segmente bei Strava.
@@ -230,7 +251,7 @@ Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Tra
 
 ## 3. Einstellungen
 
-Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**. Dort kannst du:
+Klicke auf der Seite **„Live tracking“** oben rechts auf **„Settings“**. Dort kannst du:
 - den **Port** ändern,
 - **ungültige Runden** mitspeichern,
 - einstellen, ob F1 25 auf **einem anderen Gerät** läuft (PlayStation, Xbox oder ein zweiter PC). Dann trägst du im Spiel statt 127.0.0.1 die IP-Adresse deines PCs ein.
@@ -239,22 +260,22 @@ Klicke oben rechts auf **„Live“** oder auf der Karte auf **„Settings“**.
 - Assetto Corsa **ein- oder ausschalten** und den **AC-Ordner** wählen,
 - Forza-Einstellungen, Zeitfahren und Autos umbenennen.
 
-Das **Overlay** stellst du über den eigenen Knopf **„Overlay“** oben in Lapbook ein (siehe 2d).
+Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (siehe 2d).
 
 ---
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-1.7.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-1.8.0.lapbook-update`**.
 
 1. Starte Lapbook.
-2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du oben auf **„Update“** und dann auf **„Choose file“**.
+2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.
 3. Lapbook zeigt die Version und was neu ist. Klicke auf **„Install and restart“**.
 4. Lapbook startet neu, fertig. **Deine Runden bleiben erhalten.**
 
 Sicherheit:
 - Lapbook prüft jede Datei mit Prüfsummen. Beschädigte oder fremde Dateien werden abgelehnt.
-- **Zurück zur vorherigen Version:** oben auf **„Update“** klicken, dann **„Back to version …“** (zum Bestätigen zweimal klicken).
+- **Zurück zur vorherigen Version:** in der Seitenleiste auf **„Update“** klicken, dann **„Back to version …“** (zum Bestätigen zweimal klicken).
 - Startet ein Update nicht richtig, geht Lapbook von selbst zur eingebauten Version zurück und sagt dir Bescheid.
 - Installiere nur Update-Dateien, die du von mir bekommen hast.
 
@@ -264,7 +285,7 @@ Sicherheit:
 
 Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 1. Öffne dort Lapbook → **Data → Download**. Du bekommst eine Datei `lapbook-JJJJ-MM-TT.json`.
-2. Öffne in der Windows-App **Data → Upload** und wähle diese Datei.
+2. Öffne in der Windows-App in der Seitenleiste **Data & backup → Load a backup** und wähle diese Datei.
 
 **Achtung:** Upload **ersetzt** die Daten in der App. Mach das also direkt am Anfang, bevor du die ersten Runden live aufzeichnest.
 
@@ -273,7 +294,7 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 ## 6. Sicherung
 
 - Lapbook speichert automatisch nach **`Dokumente\Lapbook`**: `lapbook-autosave.json` und eine Kopie pro Tag (die letzten 14 Tage).
-- Wiederherstellen: **Data → Upload** und eine dieser Dateien wählen.
+- Wiederherstellen: **Data & backup → Load a backup** und eine dieser Dateien wählen.
 - Neuer PC oder Windows neu installiert? Kopiere vorher den Ordner `Dokumente\Lapbook` weg, oder nutze OneDrive.
 
 ---
