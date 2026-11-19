@@ -53,12 +53,54 @@
   .rcp .new{color:var(--pu)}
   .secg{display:grid;grid-template-columns:auto repeat(3,1fr) auto;gap:4px 14px;font-variant-numeric:tabular-nums;font-size:15px;align-items:baseline}
   .secg span{color:var(--mu);font-size:12px}.secg b{font-weight:600}.secg .pu{color:var(--pu)}
-  #ovp{max-width:1080px}.ovcols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:0 36px}@media(max-width:900px){.ovcols{grid-template-columns:1fr}}
-  .ovgrid{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(3,34px);gap:4px;padding:6px;border:1px solid var(--ln);border-radius:var(--r);background:var(--sf2)}
-  .ovgrid button{border:1px solid var(--ln);border-radius:6px;background:var(--sf);cursor:pointer;display:flex;align-items:center;justify-content:center}
-  .ovgrid button i{width:18px;height:8px;border-radius:2px;background:var(--mu);opacity:.5}
-  .ovgrid button.on{border-color:var(--rd)}.ovgrid button.on i{background:var(--rd);opacity:1}
-  .ovnudge{display:grid;grid-template-columns:repeat(3,40px);gap:4px}.ovnudge button{height:36px;border:1px solid var(--ln);border-radius:8px;background:var(--sf2);color:var(--tx);cursor:pointer;font-size:16px}
+  /* overlay settings */
+  #ovp{max-width:1320px;width:min(1320px,96vw);padding:0;max-height:92vh;overflow:auto;border-radius:16px;background:var(--sf)}
+  .oph{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 24px;border-bottom:1px solid var(--ln);background:var(--sf)}
+  .oph h3{margin:0;font-size:20px}.oph p{margin:2px 0 0;font-size:13px;color:var(--mu)}.oph p b{color:var(--tx);font-weight:600}
+  .oph-r{display:flex;align-items:center;gap:14px}.oph-r .swb b{font-size:14px;min-width:24px;text-align:right}
+  .ox{width:34px;height:34px;border-radius:50%;border:1px solid var(--ln);background:var(--sf2);color:var(--tx);cursor:pointer;font-size:15px}.ox:hover{border-color:var(--mu)}
+  .kbd{display:inline-block;font:600 11.5px/1 ui-monospace,monospace;padding:4px 7px;border-radius:6px;background:var(--sf2);border:1px solid var(--ln);border-bottom-width:2px;color:var(--tx);white-space:nowrap}
+  .opg{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;padding:22px 24px 26px;align-items:start}
+  @media(max-width:1000px){.opg{grid-template-columns:1fr}}
+  .opl{position:sticky;top:86px;display:flex;flex-direction:column;gap:14px}
+  .ovstage{position:relative;height:300px;border-radius:14px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:
+    linear-gradient(176deg,transparent 64%,#e8e8e8 64.4%,#e8e8e8 65.2%,transparent 65.6%),
+    linear-gradient(184deg,transparent 70%,#c22 70.3%,#c22 71%,#fff 71%,#fff 71.7%,transparent 72%),
+    linear-gradient(180deg,#3a5f8f 0%,#86a7c8 46%,#cfd9e2 52%,#4b5a3c 52.4%,#2f3a29 66%,#3a3a3e 66.2%,#2a2a2e 100%)}
+  .ovstage:after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 120%,rgba(0,0,0,.55),transparent 60%);pointer-events:none}
+  .ovwrap{position:relative;z-index:1}.ovwrap iframe{border:0;background:transparent;display:block;transform-origin:0 0;pointer-events:none}
+  .ovtag{position:absolute;left:12px;bottom:10px;z-index:1;font-size:11.5px;color:#fff;background:#0008;border-radius:999px;padding:3px 10px}
+  .opc{background:var(--sf2);border-radius:12px;padding:14px 16px}
+  .opc h5,.ops h5{margin:0 0 10px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+  .posrow{display:flex;gap:18px;align-items:center;flex-wrap:wrap}.posside{display:flex;flex-direction:column;gap:8px}.posside small{color:var(--mu);font-size:12.5px;max-width:230px}
+  .ovmon{position:relative;width:216px;aspect-ratio:16/9;border:2px solid var(--ln);border-radius:8px;background:linear-gradient(180deg,#1d2430,#111418);display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:4px;gap:2px;margin-bottom:10px}
+  .ovmon button{border:0;background:none;border-radius:4px;cursor:pointer;display:flex;padding:5px}.ovmon button:hover{background:#ffffff14}
+  .ovmon button i{width:26px;height:9px;border-radius:2px;background:#ffffff26}.ovmon button.on i{background:var(--rd);box-shadow:0 0 8px var(--rd)}
+  .ovmon .c-tl,.ovmon .c-ml,.ovmon .c-bl{justify-content:flex-start}.ovmon .c-tc,.ovmon .c-mc,.ovmon .c-bc{justify-content:center}.ovmon .c-tr,.ovmon .c-mr,.ovmon .c-br{justify-content:flex-end}
+  .ovmon .c-tl,.ovmon .c-tc,.ovmon .c-tr{align-items:flex-start}.ovmon .c-ml,.ovmon .c-mc,.ovmon .c-mr{align-items:center}.ovmon .c-bl,.ovmon .c-bc,.ovmon .c-br{align-items:flex-end}
+  .ovstand{position:absolute;left:50%;bottom:-12px;width:46px;height:8px;margin-left:-23px;border-radius:0 0 6px 6px;background:var(--ln)}
+  .ovnudge{display:grid;grid-template-columns:repeat(3,38px);gap:4px}.ovnudge button{height:34px;border:1px solid var(--ln);border-radius:8px;background:var(--sf);color:var(--tx);cursor:pointer;font-size:15px}.ovnudge button:hover{border-color:var(--mu)}
+  .osel{margin-top:10px}
+  .okeys{margin:0 0 12px;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:13.5px;color:var(--mu)}.okeys .kbd{margin-right:4px}
+  .opr{display:flex;flex-direction:column;gap:22px}
+  .ops.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .ostg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(max-width:1300px){.ostg{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .stc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px;border:1.5px solid var(--ln);border-radius:12px;background:var(--sf2);color:var(--tx);font:inherit;text-align:left;cursor:pointer;transition:border-color .12s,transform .12s}
+  .stc:hover{border-color:var(--mu);transform:translateY(-1px)}.stc.on{border-color:var(--rd);box-shadow:0 0 0 1px var(--rd)}
+  .stc b{font-size:14px;margin:6px 2px 0}.stc small{font-size:12px;color:var(--mu);margin:0 2px 2px}
+  .stt{display:flex;align-items:center;justify-content:center;width:100%;height:92px;border-radius:8px;overflow:hidden;background:linear-gradient(180deg,#2c4466 0%,#5d7c9c 50%,#2d3727 51%,#1b2018 100%)}
+  .stw{display:block;position:relative;overflow:hidden}.stw iframe{border:0;background:transparent;display:block;transform-origin:0 0;pointer-events:none}
+  .otl{display:flex;flex-direction:column;background:var(--sf2);border-radius:12px;padding:2px 14px}
+  .otr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--ln)}.otr:first-child{border-top:0}
+  .otr b{display:block;font-size:14.5px;font-weight:600}.otr small{display:block;font-size:12px;color:var(--mu)}
+  .otr.off{opacity:.35;pointer-events:none}
+  .oseg{display:flex;background:var(--sf2);border-radius:10px;padding:3px;gap:3px}
+  .oseg button{flex:1;border:0;background:none;color:var(--mu);font:inherit;font-size:13.5px;font-weight:600;padding:8px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}
+  .oseg button:hover{color:var(--tx)}.oseg button.on{background:var(--sf);color:var(--tx);box-shadow:0 1px 3px #0006,inset 0 0 0 1px var(--ln)}
+  .osw{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
+  .osw button{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;padding:8px 4px;border:1.5px solid transparent;border-radius:12px;background:var(--sf2);color:var(--mu);cursor:pointer;font:inherit}
+  .osw button:hover{color:var(--tx)}.osw button.on{border-color:var(--rd);color:var(--tx)}
+  .osw i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px #fff3}.osw small{font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .unotes{margin:6px 0 0;padding-left:18px;color:var(--mu);font-size:14px}
   .md h4{margin:16px 0 6px;font-size:14px}
   .cn{display:grid;grid-template-columns:70px 1fr;gap:6px 10px;align-items:center;font-size:14px}
@@ -167,9 +209,6 @@
   .sl{display:grid;grid-template-columns:34px 1fr 74px;gap:6px 10px;align-items:center;margin-top:12px;font-size:13px;font-variant-numeric:tabular-nums}
   .sl>span{color:var(--mu)}.sl>b{text-align:right;font-weight:600}.sl .bar{height:10px;border-radius:5px;background:var(--sf2);overflow:hidden}.sl .bar i{display:block;height:100%;border-radius:5px;background:var(--dn)}
   .sl .bar i.z{background:var(--pu)}
-  /* overlay preview */
-  .ovprev{display:flex;align-items:center;justify-content:center;min-height:170px;margin:4px 0 14px;border-radius:12px;padding:16px;background:linear-gradient(180deg,#5b7da8 0%,#9db6cf 42%,#3d4a33 43%,#2b3326 70%,#1b1f19 100%);overflow:hidden}
-  .ovprev iframe{border:0;background:transparent;display:block;max-width:100%}
   @media (min-width:2200px){.wd{grid-template-columns:minmax(0,1fr) minmax(420px,26%)}#app .list:has(>.gcov){grid-template-columns:repeat(auto-fill,minmax(560px,1fr))}#app .list>.gcov{height:180px;font-size:34px}}`;
   document.head.appendChild(css);
 
@@ -1056,67 +1095,124 @@
     });
   }
 
-  // ---------- overlay panel: on/off, style, size, position ----------
+  // ---------- overlay panel: style, what it shows, look, position ----------
+  // Built once; every change only updates the controls and the previews, so
+  // nothing flickers while you click through the options.
+  const OV_STYLES = [
+    ["clean", "Clean", "Calm panel, time and delta first"],
+    ["broadcast", "Broadcast", "TV graphics with a team band"],
+    ["glass", "Glass", "Light, airy and rounded"],
+    ["minimal", "Minimal", "No panel, floating numbers"],
+    ["strip", "Strip", "One thin row for a screen edge"],
+    ["compact", "Compact", "Only lap time and delta"],
+  ];
+  const OV_SHOW = [["head", "Circuit and car", "name of the circuit and your car"], ["position", "Race position", "P4/20 in races"], ["delta", "Delta", "live gap to your best lap"], ["sectors", "Sectors", "purple, green, yellow like on TV"], ["foot", "Best and last lap", "with the gap of the last lap"]];
+  const OV_ACCENTS = [["team", "Team", "conic-gradient(#ff8000 0 25%,#3671c6 0 50%,#e8002d 0 75%,#27f4d2 0)"], ["red", "Red", "#ff3030"], ["white", "White", "#f5f5f7"], ["blue", "Blue", "#3d8bff"], ["green", "Green", "#2fe07f"], ["yellow", "Yellow", "#ffd12a"], ["purple", "Purple", "#b45bff"], ["none", "None", "repeating-linear-gradient(135deg,#555 0 2px,transparent 2px 6px)"]];
+  const OV_SAMPLE = {
+    d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250 },
+    live: { game: "F1 25", t: 41234, delta: -123, sectors: [{ t: 26123, c: "purple" }, { t: 15111, c: "green" }, { t: 0 }], position: 3, cars: 20 },
+  };
+  const seg = (k, list, cur) => `<div class="oseg">${list.map(([v, n]) => `<button data-ov="${k}" data-v="${v}" class="${String(cur) === String(v) ? "on" : ""}">${n}</button>`).join("")}</div>`;
+  const ovShow = o => ({ head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, ...(o.show || {}) });
+  function ovIsOn(k, v, o) {
+    const sh = ovShow(o);
+    if (k === "layout") return (o.layout || "clean") === v;
+    if (k === "show") return !!sh[v];
+    if (k === "dstyle") return (v === "bar") === !!sh.deltaBar;
+    if (k === "accent") return (o.accent || "team") === v;
+    if (k === "scale") return Math.abs((o.scale || 1) - Number(v)) < 0.01;
+    if (k === "opacity") return Math.abs((o.opacity || 0.86) - Number(v)) < 0.01;
+    if (k === "corners") return (o.corners || "round") === v;
+    if (k === "font") return (o.font || "saira") === v;
+    if (k === "anchor") return !o.bounds && o.anchor === v;
+    if (k === "on") return !!o.on;
+    return false;
+  }
   async function openOverlayPanel() {
     const o = await B.getOverlay();
     st.settings.overlay = o;
     header();
-    const chip = (attr, v, label, on) => `<button class="chip ${on ? "on" : ""}" data-ov="${attr}" data-v="${v}">${label}</button>`;
-    const grid = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
-    const sh = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, ...(o.show || {}) };
-    const at = o.bounds ? "" : o.anchor;
-    $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp"><h3>In-game overlay</h3>
-      <div class="lh" style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px"><span class="ls" style="color:var(--mu)">Shows over the game in <b style="color:var(--tx)">borderless / windowed fullscreen</b>. Shortcut: Ctrl+Shift+O.</span>
-        <span class="swb"><b style="font-size:14px">${o.on ? "On" : "Off"}</b><span class="sw ${o.on ? "on" : ""}" data-ov="on" data-v="${o.on ? 0 : 1}" role="switch" aria-checked="${!!o.on}"></span></span></div>
-      <div class="ovprev" title="Preview with example data"><iframe id="ovpf" src="overlay.html" width="${(o.size || {}).width || 440}" height="${(o.size || {}).height || 190}" tabindex="-1"></iframe></div>
-      <div class="ovcols"><div>
-      <h4>Style</h4><div class="chips wrapc">${chip("layout", "clean", "Clean: time, delta, sectors, best and last", o.layout !== "compact")}${chip("layout", "compact", "Compact: time and delta only", o.layout === "compact")}</div>
-      ${o.layout !== "compact" ? `<h4>Show</h4><div class="chips wrapc">${[["head", "Circuit and car"], ["position", "Race position"], ["delta", "Delta"], ["sectors", "Sectors"], ["foot", "Best and last lap"]].map(([k2, n]) => chip("show", k2, (sh[k2] ? "✓ " : "") + n, sh[k2])).join("")}</div>` : `<h4>Show</h4><div class="chips wrapc">${chip("show", "delta", (sh.delta ? "✓ " : "") + "Delta", sh.delta)}</div>`}
-      <h4>Delta</h4><div class="chips wrapc">${chip("dstyle", "num", "Number", !sh.deltaBar)}${chip("dstyle", "bar", "Number and bar", sh.deltaBar)}</div>
-      <h4>Accent</h4><div class="chips wrapc">${[["team", "Team colour"], ["red", "Lapbook red"], ["white", "White"], ["none", "None"]].map(([v, n]) => chip("accent", v, n, (o.accent || "team") === v)).join("")}</div>
-      <h4>Size</h4><div class="chips wrapc">${[[0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"]].map(([v, n]) => chip("scale", v, n, Math.abs((o.scale || 1) - v) < 0.01)).join("")}</div>
-      <h4>Background</h4><div class="chips wrapc">${[[0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]].map(([v, n]) => chip("opacity", v, n, Math.abs((o.opacity || 0.86) - v) < 0.01)).join("")}</div>
-      </div><div>
-      <h4>Position</h4>
-      <div style="display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start">
-        <div class="ovgrid">${grid.map(g => `<button class="${at === g ? "on" : ""}" data-ov="anchor" data-v="${g}" title="${g}"><i></i></button>`).join("")}</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <div class="ovnudge"><span></span><button data-ov="nudge" data-v="0,-20" title="Up">↑</button><span></span><button data-ov="nudge" data-v="-20,0" title="Left">←</button><button data-ov="nudge" data-v="0,20" title="Down">↓</button><button data-ov="nudge" data-v="20,0" title="Right">→</button></div>
-          <span class="ls" style="color:var(--mu);max-width:280px">Pick a corner, then fine-tune with the arrows.</span>
+    const sh = ovShow(o), grid = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
+    $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp">
+      <header class="oph">
+        <div><h3>In-game overlay</h3><p>Shows over the game in <b>borderless</b> or <b>windowed fullscreen</b></p></div>
+        <div class="oph-r"><span class="kbd">Ctrl+Shift+O</span><span class="swb"><b id="ovstate">${o.on ? "On" : "Off"}</b><span class="sw ${o.on ? "on" : ""}" data-ov="on" role="switch"></span></span><button class="ox" data-act="closem" title="Close">✕</button></div>
+      </header>
+      <div class="opg">
+        <aside class="opl">
+          <div class="ovstage" id="ovstage"><div class="ovwrap" id="ovwrap"><iframe id="ovpf" src="overlay.html" tabindex="-1"></iframe></div><span class="ovtag">Preview · example data</span></div>
+          <div class="opc"><h5>Position on screen</h5>
+            <div class="posrow"><div class="ovmon">${grid.map(g => `<button data-ov="anchor" data-v="${g}" class="c-${g} ${ovIsOn("anchor", g, o) ? "on" : ""}" title="${g}"><i></i></button>`).join("")}<span class="ovstand"></span></div>
+              <div class="posside"><div class="ovnudge"><span></span><button data-ov="nudge" data-v="0,-20" title="Up">↑</button><span></span><button data-ov="nudge" data-v="-20,0" title="Left">←</button><button data-ov="nudge" data-v="0,20" title="Down">↓</button><button data-ov="nudge" data-v="20,0" title="Right">→</button></div>
+              <small>Pick a spot on the screen, then fine-tune with the arrows.</small></div></div>
+            ${o.displays && o.displays.length > 1 ? `<label class="osel">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label>` : ""}</div>
+          <div class="opc"><h5>Move it while you drive</h5>
+            <ol class="okeys"><li><span class="kbd">Ctrl+Shift+L</span> unlocks it, it gets a red frame</li><li>drag it with the mouse or use <span class="kbd">Ctrl+Shift+arrows</span></li><li><span class="kbd">Ctrl+Shift+L</span> again locks it, clicks go to the game</li></ol>
+            <button class="b" data-ov="locked" id="ovlock">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
+        </aside>
+        <div class="opr">
+          <section class="ops"><h5>Style</h5><div class="ostg">${OV_STYLES.map(([v, n, dsc]) => `<button class="stc ${ovIsOn("layout", v, o) ? "on" : ""}" data-ov="layout" data-v="${v}"><span class="stt"><span class="stw" data-thumb="${v}"><iframe src="overlay.html" tabindex="-1" data-thumbf="${v}"></iframe></span></span><b>${n}</b><small>${dsc}</small></button>`).join("")}</div></section>
+          <section class="ops"><h5>What it shows</h5><div class="otl">${OV_SHOW.map(([k2, n, dsc]) => `<div class="otr" data-row="${k2}"><span><b>${n}</b><small>${dsc}</small></span><span class="sw ${sh[k2] ? "on" : ""}" data-ov="show" data-v="${k2}" role="switch"></span></div>`).join("")}</div></section>
+          <section class="ops two"><div><h5>Delta</h5>${seg("dstyle", [["num", "Number"], ["bar", "Number + bar"]], sh.deltaBar ? "bar" : "num")}</div><div><h5>Corners</h5>${seg("corners", [["round", "Rounded"], ["sharp", "Sharp"]], o.corners || "round")}</div></section>
+          <section class="ops"><h5>Accent colour</h5><div class="osw">${OV_ACCENTS.map(([v, n, c]) => `<button data-ov="accent" data-v="${v}" class="${ovIsOn("accent", v, o) ? "on" : ""}" title="${n}"><i style="background:${c}"></i><small>${n}</small></button>`).join("")}</div></section>
+          <section class="ops two"><div><h5>Size</h5>${seg("scale", [[0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"]], [0.9, 1.15, 1.4, 1.75].find(x => Math.abs((o.scale || 1) - x) < 0.01) || "")}</div><div><h5>Font</h5>${seg("font", [["saira", "Sport"], ["sans", "Clean"], ["mono", "Mono"]], o.font || "saira")}</div></section>
+          <section class="ops"><h5>Background</h5>${seg("opacity", [[0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]], [0.6, 0.86, 0.97].find(x => Math.abs((o.opacity || 0.86) - x) < 0.01) || "")}</section>
         </div>
-      </div>
-      ${o.displays && o.displays.length > 1 ? `<label style="margin-top:10px">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label>` : ""}
-      <div class="panel" style="margin:12px 0 0"><b>Move it while you drive</b><p class="ls" style="margin:6px 0 0;color:var(--mu)">Press <b style="color:var(--tx)">Ctrl+Shift+L</b> in the game. The overlay gets a red frame. Drag it with the mouse or press <b style="color:var(--tx)">Ctrl+Shift+arrow keys</b>. Press <b style="color:var(--tx)">Ctrl+Shift+L</b> again to lock it, then clicks go to the game again.</p>
-        <button class="b" data-ov="locked" data-v="${o.locked ? 0 : 1}" style="margin-top:8px">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
-      </div></div>
-      <div class="acts" style="margin-top:12px"><button class="b ghost" data-act="closem">Close</button></div></div></div>`;
-    // the preview is the real overlay page, fed with example data
-    const pf = $("#ovpf");
-    if (pf) pf.onload = () => pf.contentWindow.postMessage({
-      cfg: { ...o, locked: true },
-      d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250 },
-      live: { game: "F1 25", t: 41234, delta: -123, sectors: [{ t: 26123, c: "purple" }, { t: 15111, c: "green" }, { t: 0 }], position: 3, cars: 20 },
-    }, "*");
+      </div></div></div>`;
+    document.querySelectorAll("#ovp iframe").forEach(f => (f.onload = () => feedPreviews(st.settings.overlay)));
     const dsel = $("#ovdisp");
-    if (dsel) dsel.onchange = async () => { await B.setOverlay({ on: true, display: Number(dsel.value) }); openOverlayPanel(); };
+    if (dsel) dsel.onchange = async () => { st.settings.overlay = await B.setOverlay({ on: true, display: Number(dsel.value) }); syncPanel(st.settings.overlay); };
+    feedPreviews(o);
+  }
+  // size and data of the big preview and of the style thumbnails
+  function feedPreviews(o) {
+    const pf = $("#ovpf"), stage = $("#ovstage"), wrap = $("#ovwrap");
+    if (pf && stage && wrap) {
+      const sz = o.size || { width: 440, height: 190 }, f = Math.min(1, (stage.clientWidth - 32) / sz.width, (stage.clientHeight - 48) / sz.height);
+      Object.assign(pf.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
+      Object.assign(wrap.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
+      if (pf.contentWindow) pf.contentWindow.postMessage({ cfg: { ...o, locked: true }, ...OV_SAMPLE }, "*");
+    }
+    document.querySelectorAll("#ovp [data-thumbf]").forEach(fr => {
+      const l = fr.dataset.thumbf, sz = (o.sizes && o.sizes[l]) || { width: 380, height: 190 }, box = fr.parentNode.parentNode;
+      const f = Math.min((box.clientWidth - 16) / sz.width, (box.clientHeight - 14) / sz.height);
+      Object.assign(fr.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
+      Object.assign(fr.parentNode.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
+      if (fr.contentWindow) fr.contentWindow.postMessage({ cfg: { ...o, layout: l, scale: 1, locked: true }, ...OV_SAMPLE }, "*");
+    });
+  }
+  // after a change: mark the chosen options, keep everything else in place
+  function syncPanel(o) {
+    if (!$("#ovp")) return;
+    document.querySelectorAll("#ovp [data-ov]").forEach(el => {
+      const k = el.dataset.ov;
+      if (["nudge", "locked"].includes(k)) return;
+      el.classList.toggle("on", ovIsOn(k, el.dataset.v, o));
+    });
+    const sh = ovShow(o), compact = o.layout === "compact";
+    // compact shows only the delta
+    document.querySelectorAll("#ovp .otr").forEach(r => r.classList.toggle("off", compact && r.dataset.row !== "delta"));
+    $("#ovstate").textContent = o.on ? "On" : "Off";
+    $("#ovlock").textContent = o.locked ? "Unlock to drag with the mouse" : "Lock it";
+    feedPreviews(o);
+    header();
   }
   document.addEventListener("click", async e => {
     const t = e.target.closest("[data-ov]");
     if (!t) return;
     e.stopPropagation();
-    const k = t.dataset.ov, v = t.dataset.v, next = {};
-    if (k === "on") next.on = v === "1";
-    else if (k === "locked") next.locked = v === "1";
-    else if (k === "layout") next.layout = v;
+    const k = t.dataset.ov, v = t.dataset.v, next = {}, cur = st.settings.overlay || {};
+    if (k === "on") next.on = !cur.on;
+    else if (k === "locked") next.locked = !cur.locked;
+    else if (k === "layout" || k === "accent" || k === "corners" || k === "font") next[k] = v;
     else if (k === "scale" || k === "opacity") next[k] = Number(v);
     else if (k === "anchor") next.anchor = v;
-    else if (k === "show") { const cur = (st.settings.overlay && st.settings.overlay.show) || {}; next.show = { [v]: cur[v] === false }; }
+    else if (k === "show") next.show = { [v]: !ovShow(cur)[v] };
     else if (k === "dstyle") next.show = { deltaBar: v === "bar" };
-    else if (k === "accent") next.accent = v;
     else if (k === "nudge") next.nudge = v.split(",").map(Number);
     if (k !== "on") next.on = true; // changing it shows it
     st.settings.overlay = await B.setOverlay(next);
-    openOverlayPanel();
+    syncPanel(st.settings.overlay);
   }, true);
 
   // ---------- updates ----------

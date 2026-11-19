@@ -19,7 +19,8 @@ const { PC2Telemetry } = require("./pc2.js");
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 // show: which parts of the overlay are visible; accent: colour of the side stripe
 const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false };
-const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team" };
+const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team", corners: "round", font: "saira" };
+const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip"];
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false, accOn: true, lmuOn: true, lmuPort: 6397, pc2On: true, pc2Port: 5606 };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
@@ -330,12 +331,16 @@ ac.on("error", () => {});
 // Shows over games in borderless / windowed fullscreen mode.
 let overlay = null, overlayData = {}, overlayTimer = null, placingAt = 0;
 const ov = () => settings.overlay;
-function overlaySize() {
-  const o = ov(), k = Math.max(0.6, Math.min(2.5, Number(o.scale) || 1)), sh = { ...SHOW, ...(o.show || {}) };
-  if (o.layout === "compact") return { width: Math.round((sh.delta ? 330 : 230) * k), height: Math.round((sh.deltaBar && sh.delta ? 96 : 80) * k) };
-  // the window grows with the parts that are switched on
-  const h = 30 + (sh.head ? 24 : 0) + 50 + (sh.deltaBar && sh.delta ? 14 : 0) + (sh.sectors ? 36 : 0) + (sh.foot ? 26 : 0);
-  return { width: Math.round(380 * k), height: Math.round(h * k) };
+// the window size follows the style and the parts that are switched on
+function overlaySize(o = ov(), layout = o.layout, k = Math.max(0.6, Math.min(2.5, Number(o.scale) || 1))) {
+  const sh = { ...SHOW, ...(o.show || {}) }, bar = sh.deltaBar && sh.delta;
+  const W = (w, h) => ({ width: Math.round(w * k), height: Math.round(h * k) });
+  if (layout === "compact") return W(sh.delta ? 330 : 230, bar ? 96 : 80);
+  if (layout === "strip") return W(40 + (sh.position ? 70 : 0) + (sh.head ? 160 : 0) + 160 + (sh.delta ? 110 : 0) + (bar ? 100 : 0) + (sh.sectors ? 224 : 0) + (sh.foot ? 140 : 0), 62);
+  if (layout === "minimal") return W(360, 20 + (sh.head ? 22 : 0) + 54 + (bar ? 12 : 0) + (sh.sectors ? 30 : 0) + (sh.foot ? 24 : 0));
+  if (layout === "broadcast") return W(400, 8 + (sh.head ? 30 : 0) + 62 + (bar ? 16 : 0) + (sh.sectors ? 36 : 0) + (sh.foot ? 32 : 0));
+  const h = 30 + (sh.head ? 24 : 0) + 50 + (bar ? 14 : 0) + (sh.sectors ? 36 : 0) + (sh.foot ? 26 : 0);
+  return W(layout === "glass" ? 396 : 380, h + (layout === "glass" ? 6 : 0));
 }
 const displays = () => screen.getAllDisplays();
 function displayOf(o) {
@@ -381,7 +386,7 @@ function pushOverlayConfig() {
   overlay.setFocusable(!ov().locked);
   overlay.setResizable(!ov().locked);
   nudgeShortcuts(!ov().locked);
-  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout, show: { ...SHOW, ...(ov().show || {}) }, accent: ov().accent || "team" });
+  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout, show: { ...SHOW, ...(ov().show || {}) }, accent: ov().accent || "team", corners: ov().corners || "round", font: ov().font || "saira" });
 }
 function openOverlay() {
   if (overlay && !overlay.isDestroyed()) return pushOverlayConfig();
@@ -478,14 +483,16 @@ function closeOverlay() {
 function setOverlay(next) {
   const o = ov();
   const sizeChange = (next.scale !== undefined && Number(next.scale) !== o.scale) || (next.layout && next.layout !== o.layout) || !!next.show;
+  if (next.corners === "round" || next.corners === "sharp") o.corners = next.corners;
+  if (["saira", "mono", "sans"].includes(next.font)) o.font = next.font;
   if (next.show && typeof next.show === "object") o.show = { ...SHOW, ...(o.show || {}), ...Object.fromEntries(Object.entries(next.show).filter(([k]) => k in SHOW).map(([k, v]) => [k, !!v])) };
-  if (next.accent && /^(team|red|white|none|#[0-9a-f]{6})$/i.test(next.accent)) o.accent = next.accent;
+  if (next.accent && /^(team|red|white|none|blue|green|yellow|purple|#[0-9a-f]{6})$/i.test(next.accent)) o.accent = next.accent;
   Object.assign(o, {
     on: next.on !== undefined ? !!next.on : o.on,
     locked: next.locked !== undefined ? !!next.locked : o.locked,
     scale: next.scale !== undefined ? Math.max(0.6, Math.min(2.5, Number(next.scale) || 1)) : o.scale,
     opacity: next.opacity !== undefined ? Math.max(0.2, Math.min(1, Number(next.opacity) || 0.86)) : o.opacity,
-    layout: next.layout === "compact" || next.layout === "clean" ? next.layout : o.layout,
+    layout: LAYOUTS.includes(next.layout) ? next.layout : LAYOUTS.includes(o.layout) ? o.layout : "clean",
   });
   if (next.display !== undefined) o.display = next.display;
   // a place from the grid (or another screen) replaces the dragged position
@@ -502,7 +509,7 @@ function setOverlay(next) {
     nudgeShortcuts(false);
   }
   pushStatus();
-  return { ...o, size: overlaySize(), displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
+  return { ...o, size: overlaySize(), sizes: Object.fromEntries(LAYOUTS.map(l => [l, overlaySize(o, l, 1)])), displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
 }
 ipcMain.handle("overlay:set", (e, next) => setOverlay(next || {}));
 ipcMain.handle("overlay:get", () => setOverlay({}));

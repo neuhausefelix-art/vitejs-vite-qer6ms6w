@@ -1,4 +1,4 @@
-# Lapbook für Windows – Anleitung (Version 2.1.0)
+# Lapbook für Windows – Anleitung (Version 2.2.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
@@ -13,9 +13,9 @@ Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten
 
 ---
 
-## 0. Update auf 2.1.0
+## 0. Update auf 2.2.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.1.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.2.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
@@ -152,7 +152,7 @@ Lapbook kennt die echten Fahrzeugnamen:
 
 ## 2d. Overlay im Spiel
 
-Ein ruhiges Zeitenpanel über dem Spiel. Zwei Stile stehen zur Wahl:
+Ein Zeitenpanel über dem Spiel. Sechs Stile stehen zur Wahl, unten das Beispiel **Clean**:
 
 **Clean** (Standard):
 ```
@@ -162,7 +162,14 @@ MONZA  McLaren MCL40                    P4/20
 27.350       –            –
 Best 1:21.000                   Last 1:21.150 +0.150
 ```
-**Compact:** nur laufende Runde und Delta, in einer Zeile.
+| Stil | So sieht er aus |
+|---|---|
+| **Clean** (Standard) | ruhiges dunkles Panel, Zeit und Delta am größten |
+| **Broadcast** | wie eine TV-Grafik: farbiges Band in der Teamfarbe mit Position, Delta als grünes oder rotes Feld |
+| **Glass** | hell und durchscheinend, stark abgerundet |
+| **Minimal** | kein Panel, nur schwebende Zahlen mit Schatten |
+| **Strip** | eine schmale Zeile mit allem nebeneinander, gut für den oberen oder unteren Bildschirmrand |
+| **Compact** | nur laufende Runde und Delta |
 
 - **Live-Delta:** grün = schneller als deine Bestzeit an dieser Stelle der Runde, rot = langsamer. Verglichen wird mit deiner schnellsten gültigen Runde mit diesem Auto auf dieser Strecke, auch aus früheren Sessions. Das Delta erscheint ab der **zweiten** Runde, die du mit Lapbook fährst.
 - **Sektorfarben** wie im TV: **Lila** = deine beste Zeit überhaupt, **Grün** = beste dieser Session, **Weiß/Gelb** = langsamer.
@@ -177,15 +184,17 @@ Best 1:21.000                   Last 1:21.150 +0.150
 **Vorschau:** Oben in den Overlay-Einstellungen siehst du das Overlay mit Beispieldaten. Jede Änderung (Stil, Anzeige, Farbe, Größe, Hintergrund) siehst du dort sofort.
 
 ### Einstellen
-Klicke in der Seitenleiste auf **„Overlay“**. Es öffnet sich ein Fenster mit:
-- **Turn on / Turn off** (oder **Strg+Umschalt+O**, auch im Spiel)
-- **Style:** Clean oder Compact
-- **Show:** welche Teile zu sehen sind: Strecke und Auto, Rennposition, Delta, Sektoren, Best und Last. Das Fenster passt seine Höhe automatisch an.
+Klicke in der Seitenleiste auf **„Overlay“**. Links siehst du eine große **Vorschau** über einer Rennszene und die Position, rechts alle Einstellungen:
+- **Ein/Aus-Schalter** oben rechts (oder **Strg+Umschalt+O**, auch im Spiel)
+- **Style:** sechs Karten mit einer kleinen Live-Vorschau des jeweiligen Stils
+- **What it shows:** Schalter für Strecke und Auto, Rennposition, Delta, Sektoren, Best und Last. Das Fenster passt seine Größe automatisch an.
 - **Delta:** als Zahl oder als Zahl mit Balken (Mitte = gleich schnell, grün nach links = schneller, rot nach rechts = langsamer, voller Ausschlag = 1 Sekunde)
-- **Accent:** Farbe des Strichs am linken Rand: Teamfarbe, Lapbook-Rot, Weiß oder keine
+- **Corners:** abgerundet oder eckig
+- **Accent colour:** Teamfarbe, Rot, Weiß, Blau, Grün, Gelb, Lila oder keine
 - **Size:** S, M, L, XL
+- **Font:** Sport (Standard), Clean oder Mono
 - **Background:** See-through, Normal, Solid
-- **Position:** Klicke auf eines der 9 Felder, z. B. unten Mitte oder oben links. Mit den **Pfeilen** daneben verschiebst du es in 20-px-Schritten. Bei mehreren Monitoren wählst du den **Bildschirm**.
+- **Position on screen:** Klicke auf dem kleinen Bildschirm auf eine der 9 Stellen, z. B. unten Mitte. Mit den **Pfeilen** daneben verschiebst du es in 20-px-Schritten. Bei mehreren Monitoren wählst du den **Bildschirm**.
 
 ### Im Spiel verschieben
 1. Drücke **Strg+Umschalt+L**. Das Overlay bekommt einen **roten Rahmen**.
@@ -363,7 +372,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-2.1.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.2.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.
