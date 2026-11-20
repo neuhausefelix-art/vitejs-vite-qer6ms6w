@@ -162,3 +162,24 @@ test("F1 25 career: practice without a final result uses the last live order", (
   assert.equal(cls.length, 1); assert.equal(cls[0].kind, "practice"); assert.equal(cls[0].source, "live");
   assert.deepEqual(cls[0].cars.map(c => c.name), ["Oscar Piastri", "Max Verstappen", "Felix"]);
 });
+
+test("F1 25: car setup packet, reported once per change", () => {
+  const { F1Telemetry, HEADER } = require("../f1-25.js");
+  const P = require("./packets.js");
+  const t = new F1Telemetry(), got = [];
+  t.on("setup", x => got.push(x));
+  const o = { player: 0, uid: 501n };
+  t.handle(P.session(o, { trackId: 11, type: 15 })); t.handle(P.participants(o, 8));
+  const pack = (rear, fuel) => {
+    const b = P.header(5, o, HEADER + 22 * 50 + 4), q = HEADER;
+    b.writeUInt8(30, q); b.writeUInt8(rear, q + 1); b.writeUInt8(55, q + 2); b.writeUInt8(60, q + 3);
+    b.writeFloatLE(-3.5, q + 4); b.writeFloatLE(-2, q + 8); b.writeFloatLE(0.05, q + 12); b.writeFloatLE(0.2, q + 16);
+    [41, 3, 10, 5, 25, 40, 95, 56].forEach((v, i) => b.writeUInt8(v, q + 20 + i)); b.writeUInt8(80, q + 28);
+    b.writeFloatLE(21.5, q + 29); b.writeFloatLE(21.6, q + 33); b.writeFloatLE(23.1, q + 37); b.writeFloatLE(23.2, q + 41); b.writeUInt8(6, q + 45); b.writeFloatLE(fuel, q + 46);
+    return b;
+  };
+  t.handle(pack(20, 100)); t.handle(pack(20, 99.5)); t.handle(pack(18, 99));
+  assert.equal(got.length, 2, "fuel burn is no new setup, a wing change is");
+  assert.deepEqual(got[0].values, { frontWing: 30, rearWing: 20, onThrottle: 55, offThrottle: 60, frontCamber: -3.5, rearCamber: -2, frontToe: 0.05, rearToe: 0.2, frontSuspension: 41, rearSuspension: 3, frontAntiRollBar: 10, rearAntiRollBar: 5, frontRideHeight: 25, rearRideHeight: 40, brakePressure: 95, brakeBias: 56, engineBraking: 80, pressureRL: 21.5, pressureRR: 21.6, pressureFL: 23.1, pressureFR: 23.2, ballast: 6, fuel: 100 });
+  assert.equal(got[1].values.rearWing, 18); assert.equal(got[0].car, "McLaren MCL39");
+});

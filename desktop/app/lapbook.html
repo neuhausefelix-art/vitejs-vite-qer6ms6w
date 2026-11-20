@@ -233,8 +233,8 @@ function brand(n){const s=n.toLowerCase().replace(/[^a-z0-9 ]+/g," ").trim().rep
 
 let D,TH="race",S={v:"home",g:"",tab:"tracks",br:"All",tf:"all",t:"",F:{},arm:"",open:"",add:false,edit:"",hc:"",af:"all",fair:false,rf:false,R:{},redit:"",rctx:null,cid:"",ctab:"standings"};
 TH="race";document.documentElement.dataset.t=TH;
-const blank=()=>({tracks:{},cars:{},lapTimes:[],races:[],championships:[],fans:0,setupNotes:{},trackTypes:{},_version:1});
-function norm(d){d=Object.assign(blank(),d||{});if(!Array.isArray(d.races))d.races=[];if(!Array.isArray(d.championships))d.championships=[];d.races=d.races.filter(r=>r&&r.game);d.championships=d.championships.filter(c=>c&&c.name);d.races.forEach(r=>{if(!r.id)r.id=uid()});d.championships.forEach(c=>{if(!c.id)c.id=uid();c.teams=c.teams||[];c.calendar=c.calendar||[];c.results=c.results||{}});["tracks","cars","trackTypes","setupNotes","_del","_add"].forEach(k=>{if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={}});
+const blank=()=>({tracks:{},cars:{},lapTimes:[],races:[],championships:[],setups:[],fans:0,setupNotes:{},trackTypes:{},_version:1});
+function norm(d){d=Object.assign(blank(),d||{});if(!Array.isArray(d.races))d.races=[];if(!Array.isArray(d.championships))d.championships=[];if(!Array.isArray(d.setups))d.setups=[];d.setups=d.setups.filter(x=>x&&x.id&&x.game);d.races=d.races.filter(r=>r&&r.game);d.championships=d.championships.filter(c=>c&&c.name);d.races.forEach(r=>{if(!r.id)r.id=uid()});d.championships.forEach(c=>{if(!c.id)c.id=uid();c.teams=c.teams||[];c.calendar=c.calendar||[];c.results=c.results||{}});["tracks","cars","trackTypes","setupNotes","_del","_add"].forEach(k=>{if(!d[k]||typeof d[k]!=="object"||Array.isArray(d[k]))d[k]={}});
  const ens=g=>{if(!Array.isArray(d.tracks[g]))d.tracks[g]=[];if(!Array.isArray(d.cars[g]))d.cars[g]=[];d.trackTypes[g]=d.trackTypes[g]||{}};
  GM.forEach(ens);Object.keys(d.tracks).concat(Object.keys(d.cars)).forEach(ens);
  d.lapTimes=(Array.isArray(d.lapTimes)?d.lapTimes:[]).filter(l=>l&&l.game&&l.track&&l.car&&Number(l.timeInMs)>0);
@@ -243,8 +243,8 @@ let TS=0,CL=null,cT=0,cB=false,cD=false,CST="Local only";try{TS=Number(localStor
 const CHK=60000,cst=(t,er)=>{CST=t;const e=$("#cl");if(e){e.textContent=t;e.className="cl"+(er?" err":"")}};
 let SNAP=new Map(),DIRTY=false,SYNC=0;try{SYNC=Number(localStorage.getItem("lapbook.sync"))||0}catch(e){}
 /* every lap, race and championship carries _m (last change). Deleted things leave a tombstone in _del, re-added ones a mark in _add, so two devices can be merged instead of one overwriting the other. */
-function stamp(set){const now=Date.now(),n=new Map();[["l",D.lapTimes],["r",D.races],["ch",D.championships]].forEach(([p,a])=>a.forEach(x=>{const{_m,...rest}=x,j=JSON.stringify(rest),k=p+":"+x.id;if(set&&SNAP.get(k)!==j)x._m=now;n.set(k,j)}));SNAP=n}
-const keysOf=d=>{const k=[];d.lapTimes.forEach(x=>k.push("l:"+x.id));d.races.forEach(x=>k.push("r:"+x.id));d.championships.forEach(x=>k.push("ch:"+x.id));Object.keys(d.tracks).forEach(g=>d.tracks[g].forEach(n=>k.push("t:"+g+"|"+n)));Object.keys(d.cars).forEach(g=>d.cars[g].forEach(n=>k.push("c:"+g+"|"+n)));return k};
+function stamp(set){const now=Date.now(),n=new Map();[["l",D.lapTimes],["r",D.races],["ch",D.championships],["su",D.setups||[]]].forEach(([p,a])=>a.forEach(x=>{const{_m,...rest}=x,j=JSON.stringify(rest),k=p+":"+x.id;if(set&&SNAP.get(k)!==j)x._m=now;n.set(k,j)}));SNAP=n}
+const keysOf=d=>{const k=[];d.lapTimes.forEach(x=>k.push("l:"+x.id));d.races.forEach(x=>k.push("r:"+x.id));d.championships.forEach(x=>k.push("ch:"+x.id));(d.setups||[]).forEach(x=>k.push("su:"+x.id));Object.keys(d.tracks).forEach(g=>d.tracks[g].forEach(n=>k.push("t:"+g+"|"+n)));Object.keys(d.cars).forEach(g=>d.cars[g].forEach(n=>k.push("c:"+g+"|"+n)));return k};
 function revive(){const now=Date.now();keysOf(D).forEach(k=>{const t=D._del[k];if(t&&!((D._add[k]||0)>t))D._add[k]=now})}
 const tomb=k=>{D._del[k]=Date.now()};
 function merge(A,B){const del={...B._del},add={...B._add};Object.entries(A._del).forEach(([k,t])=>del[k]=Math.max(del[k]||0,t));Object.entries(A._add).forEach(([k,t])=>add[k]=Math.max(add[k]||0,t));
@@ -252,7 +252,7 @@ function merge(A,B){const del={...B._del},add={...B._add};Object.entries(A._del)
  const items=(p,a,b)=>{const m=new Map();a.forEach(x=>m.set(x.id,x));b.forEach(x=>{const o=m.get(x.id);if(!o||(x._m||0)>(o._m||0))m.set(x.id,x)});return[...m.values()].filter(x=>alive(p+":"+x.id,x._m))};
  const names=(p,ka)=>{const o={};new Set([...Object.keys(A[ka]),...Object.keys(B[ka])]).forEach(g=>{o[g]=[...new Set([...(A[ka][g]||[]),...(B[ka][g]||[])])].filter(n=>alive(p+":"+g+"|"+n,0))});return o};
  const tt={};new Set([...Object.keys(A.trackTypes),...Object.keys(B.trackTypes)]).forEach(g=>tt[g]={...(B.trackTypes[g]||{}),...(A.trackTypes[g]||{})});
- return{...B,...A,lapTimes:items("l",A.lapTimes,B.lapTimes),races:items("r",A.races,B.races),championships:items("ch",A.championships,B.championships),tracks:names("t","tracks"),cars:names("c","cars"),trackTypes:tt,setupNotes:{...B.setupNotes,...A.setupNotes},fans:Math.max(A.fans||0,B.fans||0),_del:del,_add:add}}
+ return{...B,...A,lapTimes:items("l",A.lapTimes,B.lapTimes),races:items("r",A.races,B.races),championships:items("ch",A.championships,B.championships),setups:items("su",A.setups||[],B.setups||[]),tracks:names("t","tracks"),cars:names("c","cars"),trackTypes:tt,setupNotes:{...B.setupNotes,...A.setupNotes},fans:Math.max(A.fans||0,B.fans||0),_del:del,_add:add}}
 const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(D));localStorage.setItem("lapbook.ts",TS);localStorage.setItem("lapbook.prof",JSON.stringify(PROF));localStorage.setItem("lapbook.sync",SYNC)}catch(e){}};
 const save=()=>{revive();stamp(true);bump();TS=Date.now();DIRTY=true;persist();if(CL){cst("Syncing…");clearTimeout(cT);cT=setTimeout(cloudPush,1200)}};
 async function pull(){const m=await CL.doc("meta").get(),md=m.exists?m.data():null;if(!md||md.ts===SYNC)return{md};let s="";for(let i=0;i<md.n;i++){const c=await CL.doc("c"+i).get();s+=c.exists?c.data().s:""}return{md,r:JSON.parse(s)}}
@@ -852,5 +852,5 @@ document.addEventListener("input",e=>{if(e.target.id==="il")ilPrev()});
 document.addEventListener("change",e=>{if(e.target.id==="ilf"){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$("#il").value=r.result;ilPrev()};r.readAsText(f)}});
 document.addEventListener("input",e=>{const k=e.target.dataset&&e.target.dataset.sv;if(k===undefined)return;setST(k,e.target.value);const r=$("#sres");if(r)r.innerHTML=stratOut()});
 render();cloudInit();
-</script><script src="desktop-bridge.js"></script>
+</script><script src="setup-catalog.js"></script><script src="desktop-bridge.js"></script>
 </body></html>

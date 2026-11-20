@@ -133,7 +133,7 @@ function draw() {
   if (layout === "compact") { o.innerHTML = timeHtml + deltaHtml + barHtml + hint; return; }
   const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
   const secs = Array.isArray(live.sectors) ? live.sectors : null;
-  const headHtml = sh.head ? `<div class="top"><b>${esc(live.trial || d.track || g)}</b><span>${esc(d.car || "")}</span>${posHtml && layout !== "strip" ? `<em>${posHtml}</em>` : ""}</div>` : "";
+  const headHtml = sh.head ? `<div class="top"><b>${esc(live.trial || d.track || g)}</b><span>${esc(d.car || "")}${sh.setup && d.setup ? ` · ${esc(d.setup)}` : ""}</span>${posHtml && layout !== "strip" ? `<em>${posHtml}</em>` : ""}</div>` : "";
   const secHtml = secs && sh.sectors ? `<div class="secs">${secs.map(s => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><b>${sfmt(s.t)}</b></div>`).join("")}</div>` : "";
   const footHtml = sh.foot ? `<div class="foot"><span>Best<b class="pb">${fmt(d.best)}</b></span><span>Last<b>${fmt(d.last)}</b>${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</span></div>` : "";
   if (layout === "strip") {

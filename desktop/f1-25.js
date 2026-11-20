@@ -5,7 +5,7 @@
 const { EventEmitter } = require("events");
 
 const HEADER = 29;
-const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, FINAL_CLASSIFICATION: 8, SESSION_HISTORY: 11 };
+const PACKET = { SESSION: 1, LAP_DATA: 2, PARTICIPANTS: 4, CAR_SETUPS: 5, FINAL_CLASSIFICATION: 8, SESSION_HISTORY: 11 };
 const RACES = new Set([15, 16, 17]); // session types that are races
 // game modes (m_gameMode) that are a career season
 const CAREER = { 27: "My Team Career", 28: "Driver Career", 29: "Career Online" };
@@ -127,6 +127,7 @@ class F1Telemetry extends EventEmitter {
     else if (id === PACKET.SESSION_HISTORY) this.onHistory(buf, uid, player);
     else if (id === PACKET.LAP_DATA) this.onLapData(buf, player);
     else if (id === PACKET.FINAL_CLASSIFICATION) this.onFinal(buf, uid, player);
+    else if (id === PACKET.CAR_SETUPS) this.onSetup(buf, player);
   }
 
   onSession(buf, uid) {
@@ -270,6 +271,28 @@ class F1Telemetry extends EventEmitter {
       session: SESSIONS[this.session.type] || "Race",
       career: this.career(),
     });
+  }
+
+  // your car setup: every option of the game's setup menu
+  onSetup(buf, player) {
+    const stride = (buf.length - HEADER - 4) / 22;
+    if (!Number.isInteger(stride) || stride < 49 || player >= 22 || !this.session || this.teamId === null) return;
+    const o = HEADER + player * stride, eb = stride >= 50 ? 1 : 0, f = (x, d = 2) => Math.round(buf.readFloatLE(x) * 10 ** d) / 10 ** d;
+    const v = {
+      frontWing: buf.readUInt8(o), rearWing: buf.readUInt8(o + 1), onThrottle: buf.readUInt8(o + 2), offThrottle: buf.readUInt8(o + 3),
+      frontCamber: f(o + 4), rearCamber: f(o + 8), frontToe: f(o + 12), rearToe: f(o + 16),
+      frontSuspension: buf.readUInt8(o + 20), rearSuspension: buf.readUInt8(o + 21), frontAntiRollBar: buf.readUInt8(o + 22), rearAntiRollBar: buf.readUInt8(o + 23),
+      frontRideHeight: buf.readUInt8(o + 24), rearRideHeight: buf.readUInt8(o + 25), brakePressure: buf.readUInt8(o + 26), brakeBias: buf.readUInt8(o + 27),
+    };
+    if (eb) v.engineBraking = buf.readUInt8(o + 28);
+    const t = o + 28 + eb;
+    Object.assign(v, { pressureRL: f(t, 1), pressureRR: f(t + 4, 1), pressureFL: f(t + 8, 1), pressureFR: f(t + 12, 1), ballast: buf.readUInt8(t + 16), fuel: f(t + 17, 1) });
+    if (!v.frontWing && !v.rearWing && !v.brakeBias) return; // not loaded yet (menus)
+    // fuel goes down while you drive, so it does not make a new setup
+    const { fuel, ...rest } = v, key = JSON.stringify(rest) + "|" + this.uid;
+    if (key === this.setupKey) return;
+    this.setupKey = key;
+    this.emit("setup", { game: "F1 25", track: trackName(this.session.trackId), car: carName(this.teamId, this.names), values: v, session: SESSIONS[this.session.type] || "" });
   }
 
   onHistory(buf, uid, player) {

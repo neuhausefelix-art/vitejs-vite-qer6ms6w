@@ -15,10 +15,11 @@ const updates = require("./updates.js");
 const { ACCTelemetry, configFile: accConfigFile, enableConfig: accEnable } = require("./acc.js");
 const { LMUTelemetry } = require("./lmu.js");
 const { PC2Telemetry } = require("./pc2.js");
+const setupFiles = require("./setups.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 // show: which parts of the overlay are visible; accent: colour of the side stripe
-const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false };
+const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false };
 const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team", corners: "round", font: "saira" };
 const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip"];
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false, accOn: true, lmuOn: true, lmuPort: 6397, pc2On: true, pc2Port: 5606 };
@@ -301,6 +302,7 @@ function sendKept(channel, x) {
 }
 f1.on("classification", x => sendKept("telemetry:classification", x));
 f1.on("race", race => sendKept("telemetry:race", race));
+f1.on("setup", x => sendKept("telemetry:setup", x));
 f1.on("lap", lap => {
   lapDone("F1 25", lap);
   if (!lap.valid && !settings.saveInvalid) {
@@ -317,7 +319,7 @@ ac.on("car", c => {
   const s = ac.session;
   if (delta && s) delta.sample(dkey("Assetto Corsa", s.track, s.car), c.lapCount, c.pos * 5000, c.lapTime);
 });
-ac.on("session", s => { if (delta && s) delta.newSession(dkey("Assetto Corsa", s.track, s.car)); });
+ac.on("session", s => { if (delta && s) delta.newSession(dkey("Assetto Corsa", s.track, s.car)); rememberFolders(); });
 ac.on("lap", lap => {
   lapDone("Assetto Corsa", lap);
   send("telemetry:lap", lap);
@@ -735,6 +737,42 @@ ipcMain.handle("ac:pick", async () => {
   const r = await dialog.showOpenDialog(win, { title: "Choose your Assetto Corsa folder (the one with content\\cars inside)", properties: ["openDirectory"] });
   return r.canceled ? "" : r.filePaths[0] || "";
 });
+// ---- saved setups of AC and ACC for a car on a track (read-only) ----
+// the game folders of the car and track are remembered from the last session
+function rememberFolders() {
+  let changed = false;
+  const s = ac.session;
+  if (s && s.carId && s.car && s.track) {
+    const k = `${s.car}|${s.track}`;
+    settings.acFolders = settings.acFolders || {};
+    if (!settings.acFolders[k] || settings.acFolders[k][0] !== s.carId) { settings.acFolders[k] = [s.carId, s.trackId]; changed = true; }
+  }
+  const L = acc.live;
+  if (L && L.car && L.track && L.model !== null && L.model !== undefined) {
+    const k = `${L.car}|${L.track}`;
+    settings.accFolders = settings.accFolders || {};
+    if (!settings.accFolders[k]) { settings.accFolders[k] = [L.model, L.trackRaw]; changed = true; }
+  }
+  if (changed) saveSettings();
+}
+ipcMain.handle("setups:list", (e, q) => {
+  try {
+    rememberFolders();
+    const docs = app.getPath("documents"), game = q && q.game, k = `${q && q.car}|${q && q.track}`;
+    if (game === "Assetto Corsa") {
+      const f = (settings.acFolders || {})[k];
+      return f ? { ok: true, list: setupFiles.acSetups(docs, f[0], f[1]), folder: f[0] + "\\" + f[1] } : { ok: true, list: [], unknown: true };
+    }
+    if (game === "Assetto Corsa Competizione") {
+      const f = (settings.accFolders || {})[k];
+      return f ? { ok: true, list: setupFiles.accSetups(docs, f[0], q.car, f[1]) } : { ok: true, list: [], unknown: true };
+    }
+    return { ok: true, list: [] };
+  } catch (err) {
+    return { ok: false, error: String(err.message || err), list: [] };
+  }
+});
+
 // ACC: switch on its broadcasting interface in broadcasting.json (port 9000)
 ipcMain.handle("acc:enable", () => {
   try {

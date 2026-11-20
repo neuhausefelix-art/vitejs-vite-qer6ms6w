@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld("lapbridge", {
   setACFolder: dir => ipcRenderer.invoke("ac:folder", dir),
   pickACFolder: () => ipcRenderer.invoke("ac:pick"),
   accEnable: () => ipcRenderer.invoke("acc:enable"),
+  setupsList: q => ipcRenderer.invoke("setups:list", q),
+  onSetup: cb => ipcRenderer.on("telemetry:setup", (e, x) => cb(x)),
   setOverlay: o => ipcRenderer.invoke("overlay:set", o),
   getOverlay: () => ipcRenderer.invoke("overlay:get"),
   overlayData: d => ipcRenderer.send("overlay:data", d),

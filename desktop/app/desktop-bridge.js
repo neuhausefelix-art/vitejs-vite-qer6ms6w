@@ -180,6 +180,22 @@
    .strip{grid-template-columns:repeat(3,minmax(0,1fr))}
    .md{max-width:760px}
   }
+  /* car setups */
+  .suline{border-top:1px dashed var(--ln);padding-top:8px}.suline .ls span{color:var(--mu)}
+  #suf,#sup,#sua{max-width:860px}
+  .sua{border:1px solid var(--ln);border-radius:10px;margin:8px 0;padding:0 12px;background:var(--sf2)}
+  .sua summary{cursor:pointer;padding:10px 0;font-weight:600;display:flex;justify-content:space-between}.sua summary small{color:var(--mu);font-weight:400}
+  .sug{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:6px 14px;align-items:center;padding:0 0 12px}.sug>span{font-size:13.5px}.sug>span small{color:var(--mu)}
+  .suc{display:grid;gap:6px}.suc.n1{grid-template-columns:minmax(0,140px)}.suc.n2{grid-template-columns:repeat(2,minmax(0,110px))}.suc.n3,.suc.n4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .suc label{display:flex;align-items:center;gap:4px;margin:0}.suc label small{color:var(--mu);font-size:11px;width:20px}.suc input{padding:6px 8px;min-width:0}
+  .sut{display:grid;grid-template-columns:minmax(140px,1.4fr) 44px 92px 92px 70px minmax(160px,1.6fr) auto;gap:8px 12px;align-items:center;font-size:14px;font-variant-numeric:tabular-nums}
+  .sut>span:nth-child(-n+7){font-size:11.5px;color:var(--mu)}.sut>b{font-weight:600;overflow:hidden;text-overflow:ellipsis}.sut>b small{display:block;font-weight:400;color:var(--mu);font-size:12px}.sut .pu{color:var(--pu)}
+  .sl1{display:flex;align-items:center;gap:8px}.sl1 .bar{flex:1;height:10px;border-radius:5px;background:var(--sf2);overflow:hidden}.sl1 .bar i{display:block;height:100%;border-radius:5px;background:var(--dn)}.sl1 .bar i.z{background:var(--pu)}.sl1 em{font-style:normal;font-size:12.5px;min-width:56px;text-align:right}
+  .suact{display:flex;gap:4px}
+  .sucmp{margin-top:16px;border-top:1px solid var(--ln);padding-top:14px}.sucmp .up{color:var(--gr)}.sucmp .dn{color:var(--dn)}
+  .suarea{margin:8px 0}.suarea h6{margin:10px 0 4px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mu)}
+  .surow{display:grid;grid-template-columns:minmax(150px,240px) 1fr;gap:10px;padding:5px 0;border-top:1px solid var(--ln);font-size:13.5px;align-items:baseline}
+  .suv{display:flex;gap:6px 16px;flex-wrap:wrap;font-variant-numeric:tabular-nums}.suv span{color:var(--mu)}.suv span small{margin-right:4px;font-size:11px}.suv span.ch{color:var(--tx)}.suv span.ch b{color:#ffd23f}.suv i{font-style:normal;color:var(--mu)}
   /* F1 25 career: sessions of a round */
   .csess{max-width:720px;display:flex;flex-direction:column;gap:4px;margin-top:10px;border-top:1px solid var(--ln);padding-top:8px}
   .csess summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;font-size:14px;padding:4px 0}.csess summary span{color:var(--mu)}
@@ -324,13 +340,13 @@
     const i = st.info || {};
     const ask = i.teamId !== null && i.teamId !== undefined && i.known === false;
     return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · F1 25</span>${openBtn(F1, i.track)}</div>
-      <div class="lh"><span><b>${esc(i.track || "Waiting for track")}</b><br><span class="ls">${esc([i.car, i.session].filter(Boolean).join(" · ") || "Drive a lap, it is saved by itself")}</span></span>${lapBox(F1)}</div>
+      <div class="lh"><span><b>${esc(i.track || "Waiting for track")}</b><br><span class="ls">${esc([i.car, i.session].filter(Boolean).join(" · ") || "Drive a lap, it is saved by itself")}</span></span>${lapBox(F1)}</div>${liveSetup(F1, i.track, i.car)}
       ${ask ? `<div class="nm2"><span class="warn2">Which car is this (team ${esc(i.teamId)})?</span><input id="cname" placeholder="for example McLaren 2026" maxlength="60"><button class="b pri" data-live="name" data-id="${esc(i.teamId)}">Save name</button></div>` : ""}</div>`;
   }
   function acLive_() {
     const a = st.ac;
     return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · Assetto Corsa</span>${openBtn(AC, a.track)}</div>
-      <div class="lh"><span><b>${esc(a.track || "Waiting for track")}</b><br><span class="ls">${esc(a.car || "")}</span></span>${lapBox(AC)}</div>${st.ac.folder ? "" : folderNote()}</div>`;
+      <div class="lh"><span><b>${esc(a.track || "Waiting for track")}</b><br><span class="ls">${esc(a.car || "")}</span></span>${lapBox(AC)}</div>${liveSetup(AC, a.track, a.car)}${st.ac.folder ? "" : folderNote()}</div>`;
   }
   function fzRows() {
     return `<div class="gset"><span>Data Out</span><b>On</b><span>Data Out IP Address</span><b>127.0.0.1</b><span>Data Out IP Port</span><b>${esc(st.fz.port || 5300)}</b><span>Data Out Packet Format</span><b>Car Dash (if offered)</b></div>
@@ -347,7 +363,7 @@
       ? `<p class="warn2" style="margin:0">Drive to your finish point and press <b>Ctrl+Shift+T</b> there. <button class="b ghost" data-live="fzcancel">Cancel</button></p>`
       : `<div class="lh"><span class="ls">${f.segments ? `${f.segments} time trial${f.segments === 1 ? "" : "s"} recorded, they are timed by themselves.` : "No time trials recorded yet."} New one: press <b>Ctrl+Shift+T</b> at the start, drive, press it again at the finish. Standing still at the start = drag run.</span><button class="b ghost" data-live="fzmark">Start here</button></div>`;
     return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(f.game)}</span>${openBtn(f.game, seg ? seg.name : here ? here.name : r ? r.name : "")}</div>
-      <div class="lh"><span><b>${esc(where)}</b><br><span class="ls">${esc([f.car, f.carClass].filter(Boolean).join(" · "))}</span></span>${lapBox(f.game)}</div>
+      <div class="lh"><span><b>${esc(where)}</b><br><span class="ls">${esc([f.car, f.carClass].filter(Boolean).join(" · "))}</span></span>${lapBox(f.game)}</div>${f.run || f.lastSegment ? liveSetup(f.game, f.run ? f.run.name : f.lastSegment.name, f.car) : ""}
       ${trialHelp}
       ${askCar ? `<div class="nm2"><span class="warn2">Which car is this (Forza car #${esc(f.ordinal)})?</span><input id="fzcar" placeholder="for example Porsche 911 GT3 RS" maxlength="80"><button class="b pri" data-live="fzcar" data-id="${esc(f.ordinal)}">Save name</button></div>` : ""}
       ${askSeg ? `<div class="nm2"><span class="warn2">Name this ${seg.kind === "drag" ? "drag run" : "time trial"} (${esc(seg.name)}):</span><input id="fzseg" placeholder="${seg.kind === "drag" ? "for example Festival Drag Strip" : "for example Mount Fuji Trailblazer"}" maxlength="80"><button class="b pri" data-live="fzseg" data-id="${esc(seg.id)}">Save name</button></div>` : ""}
@@ -358,7 +374,7 @@
   function simLive_(g) {
     const s = sim(g);
     return `<div class="game"><div class="lh"><span class="lt"><span class="dot"></span>Live · ${esc(g)}</span>${openBtn(g, s.track)}</div>
-      <div class="lh"><span><b>${esc(s.track || "Waiting for track")}</b><br><span class="ls">${esc(s.car || "")}</span></span>${lapBox(g)}</div></div>`;
+      <div class="lh"><span><b>${esc(s.track || "Waiting for track")}</b><br><span class="ls">${esc(s.car || "")}</span></span>${lapBox(g)}</div>${liveSetup(g, s.track, s.car)}</div>`;
   }
   const stepI = (done, n) => `<i>${done ? "✓" : n}</i>`;
   function simSetup(g) {
@@ -441,8 +457,9 @@
     ["Race position", "in the overlay", { F1: "y", AC: "n", ACC: "y", LMU: "y", PC2: "y", FZ: "n" }],
     ["Race results", "for your rating", { F1: "y", AC: "n", ACC: "n", LMU: "n", PC2: "n", FZ: "n" }],
     ["Championship", "career: all sessions, points", { F1: "y", AC: "n", ACC: "n", LMU: "n", PC2: "n", FZ: "n" }],
+    ["Car setup", "every option, to compare", { F1: "y", AC: "y", ACC: "y", LMU: "p", PC2: "p", FZ: "p" }],
   ];
-  const READ_TIPS = { "AC|Sectors": "Assetto Corsa sends no sectors, Lapbook uses thirds of the lap", "FZ|Lap times": "time trials and drag runs that you mark once", "FZ|Car and circuit": "you name a car once, the game sends only a number", "LMU|Invalid laps": "only if the game's interface reports it", "F1|Championship": "F1 25 career (Driver Career and My Team): practice, qualifying, sprint and race of every driver, points as in the game", "FZ|Live delta": "in time trials and drag runs" };
+  const READ_TIPS = { "AC|Sectors": "Assetto Corsa sends no sectors, Lapbook uses thirds of the lap", "FZ|Lap times": "time trials and drag runs that you mark once", "FZ|Car and circuit": "you name a car once, the game sends only a number", "LMU|Invalid laps": "only if the game's interface reports it", "F1|Car setup": "sent by the game", "AC|Car setup": "from the setup files you saved", "ACC|Car setup": "from the setup files you saved", "LMU|Car setup": "typed in by you", "PC2|Car setup": "typed in by you", "FZ|Car setup": "typed in by you", "F1|Championship": "F1 25 career (Driver Career and My Team): practice, qualifying, sprint and race of every driver, points as in the game", "FZ|Live delta": "in time trials and drag runs" };
   function readsCard() {
     const cols = [["F1", "F1 25"], ["AC", "AC"], ["ACC", "ACC"], ["LMU", "LMU"], ["PC2", "PC2"], ["FZ", "FH5/6"]];
     const cell = (k, f, v) => `<td title="${esc(READ_TIPS[k + "|" + f] || (v === "y" ? "yes" : v === "p" ? "partly" : "no"))}"><span class="${v}"></span></td>`;
@@ -752,7 +769,7 @@
   render = function () {
     if (S.v === "live") { AS = asum(); $("#app").innerHTML = livePage(); }
     else baseRender();
-    try { tidy(); sectorPanel(); careerExtras(); sidebar(); wide(); document.getElementById("app").dataset.v = S.v; placeCard.last = ""; placeCard(); } catch (e) { console.error(e); }
+    try { tidy(); sectorPanel(); setupPanel(); careerExtras(); sidebar(); wide(); document.getElementById("app").dataset.v = S.v; placeCard.last = ""; placeCard(); } catch (e) { console.error(e); }
   };
 
   // ---------- settings ----------
@@ -833,7 +850,7 @@
       const before = best(D.lapTimes.filter(x => x.game === G && x.track === lap.track && x.car === lap.car && x.id !== lap.id));
       s = sessions[G] = { key, game: G, track: lap.track, car: lap.car, laps: [], pbBefore: before ? before.timeInMs : 0, start: Date.now() };
     }
-    s.laps.push({ t: lap.timeInMs, sectors: lap.sectors || null, valid, splits: !!lap.splits });
+    s.laps.push({ t: lap.timeInMs, sectors: lap.sectors || null, valid, splits: !!lap.splits, setup: lap.setup || "" });
     s.last = Date.now();
   }
   function endSession(G) {
@@ -848,6 +865,16 @@
     const theo = secs.every(isFinite) ? secs.reduce((a, b) => a + b, 0) : 0;
     const r = { game: s.game, track: s.track, car: s.car, date: today(), at: Date.now(), laps: s.laps.length, valid: ok.length, best: bestT, avg: Math.round(avg), sd: Math.round(sd), pbBefore: s.pbBefore,
       times: s.laps.map(l => (l.valid ? l.t : -l.t)), secs: theo ? secs : null, theo, splits: s.laps.some(l => l.splits) };
+    // the setup of the session against the best other setup on this circuit
+    const used = s.laps.map(l => l.setup).filter(Boolean);
+    if (used.length) {
+      const id = used.sort((x, y) => used.filter(v => v === y).length - used.filter(v => v === x).length)[0], su = setupById(id);
+      if (su) {
+        r.setup = su.name;
+        const other = D.lapTimes.filter(l => l.game === s.game && l.track === s.track && l.car === s.car && l.setup && l.setup !== id && setupById(l.setup));
+        if (other.length) { const ob = other.reduce((m, l) => (l.timeInMs < m.timeInMs ? l : m)); r.vsSetup = { name: setupById(ob.setup).name, best: ob.timeInMs }; }
+      }
+    }
     recaps = [r, ...recaps].slice(0, 20);
     try { localStorage.setItem("lapbook.recaps", JSON.stringify(recaps)); } catch (e) {}
     placeCard.last = "";
@@ -882,7 +909,8 @@
       ${tile(r.pbBefore ? (r.best ? gpS(r.best - r.pbBefore) : "–") : "first time", r.pbBefore ? "vs. best before (" + fmt(r.pbBefore) + ")" : "on this circuit with this car")}
       ${tile(r.avg ? fmt(r.avg) : "–", "average lap")}
       ${tile(r.sd ? "±" + (r.sd / 1000).toFixed(3) : "–", "consistency (spread)")}
-      ${tile(r.valid + (r.laps > r.valid ? " / " + r.laps : ""), r.laps > r.valid ? "valid / all laps" : "laps")}</div>
+      ${tile(r.valid + (r.laps > r.valid ? " / " + r.laps : ""), r.laps > r.valid ? "valid / all laps" : "laps")}
+      ${r.setup ? tile(esc(r.setup), r.vsSetup && r.best ? `setup · ${gpS(r.best - r.vsSetup.best)} vs. ${esc(r.vsSetup.name)}` : "setup") : ""}</div>
       ${chartSvg(r.times, r.best)}
       ${r.secs ? `<div class="panel" style="margin:12px 0 0"><div class="secg"><span></span><span>${r.splits ? "1st third" : "S1"}</span><span>${r.splits ? "2nd third" : "S2"}</span><span>${r.splits ? "3rd third" : "S3"}</span><span>sum</span>
         <span>best</span>${r.secs.map(x => `<b class="pu">${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(r.theo)}</b></div>
@@ -1054,6 +1082,235 @@
     });
   }
 
+  // ---------- car setups: pick one before you drive, compare them afterwards ----------
+  // A setup is every option of the game's setup menu. AC and ACC: read from the
+  // files the game saved, F1 25: sent by the game, other games: typed in. Every
+  // new lap gets the setup that is active for its car and circuit.
+  const SC = window.SetupCatalog;
+  const vkey = v => JSON.stringify(Object.keys(v || {}).filter(k => k !== "fuel").sort().map(k => [k, v[k]]));
+  const allSetups = () => (D.setups = Array.isArray(D.setups) ? D.setups : []);
+  const setupById = id => allSetups().find(x => x.id === id);
+  const setupsFor = (g, car) => allSetups().filter(x => x.game === g && x.car === car);
+  const FILE_GAMES = [AC, ACC];
+  let ACTIVE = {}, fileCache = {};
+  try { ACTIVE = JSON.parse(localStorage.getItem("lapbook.activeSetup") || "{}") || {}; } catch (e) {}
+  const akey = (g, car, track) => [g, car, track].join("|");
+  const activeId = (g, car, track) => { const id = ACTIVE[akey(g, car, track)]; return id && setupById(id) ? id : ""; };
+  function setActive(g, car, track, id) {
+    if (id) ACTIVE[akey(g, car, track)] = id; else delete ACTIVE[akey(g, car, track)];
+    try { localStorage.setItem("lapbook.activeSetup", JSON.stringify(ACTIVE)); } catch (e) {}
+    placeCard.last = ""; placeCard(); overlayFeed();
+  }
+  // one Lapbook setup per file and content: a re-saved file with new values is a new version
+  function setupFromFile(g, car, track, f) {
+    const k = vkey(f.values), same = setupsFor(g, car).find(x => x.file === f.file && x.vkey === k);
+    if (same) return same;
+    const versions = setupsFor(g, car).filter(x => x.file === f.file).length;
+    const o = { id: uid(), game: g, car, track: f.generic ? "" : track, name: f.name + (versions ? ` v${versions + 1}` : ""), values: { ...f.values }, vkey: k, notes: "", source: "file", file: f.file, created: today() };
+    allSetups().push(o); save();
+    return o;
+  }
+  // the live cards: which setup the laps count for right now
+  function liveSetup(g, track, car) {
+    if (!track || !car) return "";
+    const id = activeId(g, car, track), s = id && setupById(id), fc = fileCache[akey(g, car, track)];
+    const hint = !s ? (FILE_GAMES.includes(g) ? (fc && fc.list && !fc.list.length ? "no saved setup found" : "") : g === F1 ? "comes from the game" : "") : s.source === "file" ? "saved file" : s.source === "telemetry" ? "from the game" : "typed in";
+    return `<div class="lh suline"><span class="ls">Setup · <b style="color:var(--tx)">${s ? esc(s.name) : "none"}</b>${hint ? ` <span>(${hint})</span>` : ""}</span><button class="b ghost sm" data-su="pick" data-g="${esc(g)}" data-c="${esc(car)}" data-t="${esc(track)}">${s ? "Change" : "Choose setup"}</button></div>`;
+  }
+  // AC / ACC: look at the saved files now and then; the newest one is used until you pick another
+  async function refreshFiles(g, car, track) {
+    if (!B.setupsList || !FILE_GAMES.includes(g) || !car || !track) return;
+    const k = akey(g, car, track), c = fileCache[k];
+    if (c && Date.now() - c.at < 15000) return;
+    fileCache[k] = { at: Date.now(), list: c ? c.list : null };
+    const r = await B.setupsList({ game: g, car, track });
+    fileCache[k] = { at: Date.now(), list: r.list || [], unknown: r.unknown };
+    const cur = setupById(activeId(g, car, track));
+    if (!cur && r.list && r.list.length) { const s = setupFromFile(g, car, track, r.list[0]); setActive(g, car, track, s.id); toast(`Setup: ${s.name} (newest saved). Change it in the live card.`); }
+    else if (cur && cur.source === "file") {
+      // you saved the file again with other values: laps from now on count for the new version
+      const f = (r.list || []).find(x => x.file === cur.file);
+      if (f && vkey(f.values) !== cur.vkey) { const s = setupFromFile(g, car, track, f); setActive(g, car, track, s.id); toast(`Setup changed in the game: laps now count for ${s.name}`); }
+    }
+    placeCard.last = ""; placeCard();
+  }
+  function liveFiles() {
+    if (acLive() && st.ac.car && st.ac.track) refreshFiles(AC, st.ac.car, st.ac.track);
+    if (simLive(ACC) && sim(ACC).car && sim(ACC).track) refreshFiles(ACC, sim(ACC).car, sim(ACC).track);
+  }
+  // F1 25 sends its setup: the same values are the same setup
+  if (B.onSetup) B.onSetup(x => {
+    if (!x || !x.car || !x.track || !x.values) return;
+    const k = vkey(x.values), list = setupsFor(F1, x.car);
+    let s = list.find(y => y.track === x.track && y.vkey === k);
+    if (!s) {
+      const n = list.filter(y => y.track === x.track).length + 1;
+      s = { id: uid(), game: F1, car: x.car, track: x.track, name: `${x.track} setup ${n}`, values: { ...x.values }, vkey: k, notes: "", source: "telemetry", created: today() };
+      allSetups().push(s); save();
+      toast(`F1 25 setup saved as "${s.name}". Rename it on the circuit page.`);
+    }
+    if (activeId(F1, x.car, x.track) !== s.id) setActive(F1, x.car, x.track, s.id);
+  });
+
+  // ---- choose a setup ----
+  async function openPicker(g, car, track) {
+    let files = [];
+    if (FILE_GAMES.includes(g) && B.setupsList) { const r = await B.setupsList({ game: g, car, track }); files = r.list || []; fileCache[akey(g, car, track)] = { at: Date.now(), list: files, unknown: r.unknown }; }
+    const cur = activeId(g, car, track), mine = setupsFor(g, car).filter(x => x.source !== "file" || !files.some(f => f.file === x.file));
+    const lapsWith = id => D.lapTimes.filter(l => l.setup === id).length;
+    PICK = { g, car, track, files };
+    const fc = fileCache[akey(g, car, track)];
+    $("#modal").innerHTML = `<div class="ov"><div class="md" id="sup"><h3>Setup for ${esc(car)}</h3><p class="ls" style="color:var(--mu);margin:0 0 12px">${esc(track)} · laps you drive from now on count for the setup you pick.</p>
+      ${FILE_GAMES.includes(g) ? `<h4>Saved in ${g === AC ? "Assetto Corsa" : "ACC"}</h4>${files.length ? files.map((f, i) => { const s = setupsFor(g, car).find(x => x.file === f.file && x.vkey === vkey(f.values)); return `<button class="rrow ${s && s.id === cur ? "cont" : ""}" data-su="usefile" data-i="${i}"><span><b>${esc(f.name)}</b><small>${f.generic ? "generic · " : ""}saved ${esc(new Date(f.mtime).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))} · ${Object.keys(f.values).length} options</small></span><span class="mu">${s && s.id === cur ? "active" : "Use"}</span></button>`; }).join("") : `<p class="mu" style="margin:0 0 8px">${fc && fc.unknown ? "Drive one session first, then Lapbook knows the game folder of this car." : "No setup saved for this car on this circuit. Save one in the game's setup menu."}</p>`}` : ""}
+      <h4>In Lapbook</h4>${mine.map(s => `<button class="rrow ${s.id === cur ? "cont" : ""}" data-su="use" data-id="${esc(s.id)}"><span><b>${esc(s.name)}</b><small>${esc(s.track || "every circuit")} · ${{ file: "file", telemetry: "from the game", manual: "typed in" }[s.source] || ""} · ${lapsWith(s.id)} laps</small></span><span class="mu">${s.id === cur ? "active" : "Use"}</span></button>`).join("") || `<p class="mu" style="margin:0 0 8px">No setups yet.</p>`}
+      <div class="acts" style="margin-top:14px"><button class="b pri" data-su="new">+ New setup</button>${cur ? `<button class="b" data-su="none">No setup</button>` : ""}<button class="b ghost" data-act="closem">Close</button></div></div></div>`;
+  }
+  let PICK = null, FORM = null;
+
+  // ---- type in a setup: every option of the game, area by area ----
+  function openForm(g, car, track, edit, copy) {
+    const base = edit || copy || null, values = base ? { ...base.values } : {};
+    const keys = [...new Set([...SC.template(g), ...Object.keys(values)])];
+    FORM = { g, car, track, edit: edit ? edit.id : "", keys };
+    const sources = [...((PICK && PICK.files) || []).map((f, i) => [`f${i}`, `${f.name} (saved file)`]), ...setupsFor(g, car).filter(x => !edit || x.id !== edit.id).map(x => [`s${x.id}`, x.name])];
+    const L = SC.layout(g, keys);
+    $("#modal").innerHTML = `<div class="ov"><div class="md" id="suf"><h3>${edit ? "Edit setup" : "New setup"}</h3>
+      <div class="two"><label>Name<input id="suname" value="${esc(base ? (edit ? base.name : base.name + " copy") : "")}" placeholder="for example Monza low downforce" maxlength="60"></label>
+      ${sources.length ? `<label>Copy from<select id="sucopy"><option value="">–</option>${sources.map(([v, n]) => `<option value="${esc(v)}">${esc(n)}</option>`).join("")}</select></label>` : "<span></span>"}</div>
+      <label>Notes<input id="sunotes" value="${esc((edit && edit.notes) || "")}" placeholder="for example more rear wing for the second sector" maxlength="200"></label>
+      <p class="ls" style="color:var(--mu);margin:8px 0">Every option of the ${esc(g)} setup menu. Leave out what you did not change.${SC.kind(g) === "ac" ? " Values as in the game (clicks)." : ""}</p>
+      ${L.map(a => `<details class="sua" ${a.rows.some(r => r.cells.some(c => values[c.key] !== undefined && values[c.key] !== "")) || L.length < 3 ? "open" : ""}><summary>${esc(a.area)}<small>${a.rows.length} option${a.rows.length === 1 ? "" : "s"}</small></summary>
+        <div class="sug">${a.rows.map(r => `<span>${esc(r.label)}${r.unit && r.unit !== "clicks" ? ` <small>${esc(r.unit)}</small>` : ""}</span><div class="suc n${Math.min(r.cells.length, 4)}">${r.cells.map(c => `<label>${c.wheel ? `<small>${esc(c.wheel)}</small>` : ""}<input data-suk="${esc(c.key)}" value="${esc(values[c.key] ?? "")}" inputmode="decimal"></label>`).join("")}</div>`).join("")}</div></details>`).join("")}
+      ${SC.kind(g) === "ac" || SC.kind(g) === "generic" ? `<div class="add" style="margin-top:10px"><input id="suxk" placeholder="Extra option, e.g. a mod car setting"><input id="suxv" placeholder="Value" style="max-width:120px"><button class="b" data-su="addopt">Add</button></div>` : ""}
+      <div class="acts" style="margin-top:14px"><button class="b pri" data-su="save">Save setup</button><button class="b ghost" data-act="closem">Cancel</button></div></div></div>`;
+    const cp = $("#sucopy");
+    if (cp) cp.onchange = () => {
+      const v = cp.value; if (!v) return;
+      const src = v[0] === "f" ? PICK.files[Number(v.slice(1))] : setupById(v.slice(1));
+      if (src) openForm(g, car, track, edit, { name: src.name, values: src.values });
+    };
+  }
+  function saveForm() {
+    const F = FORM, name = ($("#suname").value || "").trim();
+    if (!name) return toast("Give the setup a name first");
+    const values = {};
+    document.querySelectorAll("#suf [data-suk]").forEach(i => { const v = i.value.trim(); if (v !== "") values[i.dataset.suk] = isFinite(Number(v)) ? Number(v) : v; });
+    const notes = ($("#sunotes").value || "").trim();
+    let s = F.edit && setupById(F.edit);
+    if (s) Object.assign(s, { name, values, vkey: vkey(values), notes });
+    else { s = { id: uid(), game: F.g, car: F.car, track: F.track, name, values, vkey: vkey(values), notes, source: "manual", created: today() }; allSetups().push(s); }
+    save();
+    if (!F.edit) setActive(F.g, F.car, F.track, s.id);
+    $("#modal").innerHTML = "";
+    refresh();
+    toast(F.edit ? "Setup saved" : `Setup "${name}" saved. New laps count for it.`);
+  }
+  document.addEventListener("click", async e => {
+    const t = e.target.closest("[data-su]");
+    if (!t) return;
+    const k = t.dataset.su;
+    if (k === "pick") return openPicker(t.dataset.g, t.dataset.c, t.dataset.t);
+    if (k === "use" && PICK) { setActive(PICK.g, PICK.car, PICK.track, t.dataset.id); $("#modal").innerHTML = ""; toast("Setup chosen: " + setupById(t.dataset.id).name); refresh(); }
+    if (k === "usefile" && PICK) { const s = setupFromFile(PICK.g, PICK.car, PICK.track, PICK.files[Number(t.dataset.i)]); setActive(PICK.g, PICK.car, PICK.track, s.id); $("#modal").innerHTML = ""; toast("Setup chosen: " + s.name); refresh(); }
+    if (k === "none" && PICK) { setActive(PICK.g, PICK.car, PICK.track, ""); $("#modal").innerHTML = ""; refresh(); }
+    if (k === "new" && PICK) openForm(PICK.g, PICK.car, PICK.track, null, null);
+    if (k === "newhere") { PICK = { g: t.dataset.g, car: t.dataset.c, track: t.dataset.t, files: [] }; if (FILE_GAMES.includes(PICK.g) && B.setupsList) PICK.files = (await B.setupsList({ game: PICK.g, car: PICK.car, track: PICK.track })).list || []; openForm(PICK.g, PICK.car, PICK.track, null, null); }
+    if (k === "edit") { const s = setupById(t.dataset.id); if (s) { PICK = { g: s.game, car: s.car, track: s.track || S.t, files: [] }; openForm(s.game, s.car, s.track, s, null); } }
+    if (k === "save") saveForm();
+    if (k === "addopt") {
+      const key = ($("#suxk").value || "").trim(), v = ($("#suxv").value || "").trim();
+      if (!key) return;
+      const values = {}; document.querySelectorAll("#suf [data-suk]").forEach(i => { if (i.value.trim() !== "") values[i.dataset.suk] = i.value.trim(); });
+      const kk = SC.kind(FORM.g) === "ac" ? key.toUpperCase().replace(/\s+/g, "_") : "x:" + key;
+      values[kk] = v;
+      const ed = FORM.edit && setupById(FORM.edit);
+      openForm(FORM.g, FORM.car, FORM.track, ed ? { ...ed, values } : null, ed ? null : { name: ($("#suname").value || "").trim().replace(/ copy$/, ""), values });
+    }
+    if (k === "del") { const s = setupById(t.dataset.id); if (!s) return; if (!t.dataset.armed) { t.dataset.armed = "1"; t.textContent = "Really delete?"; return; } D.setups = allSetups().filter(x => x.id !== s.id); tomb("su:" + s.id); D.lapTimes.forEach(l => { if (l.setup === s.id) delete l.setup; }); save(); render(); toast("Setup deleted, its laps keep their times"); }
+    if (k === "cmp") { SU[t.dataset.w] = t.dataset.id; render(); }
+    if (k === "only") { SU.only = !SU.only; render(); }
+    if (k === "assign") openAssign(S.g, S.t);
+    if (k === "assignsave") {
+      document.querySelectorAll("#sua [data-sess]").forEach(sel => { const ids = sel.dataset.sess.split(","); D.lapTimes.forEach(l => { if (ids.includes(l.id)) { if (sel.value) l.setup = sel.value; else delete l.setup; } }); });
+      save(); $("#modal").innerHTML = ""; render(); toast("Setups assigned");
+    }
+  });
+
+  // ---- give older laps their setup, one session (day and car) at a time ----
+  function openAssign(g, track) {
+    const L = D.lapTimes.filter(l => l.game === g && l.track === track), by = {};
+    L.forEach(l => (by[(l.date || "") + "|" + l.car] = by[(l.date || "") + "|" + l.car] || []).push(l));
+    const rows = Object.entries(by).sort((a, b) => b[0].localeCompare(a[0]));
+    $("#modal").innerHTML = `<div class="ov"><div class="md" id="sua"><h3>Setups of your laps at ${esc(track)}</h3><p class="ls" style="color:var(--mu);margin:0 0 12px">Pick the setup you drove each session with. Laps from live tracking already have one.</p>
+      ${rows.map(([k, ls]) => { const [d, car] = k.split("|"), list = setupsFor(g, car), cur = ls[0].setup || "", mixed = ls.some(l => (l.setup || "") !== cur); return `<div class="sr" style="grid-template-columns:1fr minmax(0,220px)"><span>${esc(shortDate(d))} · ${esc(car)}<small>${ls.length} lap${ls.length === 1 ? "" : "s"} · best ${fmt(Math.min(...ls.map(l => l.timeInMs)))}</small></span><select data-sess="${ls.map(l => l.id).join(",")}"><option value="">${mixed ? "(several, keep)" : "no setup"}</option>${list.map(s => `<option value="${esc(s.id)}" ${!mixed && s.id === cur ? "selected" : ""}>${esc(s.name)}</option>`).join("")}</select></div>`; }).join("")}
+      <div class="acts" style="margin-top:14px"><button class="b pri" data-su="assignsave">Save</button><button class="b ghost" data-act="closem">Cancel</button></div></div></div>`;
+    // "(several, keep)" must not wipe mixed sessions
+    document.querySelectorAll("#sua select").forEach(sel => { if (sel.options[0].textContent.startsWith("(several")) sel.dataset.keep = "1"; sel.onchange = () => delete sel.dataset.keep; });
+    const btn = document.querySelector('#sua [data-su="assignsave"]');
+    btn.addEventListener("click", () => document.querySelectorAll("#sua select[data-keep]").forEach(s => s.removeAttribute("data-sess")), true);
+  }
+
+  // ---- circuit page: how fast was each setup ----
+  const SU = { a: "", b: "", only: true };
+  const statsOf = laps => {
+    const t = laps.map(l => l.timeInMs), best = Math.min(...t), clean = t.filter(x => x <= best * 1.07), avg = clean.reduce((a, b) => a + b, 0) / clean.length;
+    const sd = clean.length > 1 ? Math.sqrt(clean.reduce((a, x) => a + (x - avg) ** 2, 0) / (clean.length - 1)) : 0;
+    const ws = laps.filter(l => Array.isArray(l.sectors) && l.sectors.length === 3), secs = ws.length ? [0, 1, 2].map(i => Math.min(...ws.map(l => l.sectors[i]))) : null;
+    return { n: laps.length, best, avg: Math.round(avg), sd: Math.round(sd), secs };
+  };
+  const sg3 = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1000).toFixed(3);
+  function setupPanel() {
+    if (S.v !== "track" || document.getElementById("supanel")) return;
+    const g = S.g, track = S.t, L = D.lapTimes.filter(l => l.game === g && l.track === track);
+    if (!L.length) return;
+    const cars = [...new Set(L.filter(l => l.setup && setupById(l.setup)).map(l => l.car))];
+    const withSetup = L.filter(l => l.setup && setupById(l.setup)).length;
+    let html = `<div id="supanel"><div class="bh"><span>Setups</span><small>${withSetup} of ${L.length} laps have a setup</small></div>`;
+    if (!cars.length) {
+      html += `<div class="panel" style="margin-top:0"><p class="ls" style="margin:0;color:var(--mu)">Pick a setup in the live card before you drive (AC and ACC take the newest saved file by themselves, F1 25 sends it), or give your laps a setup here. Then Lapbook shows which setup was faster.</p>
+        <div class="acts" style="margin-top:10px"><button class="b" data-su="assign">Give laps a setup</button><button class="b ghost" data-su="newhere" data-g="${esc(g)}" data-c="${esc(L[L.length - 1].car)}" data-t="${esc(track)}">+ New setup</button></div></div></div>`;
+    } else {
+      for (const car of cars) {
+        const ids = [...new Set(L.filter(l => l.car === car && l.setup && setupById(l.setup)).map(l => l.setup))];
+        const rows = ids.map(id => ({ s: setupById(id), st: statsOf(L.filter(l => l.car === car && l.setup === id)) })).sort((a, b) => a.st.best - b.st.best);
+        const top = rows[0].st.best, mx = Math.max(1, ...rows.map(r => r.st.best - top));
+        if (!rows.some(r => r.s.id === SU.a)) SU.a = rows[0].s.id;
+        if (!rows.some(r => r.s.id === SU.b) || SU.b === SU.a) SU.b = (rows.find(r => r.s.id !== SU.a) || {}).s ? rows.find(r => r.s.id !== SU.a).s.id : "";
+        html += `<div class="panel" style="margin-top:0"><div class="ch" style="margin-bottom:8px"><b>${esc(car)}</b><span class="mu" style="font-size:13px">${rows.length} setup${rows.length === 1 ? "" : "s"}</span></div>
+          <div class="sut"><span></span><span>laps</span><span>best</span><span>average</span><span>spread</span><span>gap to the fastest</span><span></span>
+          ${rows.map((r, i) => `<b>${esc(r.s.name)}${r.s.notes ? `<small>${esc(r.s.notes)}</small>` : ""}</b><span>${r.st.n}</span><span class="${i ? "" : "pu"}">${fmt(r.st.best)}</span><span>${fmt(r.st.avg)}</span><span>±${(r.st.sd / 1000).toFixed(3)}</span><span class="sl1"><span class="bar"><i class="${i ? "" : "z"}" style="width:${i ? Math.max(4, ((r.st.best - top) / mx) * 100).toFixed(0) : 4}%"></i></span><em>${i ? sg3(r.st.best - top) : "fastest"}</em></span><span class="suact"><button class="b ghost sm" data-su="cmp" data-w="a" data-id="${esc(r.s.id)}" ${SU.a === r.s.id ? 'style="border-color:var(--pu)"' : ""}>A</button><button class="b ghost sm" data-su="cmp" data-w="b" data-id="${esc(r.s.id)}" ${SU.b === r.s.id ? 'style="border-color:var(--rd)"' : ""}>B</button><button class="b ghost sm" data-su="edit" data-id="${esc(r.s.id)}">Edit</button></span>`).join("")}</div>
+          ${compareBlock(rows, L.filter(l => l.car === car))}
+          <div class="acts" style="margin-top:12px"><button class="b" data-su="assign">Give laps a setup</button><button class="b ghost" data-su="newhere" data-g="${esc(g)}" data-c="${esc(car)}" data-t="${esc(track)}">+ New setup</button></div></div>`;
+      }
+      html += `</div>`;
+    }
+    const anchor = document.getElementById("secpanel") || [...document.querySelectorAll("#app .bh")].find(n => /^Scoreboard/.test(n.textContent.trim()));
+    if (anchor) anchor.insertAdjacentHTML(anchor.id === "secpanel" ? "afterend" : "beforebegin", html);
+  }
+  // two setups side by side: times, sectors and every option that changed
+  function compareBlock(rows, laps) {
+    const A = rows.find(r => r.s.id === SU.a), Bx = rows.find(r => r.s.id === SU.b);
+    if (!A || !Bx) return "";
+    const a = A.st, b = Bx.st, dBest = b.best - a.best, dAvg = b.avg - a.avg, few = a.n < 3 || b.n < 3;
+    const word = d => (d < 0 ? "faster" : d > 0 ? "slower" : "as fast");
+    // name the faster setup first: "low_df was 0.650 s faster ... than high_df"
+    const [F, Sl, fb, sb, fa] = dBest <= 0 ? [Bx, A, b, a, dAvg] : [A, Bx, a, b, -dAvg];
+    const db = Math.abs(dBest), avgWord = fa < 0 ? "faster" : fa > 0 ? "slower" : "as fast";
+    const sum = dBest === 0 ? `<b>${esc(A.s.name)}</b> and <b>${esc(Bx.s.name)}</b> have the same best lap.` : `<b>${esc(F.s.name)}</b> was <b class="up">${(db / 1000).toFixed(3)} s faster</b> on the best lap and <b class="${fa <= 0 ? "up" : "dn"}">${(Math.abs(fa) / 1000).toFixed(3)} s ${avgWord}</b> on average than <b>${esc(Sl.s.name)}</b> (${fb.n} vs. ${sb.n} laps).`;
+    const secs = a.secs && b.secs ? `<div class="secg" style="margin-top:10px"><span></span><span>S1</span><span>S2</span><span>S3</span><span>lap</span>
+      <span>A</span>${a.secs.map(x => `<b>${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(a.best)}</b>
+      <span>B</span>${b.secs.map(x => `<b>${(x / 1000).toFixed(3)}</b>`).join("")}<b>${fmt(b.best)}</b>
+      <span>B − A</span>${b.secs.map((x, i) => `<b class="${x - a.secs[i] < 0 ? "up" : x - a.secs[i] > 0 ? "dn" : ""}">${sg3(x - a.secs[i])}</b>`).join("")}<b class="${dBest < 0 ? "up" : "dn"}">${sg3(dBest)}</b></div>` : "";
+    const va = A.s.values || {}, vb = Bx.s.values || {}, keys = [...new Set([...Object.keys(va), ...Object.keys(vb)])], g = A.s.game;
+    const same = k => String(va[k] ?? "") === String(vb[k] ?? "");
+    const changed = SC.layout(g, keys).reduce((n, ar) => n + ar.rows.filter(r => r.cells.some(c => !same(c.key))).length, 0);
+    const L = SC.layout(g, keys).map(ar => ({ ...ar, rows: ar.rows.filter(r => !SU.only || r.cells.some(c => !same(c.key))) })).filter(ar => ar.rows.length);
+    const cell = c => { const x = va[c.key], y = vb[c.key], ch = !same(c.key); return `<span class="${ch ? "ch" : ""}">${c.wheel ? `<small>${esc(c.wheel)}</small>` : ""}${ch ? `${esc(x ?? "–")} <i>→</i> <b>${esc(y ?? "–")}</b>` : esc(x ?? "–")}</span>`; };
+    return `<div class="sucmp"><p class="ls" style="margin:0 0 4px">${sum}</p>${few ? `<p class="ls" style="margin:0;color:var(--mu)">Still few laps, drive a few more for a safe answer.</p>` : ""}${secs}
+      <div class="ch" style="margin:14px 0 6px"><b style="font-size:14px">Options · ${changed} changed</b><button class="b ghost sm" data-su="only">${SU.only ? "Show all options" : "Only changes"}</button></div>
+      ${L.length ? L.map(ar => `<div class="suarea"><h6>${esc(ar.area)}</h6>${ar.rows.map(r => `<div class="surow"><span>${esc(r.label)}</span><div class="suv">${r.cells.map(cell).join("")}</div></div>`).join("")}</div>`).join("") : `<p class="mu" style="margin:0">Both setups have the same options.</p>`}</div>`;
+  }
+
   // ---------- best sectors on the circuit page ----------
   function sectorPanel() {
     if (S.v !== "track" || document.getElementById("secpanel")) return;
@@ -1091,6 +1348,7 @@
     B.overlayData({
       game: g, live: isFz(g) ? fzLive() : gameLive(g), track, car,
       last: lastGame === g && lastL ? lastL.timeInMs : 0, prevBest: prev ? prev.timeInMs : 0,
+      setup: (setupById(activeId(g, car, track)) || {}).name || "",
       best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
     });
   }
@@ -1106,14 +1364,14 @@
     ["strip", "Strip", "One thin row for a screen edge"],
     ["compact", "Compact", "Only lap time and delta"],
   ];
-  const OV_SHOW = [["head", "Circuit and car", "name of the circuit and your car"], ["position", "Race position", "P4/20 in races"], ["delta", "Delta", "live gap to your best lap"], ["sectors", "Sectors", "purple, green, yellow like on TV"], ["foot", "Best and last lap", "with the gap of the last lap"]];
+  const OV_SHOW = [["head", "Circuit and car", "name of the circuit and your car"], ["position", "Race position", "P4/20 in races"], ["delta", "Delta", "live gap to your best lap"], ["sectors", "Sectors", "purple, green, yellow like on TV"], ["foot", "Best and last lap", "with the gap of the last lap"], ["setup", "Setup name", "the setup you drive with, next to the car"]];
   const OV_ACCENTS = [["team", "Team", "conic-gradient(#ff8000 0 25%,#3671c6 0 50%,#e8002d 0 75%,#27f4d2 0)"], ["red", "Red", "#ff3030"], ["white", "White", "#f5f5f7"], ["blue", "Blue", "#3d8bff"], ["green", "Green", "#2fe07f"], ["yellow", "Yellow", "#ffd12a"], ["purple", "Purple", "#b45bff"], ["none", "None", "repeating-linear-gradient(135deg,#555 0 2px,transparent 2px 6px)"]];
   const OV_SAMPLE = {
     d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250 },
     live: { game: "F1 25", t: 41234, delta: -123, sectors: [{ t: 26123, c: "purple" }, { t: 15111, c: "green" }, { t: 0 }], position: 3, cars: 20 },
   };
   const seg = (k, list, cur) => `<div class="oseg">${list.map(([v, n]) => `<button data-ov="${k}" data-v="${v}" class="${String(cur) === String(v) ? "on" : ""}">${n}</button>`).join("")}</div>`;
-  const ovShow = o => ({ head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, ...(o.show || {}) });
+  const ovShow = o => ({ head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false, ...(o.show || {}) });
   function ovIsOn(k, v, o) {
     const sh = ovShow(o);
     if (k === "layout") return (o.layout || "clean") === v;
@@ -1293,7 +1551,7 @@
     if (f1Live() && !wasLive) { wasLive = true; toast("F1 25 connected. Laps are saved automatically."); }
     if (acLive() && !acWas) { acWas = true; toast("Assetto Corsa connected. Laps are saved automatically."); }
     for (const g of SIMG) if (sim(g).connected && !simWas[g]) { simWas[g] = true; toast(g + " connected. Laps are saved automatically."); }
-    header(); placeCard(); overlayFeed();
+    header(); placeCard(); overlayFeed(); liveFiles();
   });
   B.onSkipped(l => { skipped++; placeCard.last = ""; placeCard(); toast(`${l && l.game && l.game !== F1 ? abbr(l.game) : "F1 25"}: invalid lap not saved`); });
   B.onLap(l => {
@@ -1316,6 +1574,8 @@
     else if (SIMG.includes(G)) Object.assign(lap, { weather: "", condition: "", tire: "", notes: [l.session, l.carClass, l.valid ? "" : "invalid", "auto"].filter(Boolean).join(" · ") });
     else Object.assign(lap, { weather: "", condition: "", tire: "", notes: "auto" });
     if (Array.isArray(l.sectors) && l.sectors.length === 3) { lap.sectors = l.sectors.map(x => Math.round(x)); if (l.splits) lap.splits = true; }
+    const su = activeId(G, l.car, l.track);
+    if (su) lap.setup = su;
     D.lapTimes.push(lap);
     sessionLap(G, lap, l.valid !== false);
     if (!D.tracks[G].includes(l.track)) D.tracks[G].push(l.track);

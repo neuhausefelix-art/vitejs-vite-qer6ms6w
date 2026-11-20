@@ -197,7 +197,7 @@ class ACCTelemetry extends EventEmitter {
       return;
     }
     if (!this.connected) { this.connected = true; this.emit("status"); }
-    if (m.type === IN.TRACK) { this.track = trackName(m.name); this.trackMeters = m.meters > 0 ? m.meters : 0; this.emit("status"); }
+    if (m.type === IN.TRACK) { this.track = trackName(m.name); this.trackRaw = m.name; this.trackMeters = m.meters > 0 ? m.meters : 0; this.emit("status"); }
     else if (m.type === IN.ENTRY_CAR) this.entries[m.car] = { model: m.model, team: m.team, number: m.number };
     else if (m.type === IN.ENTRY_LIST) { for (const id of Object.keys(this.entries)) if (!m.cars.includes(Number(id))) delete this.entries[id]; }
     else if (m.type === IN.REALTIME) {
@@ -229,7 +229,7 @@ class ACCTelemetry extends EventEmitter {
     this.live = {
       at: Date.now(), t: cur.ms, lapNum: m.laps + 1, distance: this.trackMeters ? m.spline * this.trackMeters : m.spline * 5000, spline: m.spline,
       sector: sp.filter(x => x > 0).length, s1: sp[0] || 0, s2: sp[1] || 0, invalid: cur.invalid, position: m.position, cars: Object.keys(this.cars).length,
-      pit: m.location !== 1, track: this.track, car, race: this.sessionType === 10,
+      pit: m.location !== 1, track: this.track, car, race: this.sessionType === 10, model: this.entries[m.car] ? this.entries[m.car].model : null, trackRaw: this.trackRaw || "",
     };
     this.emit("car", this.live);
   }
