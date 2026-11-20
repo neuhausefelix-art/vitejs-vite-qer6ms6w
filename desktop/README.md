@@ -1,4 +1,4 @@
-# Lapbook für Windows – Anleitung (Version 2.5.0)
+# Lapbook für Windows – Anleitung (Version 2.6.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
@@ -15,9 +15,9 @@ Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten
 
 ---
 
-## 0. Update auf 2.5.0
+## 0. Update auf 2.6.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.5.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.6.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Installieren und neu starten“**. Fertig, deine Runden bleiben erhalten.
@@ -155,7 +155,7 @@ Lapbook kennt die echten Fahrzeugnamen:
 
 ## 2d. Overlay im Spiel
 
-Ein Zeitenpanel über dem Spiel. Sechs Stile stehen zur Wahl, unten das Beispiel **Clean**:
+Ein Zeitenpanel über dem Spiel. Zwölf Stile stehen zur Wahl, unten das Beispiel **Clean**:
 
 **Clean** (Standard):
 ```
@@ -173,6 +173,12 @@ Best 1:21.000                   Last 1:21.150 +0.150
 | **Minimal** | kein Panel, nur schwebende Zahlen mit Schatten |
 | **Strip** | eine schmale Zeile mit allem nebeneinander, gut für den oberen oder unteren Bildschirmrand |
 | **Compact** | nur laufende Runde und Delta |
+| **Tower** | schmal und hoch wie die Zeitenliste im TV, alles untereinander |
+| **Neon** | dunkel, Rand und Ziffern leuchten in der Akzentfarbe |
+| **Carbon** | Carbon-Muster, kantig, Streifen in der Teamfarbe oben |
+| **Retro** | grüne LCD-Ziffern wie ein alter Rundenzähler |
+| **Pill** | kleine Kapsel mit Position, Zeit und Delta |
+| **Dash** | wie ein Lenkrad-Display: großes Delta oben, Zeit darunter |
 
 - **Live-Delta:** grün = schneller als deine Bestzeit an dieser Stelle der Runde, rot = langsamer. Verglichen wird mit deiner schnellsten gültigen Runde mit diesem Auto auf dieser Strecke, auch aus früheren Sessions. Das Delta erscheint ab der **zweiten** Runde, die du mit Lapbook fährst.
 - **Sektorfarben** wie im TV: **Lila** = deine beste Zeit überhaupt, **Grün** = beste dieser Session, **Weiß/Gelb** = langsamer.
@@ -187,17 +193,55 @@ Best 1:21.000                   Last 1:21.150 +0.150
 **Vorschau:** Oben in den Overlay-Einstellungen siehst du das Overlay mit Beispieldaten. Jede Änderung (Stil, Anzeige, Farbe, Größe, Hintergrund) siehst du dort sofort.
 
 ### Einstellen
-Klicke in der Seitenleiste auf **„Overlay“**. Links siehst du eine große **Vorschau** über einer Rennszene und die Position, rechts alle Einstellungen:
-- **Ein/Aus-Schalter** oben rechts (oder **Strg+Umschalt+O**, auch im Spiel)
-- **Style:** sechs Karten mit einer kleinen Live-Vorschau des jeweiligen Stils
-- **What it shows:** Schalter für Strecke und Auto, Rennposition, Delta, Sektoren, Best und Last. Das Fenster passt seine Größe automatisch an.
-- **Delta:** als Zahl oder als Zahl mit Balken (Mitte = gleich schnell, grün nach links = schneller, rot nach rechts = langsamer, voller Ausschlag = 1 Sekunde)
-- **Corners:** abgerundet oder eckig
-- **Accent colour:** Teamfarbe, Rot, Weiß, Blau, Grün, Gelb, Lila oder keine
-- **Size:** S, M, L, XL
-- **Font:** Sport (Standard), Clean oder Mono
-- **Background:** See-through, Normal, Solid
-- **Position on screen:** Klicke auf dem kleinen Bildschirm auf eine der 9 Stellen, z. B. unten Mitte. Mit den **Pfeilen** daneben verschiebst du es in 20-px-Schritten. Bei mehreren Monitoren wählst du den **Bildschirm**.
+Klicke in der Seitenleiste auf **„Overlay“**.
+- **Links:** eine große **Vorschau** über einer Rennszene und deine **Vorlagen**.
+- **Rechts:** alle Einstellungen in sechs Reitern.
+- **Ein/Aus:** Schalter oben rechts, im Spiel **Strg+Umschalt+O**.
+
+**Reiter „Position“:**
+- **Raster mit 25 Plätzen:** Ränder, Viertel und Mitte, z. B. über dem Rückspiegel oder unten neben dem Tacho
+- **Pfeile:** verschieben in 20-px-Schritten
+- **Abstand zum Bildschirmrand:** 0 bis 120 px
+- **Bildschirm:** bei mehreren Monitoren
+- **Entsperren** zum Ziehen mit der Maus
+
+Das Fenster nimmt immer genau die Größe des Inhalts an. Es wächst von dem Platz aus, den du gewählt hast.
+
+**Reiter „Stil“:** zwölf Karten, jede mit einer kleinen Live-Vorschau.
+
+**Reiter „Inhalt“:**
+- Schalter für Strecke und Auto, Rennposition, Delta, Sektoren, Beste und Letzte, Setup-Name
+- neu dazu:
+  - **Prognose:** Bestzeit plus aktuelles Delta
+  - **Rundenzähler**
+  - **Session-Bestzeit**
+  - **Rekord** mit dem voraussichtlichen Abstand
+  - **Uhrzeit**
+- **Delta:** als Zahl oder als Zahl mit Balken
+- **Nachkommastellen:** 1, 2 oder 3
+- **Reihenfolge:** Mit ↑ und ↓ legst du fest, was oben und was unten steht.
+
+**Reiter „Farben“:**
+- **Akzentfarbe:** Teamfarbe, sieben feste Farben oder **eigene Farbe**
+- **Eigene Farben** für Hintergrund, Text, schneller, langsamer, die drei Sektorfarben und den Rahmen. „Wie der Stil“ setzt eine Farbe zurück.
+- **Hintergrund:** Hauchzart, Durchsichtig, Normal oder Deckend. Das gilt nur für den Hintergrund, die Zahlen bleiben voll sichtbar.
+
+**Reiter „Schrift & Größe“:**
+- **Schrift:** Sport, Clean, Mono, Orbitron, Rajdhani, LCD
+- **Gesamtgröße:** XS bis XXL
+- **Größe von Rundenzeit und Delta** und **Größe der kleinen Texte**, je 70 bis 160 %
+- **Breite:** schmal, normal, breit
+- **Ecken:** kantig, abgerundet, sehr rund
+
+**Reiter „Effekte“:**
+- **Schatten** und **Rahmen**, auch in der Akzentfarbe
+- **Delta-Farbe:** nur die Zahl oder die ganze Box grün bzw. rot
+- **Leuchten**
+- **Aufblitzen** bei neuer Bestzeit oder lila Sektor
+- **Neue Runde sanft einblenden**
+- **Ausblenden, wenn du nicht fährst:** nach 10 s, 30 s oder 1 Minute ohne Daten. Es kommt von selbst zurück, sobald das Spiel wieder Daten sendet.
+
+**Vorlagen:** Gib einen Namen ein und klicke **„Aussehen speichern“**. Später lädst du die Vorlage mit einem Klick wieder, z. B. eine für F1 und eine für AC. **„Alles zurücksetzen“** stellt den Standard wieder her. Position und Vorlagen bleiben dabei erhalten.
 
 ### Im Spiel verschieben
 1. Drücke **Strg+Umschalt+L**. Das Overlay bekommt einen **roten Rahmen**.
@@ -411,7 +455,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-2.5.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.6.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Datei wählen“**.

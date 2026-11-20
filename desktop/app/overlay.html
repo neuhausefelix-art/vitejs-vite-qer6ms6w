@@ -1,64 +1,65 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>Lapbook overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light dark"><title>Lapbook overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700;800&family=Inter:wght@500;600;700;800&family=Orbitron:wght@500;700;800&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
 /* Lapbook overlay. Six styles share the same pieces (head, time, delta, bar,
    sectors, foot); the body class decides how they look and sit. */
-:root{--k:1;--op:.86;--team:#ff3030;--tx:#f5f5f7;--mu:#8f8f9b;--dim:#5c5c66;--purple:#b45bff;--green:#2fe07f;--yellow:#ffd12a;--red:#ff4b4b;--rad:14px;--font:'Saira Semi Condensed',system-ui,sans-serif}
+:root{--k:1;--tz:1;--ts:1;--wf:1;--W:374;--in:3px;--bgc:12,12,15;--kt:calc(var(--k)*var(--tz));--ks:calc(var(--k)*var(--ts));--up:#2fe07f;--dn:#ff4b4b;--sg:#2fe07f;--bd:rgba(255,255,255,.28);--op:.86;--team:#ff3030;--tx:#f5f5f7;--mu:#8f8f9b;--dim:#5c5c66;--purple:#b45bff;--green:#2fe07f;--yellow:#ffd12a;--red:#ff4b4b;--rad:14px;--font:'Saira Semi Condensed',system-ui,sans-serif}
 *{box-sizing:border-box;margin:0}
-html,body{background:transparent;overflow:hidden;height:100%;font-family:var(--font);color:var(--tx);user-select:none;font-variant-numeric:tabular-nums}
+html,body{background:transparent!important;color-scheme:inherit;overflow:hidden;height:100%;font-family:var(--font);color:var(--tx);user-select:none;font-variant-numeric:tabular-nums}
+body.f-orb{--font:'Orbitron',system-ui,sans-serif}body.f-raj{--font:'Rajdhani',system-ui,sans-serif}body.f-lcd{--font:'Share Tech Mono',ui-monospace,monospace}
 body.f-mono{--font:'JetBrains Mono',ui-monospace,monospace}body.f-sans{--font:'Inter',system-ui,sans-serif}
 body.sharp{--rad:2px}
-#o{position:absolute;inset:calc(3px*var(--k));border-radius:calc(var(--rad)*var(--k));background:rgba(12,12,15,var(--op));box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:calc(12px*var(--k)) calc(16px*var(--k));display:flex;flex-direction:column;justify-content:center;gap:calc(8px*var(--k));overflow:hidden}
+#o{position:absolute;left:var(--in);top:var(--in);width:calc(var(--W)*var(--wf)*var(--k)*1px);border-radius:calc(var(--rad)*var(--k));background:rgba(var(--bgc),var(--op));box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);padding:calc(12px*var(--k)) calc(16px*var(--k));display:flex;flex-direction:column;justify-content:center;gap:calc(8px*var(--k));overflow:hidden}
 #o:before{content:"";position:absolute;left:0;top:calc(14px*var(--k));bottom:calc(14px*var(--k));width:calc(3px*var(--k));border-radius:0 3px 3px 0;background:var(--team)}
 body.edit #o{-webkit-app-region:drag;cursor:move;box-shadow:inset 0 0 0 2px var(--red)}
-.top{display:flex;align-items:baseline;gap:calc(8px*var(--k));font-size:calc(13px*var(--k));color:var(--mu);white-space:nowrap;overflow:hidden}
+.top{display:flex;align-items:baseline;gap:calc(8px*var(--k));font-size:calc(13px*var(--ks));color:var(--mu);white-space:nowrap;overflow:hidden}
 .top b{color:var(--tx);font-weight:700;letter-spacing:.04em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis}
 .top span{overflow:hidden;text-overflow:ellipsis;flex:1}
-.top em{font-style:normal;color:var(--tx);font-weight:700;font-size:calc(14px*var(--k))}.top em small{color:var(--mu);font-weight:600}
+.top em{font-style:normal;color:var(--tx);font-weight:700;font-size:calc(14px*var(--ks))}.top em small{color:var(--mu);font-weight:600}
 .row{display:flex;align-items:baseline;justify-content:space-between;gap:calc(12px*var(--k))}
-.cur{font-size:calc(46px*var(--k));font-weight:800;line-height:.95;letter-spacing:-.01em;white-space:nowrap}
+.cur{font-size:calc(46px*var(--kt));font-weight:800;line-height:.95;letter-spacing:-.01em;white-space:nowrap}
 .cur.inv{color:#ff8a7a}
-.cur small{font-size:calc(12px*var(--k));font-weight:700;color:var(--mu);margin-left:calc(6px*var(--k));letter-spacing:.06em;text-transform:uppercase}
-.dl{font-size:calc(30px*var(--k));font-weight:800;line-height:1;white-space:nowrap}
-.dl.up{color:var(--green)}.dl.dn{color:var(--red)}.dl.no{color:var(--dim)}.dl.rec{color:var(--red);font-size:calc(20px*var(--k));letter-spacing:.08em}
+.cur small{font-size:calc(12px*var(--ks));font-weight:700;color:var(--mu);margin-left:calc(6px*var(--k));letter-spacing:.06em;text-transform:uppercase}
+.dl{font-size:calc(30px*var(--kt));font-weight:800;line-height:1;white-space:nowrap}
+.dl.up{color:var(--up)}.dl.dn{color:var(--dn)}.dl.no{color:var(--dim)}.dl.rec{color:var(--red);font-size:calc(20px*var(--kt));letter-spacing:.08em}
 .secs{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(8px*var(--k))}
 .sec i{display:block;height:calc(4px*var(--k));border-radius:2px;background:rgba(255,255,255,.1)}
-.sec.purple i{background:var(--purple)}.sec.green i{background:var(--green)}.sec.yellow i{background:var(--yellow)}.sec.invalid i{background:#ff8a7a}
-.sec b{display:block;font-size:calc(16px*var(--k));font-weight:700;margin-top:calc(4px*var(--k));color:var(--mu)}
-.sec.purple b{color:var(--purple)}.sec.green b{color:var(--green)}.sec.yellow b{color:var(--tx)}
-.foot{display:flex;justify-content:space-between;gap:calc(12px*var(--k));font-size:calc(15px*var(--k));color:var(--mu);font-weight:600;white-space:nowrap}
+.sec.purple i{background:var(--purple)}.sec.green i{background:var(--sg)}.sec.yellow i{background:var(--yellow)}.sec.invalid i{background:#ff8a7a}
+.sec b{display:block;font-size:calc(16px*var(--ks));font-weight:700;margin-top:calc(4px*var(--k));color:var(--mu)}
+.sec.purple b{color:var(--purple)}.sec.green b{color:var(--sg)}.sec.yellow b{color:var(--tx)}
+.foot{display:flex;justify-content:space-between;gap:calc(12px*var(--k));font-size:calc(15px*var(--ks));color:var(--mu);font-weight:600;white-space:nowrap}
 .foot b{color:var(--tx);font-weight:700;margin-left:calc(6px*var(--k))}.foot .pb{color:var(--purple)}
-.foot em{font-style:normal;font-weight:700;margin-left:calc(5px*var(--k))}.up2{color:var(--green)}.dn2{color:var(--red)}
-.idle{font-size:calc(14px*var(--k));color:var(--mu)}.idle b{color:var(--tx)}
+.foot em{font-style:normal;font-weight:700;margin-left:calc(5px*var(--k))}.up2{color:var(--up)}.dn2{color:var(--dn)}
+.idle{font-size:calc(14px*var(--ks));color:var(--mu)}.idle b{color:var(--tx)}
 .hint{display:none;position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:calc(10px*var(--k));color:#fff;background:var(--red);padding:1px 0;font-family:system-ui,sans-serif}
 body.edit .hint{display:block}
 .dbar{position:relative;height:calc(6px*var(--k));border-radius:3px;background:rgba(255,255,255,.08)}
 .dbar:after{content:"";position:absolute;left:50%;top:calc(-3px*var(--k));bottom:calc(-3px*var(--k));width:2px;margin-left:-1px;background:rgba(255,255,255,.35)}
 .dbar i{position:absolute;top:0;bottom:0;border-radius:3px}
-.pos2{font-size:calc(14px*var(--k));font-weight:700;color:var(--tx);align-self:center}.pos2 small{color:var(--mu)}
+.pos2{font-size:calc(14px*var(--ks));font-weight:700;color:var(--tx);align-self:center}.pos2 small{color:var(--mu)}
 
 /* compact: lap time and delta only */
-body.compact #o{flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;justify-content:space-between;padding:calc(8px*var(--k)) calc(16px*var(--k))}
-body.compact .cur{font-size:calc(38px*var(--k))}body.compact .dl{font-size:calc(26px*var(--k))}body.compact .dbar{flex-basis:100%}
+body.compact #o{width:max-content;min-width:calc(220px*var(--k));flex-direction:row;column-gap:calc(18px*var(--k));flex-wrap:wrap;align-items:center;align-content:center;justify-content:space-between;padding:calc(8px*var(--k)) calc(16px*var(--k))}
+body.compact .cur{font-size:calc(38px*var(--kt))}body.compact .dl{font-size:calc(26px*var(--kt))}body.compact .dbar{flex-basis:100%}
 
 /* broadcast: TV graphics, a coloured band with the position, square and bold */
 body.broadcast{--rad:4px}body.broadcast.sharp{--rad:0px}
 body.broadcast #o{padding:0;gap:0;background:rgba(21,21,30,var(--op));box-shadow:0 calc(4px*var(--k)) calc(18px*var(--k)) rgba(0,0,0,.45)}
 body.broadcast #o:before{display:none}
-body.broadcast .top{background:var(--team);color:#fff;padding:calc(6px*var(--k)) calc(14px*var(--k));font-size:calc(13px*var(--k));align-items:center}
+body.broadcast .top{background:var(--team);color:#fff;padding:calc(6px*var(--k)) calc(14px*var(--k));font-size:calc(13px*var(--ks));align-items:center}
 body.broadcast .top b{color:#fff;letter-spacing:.08em}body.broadcast .top span{color:rgba(255,255,255,.8)}
-body.broadcast .top em{order:-1;background:#fff;color:#15151e;padding:0 calc(8px*var(--k));border-radius:calc(2px*var(--k));font-size:calc(14px*var(--k))}body.broadcast .top em small{color:#15151e99}
+body.broadcast .top em{order:-1;background:#fff;color:#15151e;padding:0 calc(8px*var(--k));border-radius:calc(2px*var(--k));font-size:calc(14px*var(--ks))}body.broadcast .top em small{color:#15151e99}
 body.broadcast.acc-none .top{background:#2a2a36}
 body.broadcast .row{padding:calc(10px*var(--k)) calc(14px*var(--k)) calc(4px*var(--k));align-items:center}
-body.broadcast .cur{font-size:calc(44px*var(--k));font-style:italic;letter-spacing:.01em}
-body.broadcast .dl{font-size:calc(22px*var(--k));padding:calc(4px*var(--k)) calc(10px*var(--k));border-radius:calc(3px*var(--k));color:#fff;font-style:italic}
+body.broadcast .cur{font-size:calc(44px*var(--kt));font-style:italic;letter-spacing:.01em}
+body.broadcast .dl{font-size:calc(22px*var(--kt));padding:calc(4px*var(--k)) calc(10px*var(--k));border-radius:calc(3px*var(--k));color:#fff;font-style:italic}
 body.broadcast .dl.up{background:#14a35a}body.broadcast .dl.dn{background:#d62d2d}body.broadcast .dl.no{background:#2a2a36;color:#9a9aa8}body.broadcast .dl.rec{background:#d62d2d;color:#fff}
 body.broadcast .dbar{margin:calc(4px*var(--k)) calc(14px*var(--k))}
 body.broadcast .secs{gap:2px;padding:calc(6px*var(--k)) calc(14px*var(--k)) 0}
 body.broadcast .sec i{height:calc(6px*var(--k));border-radius:0}
-body.broadcast .sec b{font-size:calc(15px*var(--k))}
-body.broadcast .foot{padding:calc(6px*var(--k)) calc(14px*var(--k)) calc(10px*var(--k));font-size:calc(14px*var(--k));text-transform:uppercase;letter-spacing:.04em}
+body.broadcast .sec b{font-size:calc(15px*var(--ks))}
+body.broadcast .foot{padding:calc(6px*var(--k)) calc(14px*var(--k)) calc(10px*var(--k));font-size:calc(14px*var(--ks));text-transform:uppercase;letter-spacing:.04em}
 
 /* glass: light, airy panel */
 body.glass{--rad:22px}
@@ -74,89 +75,193 @@ body.minimal #o{background:none;box-shadow:none;padding:calc(6px*var(--k)) calc(
 body.minimal #o:before{display:none}
 body.minimal.edit #o{box-shadow:inset 0 0 0 2px var(--red)}
 body.minimal .cur,body.minimal .dl,body.minimal .top,body.minimal .sec b,body.minimal .foot,body.minimal .pos2{text-shadow:0 0 calc(3px*var(--k)) #000,0 1px calc(8px*var(--k)) rgba(0,0,0,.9)}
-body.minimal .cur{font-size:calc(48px*var(--k))}
+body.minimal .cur{font-size:calc(48px*var(--kt))}
 body.minimal .top{color:rgba(255,255,255,.8)}body.minimal .top b{color:var(--team)}body.minimal.acc-none .top b{color:#fff}
 body.minimal .sec i{height:calc(3px*var(--k));box-shadow:0 0 calc(4px*var(--k)) rgba(0,0,0,.8)}
 body.minimal .foot{color:rgba(255,255,255,.8)}
 
 /* strip: one thin row, made for the top or bottom edge */
-body.strip #o{flex-direction:row;align-items:center;justify-content:flex-start;gap:calc(14px*var(--k));padding:0 calc(16px*var(--k)) 0 calc(18px*var(--k))}
+body.strip #o{width:max-content;flex-direction:row;align-items:center;justify-content:flex-start;gap:calc(14px*var(--k));padding:calc(9px*var(--k)) calc(16px*var(--k)) calc(9px*var(--k)) calc(18px*var(--k))}
 body.strip #o:before{top:0;bottom:0;width:calc(5px*var(--k));border-radius:0}
 body.strip .top{flex:0 1 auto;flex-direction:column;align-items:flex-start;gap:0;min-width:0;max-width:calc(150px*var(--k));line-height:1.15}
-body.strip .top span{font-size:calc(11px*var(--k));max-width:100%}
+body.strip .top span{font-size:calc(11px*var(--ks));max-width:100%}
 body.strip .top em{display:none}
 body.strip .row{gap:calc(10px*var(--k));align-items:center}
-body.strip .cur{font-size:calc(30px*var(--k))}body.strip .dl{font-size:calc(22px*var(--k))}
-body.strip .pos2{font-size:calc(18px*var(--k));padding-right:calc(4px*var(--k));border-right:1px solid rgba(255,255,255,.15);padding-right:calc(12px*var(--k))}
-body.strip .secs{display:flex;gap:calc(8px*var(--k))}body.strip .sec{width:calc(66px*var(--k))}body.strip .sec b{font-size:calc(14px*var(--k));margin-top:calc(3px*var(--k))}
-body.strip .foot{flex-direction:column;gap:0;font-size:calc(12px*var(--k));line-height:1.3;margin-left:auto}
+body.strip .cur{font-size:calc(30px*var(--kt))}body.strip .dl{font-size:calc(22px*var(--kt))}
+body.strip .pos2{font-size:calc(18px*var(--ks));padding-right:calc(4px*var(--k));border-right:1px solid rgba(255,255,255,.15);padding-right:calc(12px*var(--k))}
+body.strip .secs{display:flex;gap:calc(8px*var(--k))}body.strip .sec{width:calc(66px*var(--k))}body.strip .sec b{font-size:calc(14px*var(--ks));margin-top:calc(3px*var(--k))}
+body.strip .foot{flex-direction:column;gap:0;font-size:calc(12px*var(--ks));line-height:1.3;margin-left:auto}
 body.strip .dbar{width:calc(90px*var(--k))}
+
+/* widths of the panel styles (before size and width options) */
+body.glass{--W:390}body.broadcast{--W:394}body.minimal{--W:354}body.tower{--W:206}body.carbon{--W:384}body.retro{--W:410}body.dash{--W:330}
+body.xround{--rad:26px!important}
+/* extra values: predicted lap, lap number, session best, record, clock */
+.xtr{display:flex;flex-wrap:wrap;gap:calc(4px*var(--k)) calc(14px*var(--k));font-size:calc(13px*var(--ks));color:var(--mu);font-weight:600;white-space:nowrap}
+.xtr span{display:inline-flex;align-items:baseline;gap:calc(5px*var(--k))}.xtr b{color:var(--tx);font-weight:700}.xtr em{font-style:normal;font-weight:700}
+/* tower: narrow and tall like the timing tower on TV */
+body.tower #o{gap:calc(6px*var(--k));padding:calc(10px*var(--k)) calc(12px*var(--k))}
+body.tower .top{flex-direction:column;align-items:flex-start;gap:0;white-space:normal}body.tower .top em{order:-1;font-size:calc(22px*var(--ks))}
+body.tower .row{flex-direction:column;align-items:flex-start;gap:calc(4px*var(--k))}
+body.tower .cur{font-size:calc(34px*var(--kt))}body.tower .dl{font-size:calc(24px*var(--kt))}
+body.tower .secs{grid-template-columns:1fr;gap:calc(5px*var(--k))}body.tower .sec{display:flex;align-items:center;gap:calc(8px*var(--k))}body.tower .sec i{width:calc(5px*var(--k));height:calc(18px*var(--k))}body.tower .sec b{margin:0}
+body.tower .foot,body.tower .xtr{flex-direction:column;gap:calc(2px*var(--k))}body.tower .foot span{display:flex;justify-content:space-between}
+/* neon: dark, glowing edge and digits in the accent colour */
+body.neon #o{background:rgba(4,4,10,var(--op));box-shadow:inset 0 0 0 1.5px var(--team),0 0 calc(14px*var(--k)) color-mix(in srgb,var(--team) 60%,transparent),inset 0 0 calc(18px*var(--k)) color-mix(in srgb,var(--team) 25%,transparent)}
+body.neon #o:before{display:none}
+body.neon .cur{color:#fff;text-shadow:0 0 calc(6px*var(--k)) var(--team),0 0 calc(18px*var(--k)) var(--team)}
+body.neon .dl{text-shadow:0 0 calc(10px*var(--k)) currentColor}body.neon .top b{color:var(--team);text-shadow:0 0 calc(8px*var(--k)) var(--team)}
+body.neon .sec i{box-shadow:0 0 calc(6px*var(--k)) currentColor}body.neon.acc-none #o{box-shadow:inset 0 0 0 1px #fff4}
+/* carbon: carbon weave, square, a red stripe on top */
+body.carbon{--rad:3px}
+body.carbon #o{background:linear-gradient(rgba(var(--bgc),calc(var(--op)*.55)),rgba(var(--bgc),calc(var(--op)*.55))),repeating-linear-gradient(45deg,#1b1b1f 0 3px,#101013 3px 6px),repeating-linear-gradient(-45deg,#1b1b1f 0 3px,#0c0c0e 3px 6px);background-blend-mode:normal,multiply;padding-top:calc(16px*var(--k));box-shadow:inset 0 0 0 1px #ffffff14,0 calc(4px*var(--k)) calc(14px*var(--k)) #0008}
+body.carbon #o:before{left:0;right:0;top:0;bottom:auto;width:auto;height:calc(4px*var(--k));border-radius:0;background:linear-gradient(90deg,var(--team),var(--team) 70%,transparent)}
+body.carbon .cur{font-style:italic}body.carbon .top b{letter-spacing:.12em}
+/* retro: LCD lap timer */
+body.retro{--font:'Share Tech Mono',ui-monospace,monospace;--tx:#8dffa8;--mu:#3f8f55;--dim:#2a5a36}
+body.retro #o{background:rgba(8,22,12,var(--op));box-shadow:inset 0 0 0 2px #1f4a2a,inset 0 0 calc(24px*var(--k)) #000a;background-image:repeating-linear-gradient(0deg,#ffffff06 0 1px,transparent 1px 3px)}
+body.retro #o:before{display:none}body.retro .cur,body.retro .dl{text-shadow:0 0 calc(6px*var(--k)) #8dffa866;font-weight:400}body.retro .cur{letter-spacing:.04em}
+body.retro .sec i{background:#1f4a2a}body.retro .top b{color:#8dffa8}
+/* pill: a small capsule with time and delta */
+body.pill #o{width:max-content;flex-direction:row;align-items:center;gap:calc(14px*var(--k));padding:calc(7px*var(--k)) calc(20px*var(--k));border-radius:999px!important}
+body.pill #o:before{display:none}body.pill .cur{font-size:calc(30px*var(--kt))}body.pill .dl{font-size:calc(22px*var(--kt))}
+body.pill .pos2{font-size:calc(16px*var(--ks));padding-right:calc(12px*var(--k));border-right:1px solid #ffffff26}
+/* dash: like a steering wheel display, the delta big in the middle */
+body.dash #o{align-items:stretch;text-align:center;padding:calc(12px*var(--k)) calc(14px*var(--k))}
+body.dash #o:before{display:none}body.dash .top{justify-content:center}body.dash .top span{flex:0 1 auto}
+body.dash .row{flex-direction:column;align-items:center;gap:calc(2px*var(--k))}
+body.dash .dl{order:-1;font-size:calc(56px*var(--kt));padding:calc(2px*var(--k)) calc(18px*var(--k));border-radius:calc(10px*var(--k));background:#ffffff0d}
+body.dash .dl.up{background:color-mix(in srgb,var(--up) 18%,transparent)}body.dash .dl.dn{background:color-mix(in srgb,var(--dn) 18%,transparent)}
+body.dash .cur{font-size:calc(30px*var(--kt))}body.dash .foot,body.dash .xtr{justify-content:center}
+/* own colours, effects */
+body.cbg #o{background:rgba(var(--bgc),var(--op))!important;background-image:none!important}
+body.sh-soft #o{filter:drop-shadow(0 calc(3px*var(--k)) calc(8px*var(--k)) rgba(0,0,0,.5))}body.sh-strong #o{filter:drop-shadow(0 calc(6px*var(--k)) calc(14px*var(--k)) rgba(0,0,0,.85))}
+body.fr-thin #o{outline:1px solid var(--bd);outline-offset:-1px}body.fr-accent #o{outline:calc(2px*var(--k)) solid var(--team);outline-offset:calc(-2px*var(--k))}
+body.glow .dl.up,body.glow .dl.dn,body.glow .cur{text-shadow:0 0 calc(12px*var(--k)) currentColor}
+#o{isolation:isolate}#o:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:0;transition:opacity .25s}
+body.tint-box #o.s-up:after{background:var(--up);opacity:.2}body.tint-box #o.s-dn:after{background:var(--dn);opacity:.2}
+#o.fl-pb:after{background:var(--purple);animation:flash 1.6s ease-out}#o.fl-sec:after{background:var(--purple);animation:flash .9s ease-out}
+@keyframes flash{0%{opacity:.75}100%{opacity:0}}
+body{transition:opacity .6s}body.hid{opacity:0}
 </style></head><body>
 <div id="o"></div>
 <script>
 const $ = s => document.querySelector(s);
 const pad = (n, l = 2) => String(n).padStart(l, "0");
-const fmt = ms => ms > 0 ? `${Math.floor(ms / 6e4)}:${pad(Math.floor(ms % 6e4 / 1e3))}.${pad(Math.floor(ms % 1e3), 3)}` : "–:––.–––";
-const sfmt = ms => ms > 0 ? (ms >= 6e4 ? fmt(ms) : (ms / 1e3).toFixed(3)) : "–";
-const gap = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1e3).toFixed(3);
+let DEC = 3;
+const frac = ms => String(Math.floor(ms % 1e3)).padStart(3, "0").slice(0, DEC);
+const fmt = ms => ms > 0 ? `${Math.floor(ms / 6e4)}:${pad(Math.floor(ms % 6e4 / 1e3))}.${frac(ms)}` : "–:––." + "–––".slice(0, DEC);
+const sfmt = ms => ms > 0 ? (ms >= 6e4 ? fmt(ms) : `${Math.floor(ms / 1e3)}.${frac(ms)}`) : "–";
+const gap = ms => (ms > 0 ? "+" : ms < 0 ? "−" : "±") + (Math.abs(ms) / 1e3).toFixed(DEC);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const TEAM = [[/mclaren/i, "#ff8000"], [/ferrari/i, "#e8002d"], [/red bull racing/i, "#3671c6"], [/mercedes/i, "#27f4d2"], [/aston/i, "#229971"], [/alpine/i, "#0093cc"], [/williams/i, "#64c4ff"], [/racing bulls/i, "#6692ff"], [/haas/i, "#b6babd"], [/sauber/i, "#52e252"], [/audi/i, "#ff2d2d"], [/cadillac/i, "#c9a55c"], [/porsche/i, "#d5001c"], [/bmw/i, "#1c69d4"], [/lamborghini/i, "#ddb321"]];
 let LANG = "de";
 try { LANG = localStorage.getItem("lapbook.lang") || "de"; } catch (e) {}
-const T = LANG === "de" ? { Best: "Beste", Last: "Letzte", "approx.": "ca.", invalid: "ungültig", READY: "BEREIT", "● REC": "● AUFN.", waiting: "wartet auf ein Spiel", hint: "Mit der Maus ziehen oder Strg+Umschalt+Pfeile · Strg+Umschalt+L sperrt" } : { waiting: "waiting for a game", hint: "Drag with the mouse or use Ctrl+Shift+arrows · Ctrl+Shift+L to lock" };
+const T = LANG === "de" ? { Predicted: "Prognose", Lap: "Runde", Session: "Session", Record: "Rekord", Clock: "Uhr", Best: "Beste", Last: "Letzte", "approx.": "ca.", invalid: "ungültig", READY: "BEREIT", "● REC": "● AUFN.", waiting: "wartet auf ein Spiel", hint: "Mit der Maus ziehen oder Strg+Umschalt+Pfeile · Strg+Umschalt+L sperrt" } : { waiting: "waiting for a game", hint: "Drag with the mouse or use Ctrl+Shift+arrows · Ctrl+Shift+L to lock" };
 const t = k => T[k] || k;
-const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip"];
+const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip", "tower", "neon", "carbon", "retro", "pill", "dash"];
+const LOOK = { bg: "", fg: "", up: "", dn: "", pu: "", sg: "", ye: "", bd: "", textScale: 1, timeScale: 1, width: "normal", shadow: "off", frame: "off", glow: false, flashPb: true, flashSector: false, tint: "num", autoHide: 0, fade: true, decimals: 3, order: ["head", "main", "bar", "sectors", "extra", "foot"] };
+const FONTS = { mono: "f-mono", sans: "f-sans", orbitron: "f-orb", rajdhani: "f-raj", lcd: "f-lcd" };
 let d = {}, live = {}, cfg = { locked: true, scale: 1, opacity: 0.86, layout: "clean", corners: "round", font: "saira", show: { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false }, accent: "team" };
 const ACC = { red: "#ff3030", white: "#f5f5f7", none: "transparent", blue: "#3d8bff", green: "#2fe07f", yellow: "#ffd12a", purple: "#b45bff" };
 
+
+const rgb = h => /^#[0-9a-f]{6}$/i.test(h || "") ? [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)).join(",") : "";
+let lastLiveAt = Date.now(), seenLast, seenPurple = [];
 function draw() {
-  const R = document.documentElement.style, B = document.body.classList;
-  R.setProperty("--k", cfg.scale || 1);
+  const R = document.documentElement.style, B = document.body.classList, L = { ...LOOK, ...(cfg.look || {}) }, k = cfg.scale || 1;
+  DEC = [1, 2, 3].includes(L.decimals) ? L.decimals : 3;
+  R.setProperty("--k", k);
   R.setProperty("--op", cfg.opacity ?? 0.86);
+  R.setProperty("--tz", L.timeScale || 1);
+  R.setProperty("--ts", L.textScale || 1);
+  R.setProperty("--wf", { narrow: 0.85, wide: 1.2 }[L.width] || 1);
+  R.setProperty("--in", ({ soft: 9, strong: 16 }[L.shadow] || 3) * k + "px");
   const team = TEAM.find(([re]) => re.test(d.car || ""));
   const ac = cfg.accent || "team";
   R.setProperty("--team", ac === "team" ? (team ? team[1] : "#ff3030") : ACC[ac] || ac);
+  for (const [key, v] of [["fg", "--tx"], ["up", "--up"], ["dn", "--dn"], ["pu", "--purple"], ["sg", "--sg"], ["ye", "--yellow"], ["bd", "--bd"]]) { if (L[key]) R.setProperty(v, L[key]); else R.removeProperty(v); }
+  if (rgb(L.bg)) R.setProperty("--bgc", rgb(L.bg)); else R.removeProperty("--bgc");
   const sh = cfg.show || {}, layout = LAYOUTS.includes(cfg.layout) ? cfg.layout : "clean";
   LAYOUTS.forEach(l => B.toggle(l, l === layout));
   B.toggle("edit", !cfg.locked);
   B.toggle("sharp", cfg.corners === "sharp");
-  B.toggle("f-mono", cfg.font === "mono");
-  B.toggle("f-sans", cfg.font === "sans");
+  B.toggle("xround", cfg.corners === "xround");
+  Object.entries(FONTS).forEach(([f, c]) => B.toggle(c, cfg.font === f));
   B.toggle("acc-none", ac === "none");
+  B.toggle("cbg", !!rgb(L.bg));
+  B.toggle("sh-soft", L.shadow === "soft"); B.toggle("sh-strong", L.shadow === "strong");
+  B.toggle("fr-thin", L.frame === "thin"); B.toggle("fr-accent", L.frame === "accent");
+  B.toggle("glow", !!L.glow); B.toggle("tint-box", L.tint === "box");
   const o = $("#o"), hint = `<div class="hint">${t("hint")}</div>`;
   const g = live.game || d.game;
-  if (!g) { o.innerHTML = `<div class="idle"><b>Lapbook</b> · ${t("waiting")}</div>${hint}`; return; }
+  if (live.game) lastLiveAt = Date.now();
+  if (!g) { o.innerHTML = `<div class="idle"><b>Lapbook</b> · ${t("waiting")}</div>${hint}`; return report(); }
   let cur = live.game ? live.t : 0, approx = false;
   if (!live.game && g === "Assetto Corsa" && live.acAt && Date.now() - live.acAt < 15 * 60e3) { cur = Date.now() - live.acAt; approx = true; }
   const dl = live.game ? live.delta : null, has = dl !== null && dl !== undefined;
-  const deltaHtml = !sh.delta && !live.rec ? "" : live.rec ? `<div class="dl rec">${live.rec === "drag" ? t("READY") : t("● REC")}</div>` : `<div class="dl ${has ? (dl < 0 ? "up" : "dn") : "no"}">${has ? gap(dl) : "±0.000"}</div>`;
+  o.classList.toggle("s-up", has && dl < 0); o.classList.toggle("s-dn", has && dl > 0);
+  const deltaHtml = !sh.delta && !live.rec ? "" : live.rec ? `<div class="dl rec">${live.rec === "drag" ? t("READY") : t("● REC")}</div>` : `<div class="dl ${has ? (dl < 0 ? "up" : "dn") : "no"}">${has ? gap(dl) : gap(0)}</div>`;
   const w = has ? Math.min(50, Math.abs(dl) / 1000 * 50) : 0; // full half-bar = 1 s
-  const barHtml = sh.delta && sh.deltaBar && !live.rec ? `<div class="dbar">${has ? `<i style="${dl < 0 ? `right:50%;background:var(--green)` : `left:50%;background:var(--red)`};width:${w.toFixed(1)}%"></i>` : ""}</div>` : "";
+  const barHtml = sh.delta && sh.deltaBar && !live.rec ? `<div class="dbar">${has ? `<i style="${dl < 0 ? `right:50%;background:var(--up)` : `left:50%;background:var(--dn)`};width:${w.toFixed(1)}%"></i>` : ""}</div>` : "";
   const posHtml = sh.position && live.position ? `P${live.position}${live.cars ? `<small>/${live.cars}</small>` : ""}` : "";
   const timeHtml = `<div class="cur ${live.invalid ? "inv" : ""}">${fmt(cur)}${approx && cur ? `<small>${t("approx.")}</small>` : ""}${live.invalid ? `<small>${t("invalid")}</small>` : ""}</div>`;
-  if (layout === "compact") { o.innerHTML = timeHtml + deltaHtml + barHtml + hint; return; }
-  const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
+  // effects: new best lap, purple sector, a new lap
+  if (seenLast !== undefined && d.last && d.last !== seenLast) {
+    if (L.flashPb && d.best && d.last <= d.best) { o.classList.remove("fl-pb"); void o.offsetWidth; o.classList.add("fl-pb"); setTimeout(() => o.classList.remove("fl-pb"), 1700); }
+    if (L.fade && o.animate) o.animate([{ opacity: 0.3 }, { opacity: 1 }], { duration: 500 });
+  }
+  seenLast = d.last || 0;
   const secs = Array.isArray(live.sectors) ? live.sectors : null;
+  if (secs) { secs.forEach((x, i) => { const p = x && x.t && x.c === "purple"; if (p && !seenPurple[i] && L.flashSector) { o.classList.remove("fl-sec"); void o.offsetWidth; o.classList.add("fl-sec"); setTimeout(() => o.classList.remove("fl-sec"), 1000); } seenPurple[i] = p; }); }
+  if (layout === "compact") { o.innerHTML = timeHtml + deltaHtml + barHtml + hint; return report(); }
+  if (layout === "pill") { o.innerHTML = (posHtml ? `<span class="pos2">${posHtml}</span>` : "") + timeHtml + deltaHtml + hint; return report(); }
+  const lastGap = d.last && d.prevBest ? d.last - d.prevBest : null;
   const headHtml = sh.head ? `<div class="top"><b>${esc(live.trial || d.track || g)}</b><span>${esc(d.car || "")}${sh.setup && d.setup ? ` · ${esc(d.setup)}` : ""}</span>${posHtml && layout !== "strip" ? `<em>${posHtml}</em>` : ""}</div>` : "";
   const secHtml = secs && sh.sectors ? `<div class="secs">${secs.map(s => `<div class="sec ${s.t ? s.c || "" : ""}"><i></i><b>${sfmt(s.t)}</b></div>`).join("")}</div>` : "";
   const footHtml = sh.foot ? `<div class="foot"><span>${t("Best")}<b class="pb">${fmt(d.best)}</b></span><span>${t("Last")}<b>${fmt(d.last)}</b>${lastGap === null ? "" : `<em class="${lastGap < 0 ? "up2" : "dn2"}">${gap(lastGap)}</em>`}</span></div>` : "";
-  if (layout === "strip") {
-    o.innerHTML = `${posHtml ? `<span class="pos2">${posHtml}</span>` : ""}${headHtml}<div class="row">${timeHtml}${deltaHtml}</div>${barHtml}${secHtml}${footHtml}${hint}`;
-    return;
-  }
+  const xs = [], pred = has && d.best ? d.best + dl : 0;
+  if (sh.predict && pred) xs.push([t("Predicted"), fmt(pred)]);
+  if (sh.lapno && d.sessLaps !== undefined) xs.push([t("Lap"), String((d.sessLaps || 0) + 1)]);
+  if (sh.sbest && d.sbest) xs.push([t("Session"), fmt(d.sbest)]);
+  if (sh.record && d.record) xs.push([t("Record"), fmt(d.record) + (pred ? ` <em class="${pred <= d.record ? "up2" : "dn2"}">${gap(pred - d.record)}</em>` : "")]);
+  if (sh.clock) { const n = new Date(); xs.push([t("Clock"), pad(n.getHours()) + ":" + pad(n.getMinutes())]); }
+  const xtrHtml = xs.length ? `<div class="xtr">${xs.map(([a, b]) => `<span>${a}<b>${b}</b></span>`).join("")}</div>` : "";
   const posInRow = (!sh.head || layout === "minimal") && posHtml;
-  o.innerHTML = `${headHtml}<div class="row">${timeHtml}${posInRow && !sh.head ? `<span class="pos2">${posHtml}</span>` : ""}${deltaHtml}</div>${barHtml}${secHtml}${footHtml}${hint}`;
+  const main = `<div class="row">${timeHtml}${posInRow && !sh.head && layout !== "strip" ? `<span class="pos2">${posHtml}</span>` : ""}${deltaHtml}</div>`;
+  const blocks = { head: headHtml, main, bar: barHtml, sectors: secHtml, extra: xtrHtml, foot: footHtml };
+  const order = Array.isArray(L.order) && L.order.length === 6 ? L.order : LOOK.order;
+  o.innerHTML = (layout === "strip" && posHtml ? `<span class="pos2">${posHtml}</span>` : "") + order.map(x => blocks[x] || "").join("") + hint;
+  report();
 }
+// the window (or the preview in Lapbook) takes the size of the content
+let lastSize = "";
+function report() {
+  const r = $("#o").getBoundingClientRect(), i = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--in")) || 3;
+  const s = { width: Math.ceil(r.width + 2 * i), height: Math.ceil(r.height + 2 * i) }, key = s.width + "x" + s.height;
+  if (key === lastSize || !r.width) return;
+  lastSize = key;
+  if (window.overlay && window.overlay.size) window.overlay.size(s);
+  else if (window.parent !== window) window.parent.postMessage({ lbSize: s }, "*");
+}
+if (window.ResizeObserver) new ResizeObserver(report).observe($("#o"));
+if (document.fonts) document.fonts.ready.then(() => { lastSize = ""; report(); });
+// hide it when no game sends data for a while (never while you move it)
+setInterval(() => {
+  const L = { ...LOOK, ...(cfg.look || {}) };
+  document.body.classList.toggle("hid", !!window.overlay && cfg.locked && L.autoHide > 0 && Date.now() - lastLiveAt > L.autoHide * 1000);
+  if ((cfg.show || {}).clock) draw();
+}, 1000);
 if (window.overlay) {
   window.overlay.onData(x => { d = x || {}; draw(); });
   window.overlay.onLive(x => { live = x || {}; draw(); });
-  window.overlay.onConfig(x => { cfg = { ...cfg, ...x }; draw(); });
+  window.overlay.onConfig(x => { cfg = { ...cfg, ...x }; lastSize = ""; draw(); });
 } else {
   // preview inside Lapbook's overlay settings: the page sends example data
   window.addEventListener("message", e => {
     if (e.source !== window.parent) return;
     const m = e.data || {};
-    if (m.cfg) cfg = { ...cfg, ...m.cfg, locked: true };
+    if (m.cfg) { cfg = { ...cfg, ...m.cfg, locked: true }; lastSize = ""; }
     if (m.d) d = m.d;
     if (m.live) live = m.live;
     draw();

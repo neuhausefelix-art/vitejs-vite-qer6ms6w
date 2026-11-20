@@ -83,13 +83,26 @@
   .osel{margin-top:10px}
   .okeys{margin:0 0 12px;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;font-size:13.5px;color:var(--mu)}.okeys .kbd{margin-right:4px}
   .opr{display:flex;flex-direction:column;gap:22px}
+  .otabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--ln);margin-top:-4px}
+  .otabs button{border:0;background:none;color:var(--mu);font:inherit;font-weight:600;font-size:14px;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .otabs button:hover{color:var(--tx)}.otabs button.on{color:var(--tx);border-bottom-color:var(--rd)}
+  .otab{display:none;flex-direction:column;gap:22px}.otab.on{display:flex}
+  .ovmon.g5{width:300px;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(5,1fr);gap:1px}.ovmon.g5 button{padding:3px}.ovmon.g5 button i{width:22px;height:7px}
+  .orng{display:flex;align-items:center;gap:12px}.orng input{flex:1;accent-color:var(--rd)}.orng b{min-width:58px;text-align:right;font-variant-numeric:tabular-nums}
+  .ocol{display:flex;align-items:center;gap:8px}.ocol input,.ocust input{width:44px;height:30px;padding:0;border:1px solid var(--ln);border-radius:8px;background:none;cursor:pointer}
+  .ocust{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 4px;border-radius:12px;background:var(--sf2);color:var(--mu);margin:0;cursor:pointer}.ocust small{font-size:10.5px}
+  .osw{grid-template-columns:repeat(9,minmax(0,1fr))}
+  .oord{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--ln);font-size:14px}.oord:first-child{border-top:0}
+  .oord button{width:30px;height:28px;margin-left:4px;border:1px solid var(--ln);border-radius:7px;background:var(--sf);color:var(--tx);cursor:pointer}.oord button:disabled{opacity:.3;cursor:default}
+  .opres{display:flex;flex-wrap:wrap;gap:6px}.opre{display:inline-flex;border:1px solid var(--ln);border-radius:999px;overflow:hidden}.opre button{border:0;background:var(--sf);color:var(--tx);font:inherit;font-size:13px;padding:5px 12px;cursor:pointer}.opre button+button{padding:5px 9px;color:var(--mu);border-left:1px solid var(--ln)}.opre button:hover{background:var(--sf2)}
+  .ostg{grid-template-columns:repeat(3,minmax(0,1fr))}
   .ops.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
   .ostg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media(max-width:1300px){.ostg{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .stc{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px;border:1.5px solid var(--ln);border-radius:12px;background:var(--sf2);color:var(--tx);font:inherit;text-align:left;cursor:pointer;transition:border-color .12s,transform .12s}
   .stc:hover{border-color:var(--mu);transform:translateY(-1px)}.stc.on{border-color:var(--rd);box-shadow:0 0 0 1px var(--rd)}
   .stc b{font-size:14px;margin:6px 2px 0}.stc small{font-size:12px;color:var(--mu);margin:0 2px 2px}
   .stt{display:flex;align-items:center;justify-content:center;width:100%;height:92px;border-radius:8px;overflow:hidden;background:linear-gradient(180deg,#2c4466 0%,#5d7c9c 50%,#2d3727 51%,#1b2018 100%)}
-  .stw{display:block;position:relative;overflow:hidden}.stw iframe{border:0;background:transparent;display:block;transform-origin:0 0;pointer-events:none}
+  .stw{display:block;position:relative;overflow:hidden}.stw iframe,#ovpf{color-scheme:normal}.stw iframe{border:0;background:transparent;display:block;transform-origin:0 0;pointer-events:none}
   .otl{display:flex;flex-direction:column;background:var(--sf2);border-radius:12px;padding:2px 14px}
   .otr{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--ln)}.otr:first-child{border-top:0}
   .otr b{display:block;font-size:14.5px;font-weight:600}.otr small{display:block;font-size:12px;color:var(--mu)}
@@ -1141,6 +1154,14 @@
   const setupById = id => allSetups().find(x => x.id === id);
   const setupsFor = (g, car) => allSetups().filter(x => x.game === g && x.car === car);
   const FILE_GAMES = [AC, ACC];
+  // every car / circuit you ever had in a game: from the lists, your laps and your setups; the latest first
+  function namesOf(g, field, list) {
+    const recent = [];
+    for (let i = D.lapTimes.length - 1; i >= 0 && recent.length < 5; i--) { const l = D.lapTimes[i]; if (l.game === g && l[field] && !recent.includes(l[field])) recent.push(l[field]); }
+    const all = [...new Set([...(list || []), ...D.lapTimes.filter(l => l.game === g).map(l => l[field]), ...allSetups().filter(x => x.game === g).map(x => x[field])].filter(Boolean))];
+    return { recent, all, rest: all.filter(c => !recent.includes(c)).sort((a, b) => a.localeCompare(b)) };
+  }
+  const carsOf = g => namesOf(g, "car", D.cars[g]), tracksOf = g => namesOf(g, "track", D.tracks[g]);
   let ACTIVE = {}, fileCache = {};
   let ACTIVE_AT = {};
   try { ACTIVE = JSON.parse(localStorage.getItem("lapbook.activeSetup") || "{}") || {}; ACTIVE_AT = JSON.parse(localStorage.getItem("lapbook.activeSetupAt") || "{}") || {}; } catch (e) {}
@@ -1533,26 +1554,31 @@
   });
   // new setup: game, car, circuit, and what to start from
   async function openNewSetup(pre) {
-    const p = pre || {}, gs = GM.filter(g => g !== "Forza Horizon 5" || true), g = p.game || SP.game || (LAST && LAST.g) || F1;
-    const cars = D.cars[g] || [], tracks = D.tracks[g] || [];
+    const p = pre || {}, gs = GM, g = p.game || SP.game || (LAST && LAST.g) || F1;
+    const cars = carsOf(g), tracks = tracksOf(g), car0 = p.car || (cars.recent[0] || cars.all[0] || ""), track0 = p.track !== undefined ? p.track : (tracks.recent[0] || "");
+    const opts = (o, cur) => `${o.recent.length ? `<optgroup label="${tx("Driven lately", "Zuletzt gefahren")}">${o.recent.map(c => `<option ${c === cur ? "selected" : ""}>${esc(c)}</option>`).join("")}</optgroup>` : ""}${o.rest.length ? `<optgroup label="${tx("All", "Alle")} (${o.all.length})">${o.rest.map(c => `<option ${c === cur ? "selected" : ""}>${esc(c)}</option>`).join("")}</optgroup>` : ""}`;
     $("#modal").innerHTML = `<div class="ov"><div class="md" id="spn"><h3>New setup</h3>
       <label>Game<select id="spng">${gs.map(x => `<option ${x === g ? "selected" : ""}>${esc(x)}</option>`).join("")}</select></label>
-      <div class="two"><label>Car<input id="spnc" list="spncl" value="${esc(p.car || cars[cars.length - 1] || "")}" placeholder="for example Porsche 911 GT3 R"><datalist id="spncl">${cars.map(c => `<option value="${esc(c)}">`).join("")}</datalist></label>
-      <label>Circuit<select id="spnt"><option value="">every circuit</option>${tracks.map(t => `<option ${t === p.track ? "selected" : ""}>${esc(t)}</option>`).join("")}</select></label></div>
+      <div class="two"><label>Car<select id="spncs">${opts(cars, car0)}<option value="\u0001">${tx("Other car…", "Anderes Auto …")}</option></select><input id="spnc" value="${esc(car0)}" placeholder="for example Porsche 911 GT3 R" style="margin-top:6px;${cars.all.length ? "display:none" : ""}"></label>
+      <label>Circuit<select id="spnt"><option value="">every circuit</option>${opts(tracks, track0)}</select></label></div>
       <label>Name<input id="spnn" placeholder="for example Monza low downforce" maxlength="60"></label>
       <label>Start from<select id="spnf"><option value="">empty: every option of the game</option></select></label>
       <p class="ls" id="spnh" style="color:var(--mu);margin:6px 0 0"></p>
       <div class="acts" style="margin-top:14px"><button class="b pri" data-sp="create">Create setup</button><button class="b ghost" data-act="closem">Cancel</button></div></div></div>`;
     $("#spng").onchange = () => openNewSetup({ game: $("#spng").value });
-    const fill = async () => {
+    if (!cars.all.length) $("#spncs").value = "\u0001";
+    $("#spncs").onchange = () => { const v = $("#spncs").value, i = $("#spnc"); if (v === "\u0001") { i.style.display = ""; i.value = ""; i.focus(); } else { i.style.display = "none"; i.value = v; } fill(); };
+    // what to start from: a saved file of this car and circuit, or a copy of one of your setups
+    async function fill() {
       const game = $("#spng").value, car = $("#spnc").value.trim(), track = $("#spnt").value, sel = $("#spnf");
       const own = setupsFor(game, car);
       let files = [];
       if (FILE_GAMES.includes(game) && B.setupsList && car && track) files = (await B.setupsList({ game, car, track })).list || [];
+      if (!document.body.contains(sel)) return; // the dialog was closed meanwhile
       NEWF = files;
       sel.innerHTML = `<option value="">empty: every option of the game</option>${files.map((f, i) => `<option value="f${i}">saved file: ${esc(f.name)}</option>`).join("")}${own.map(o => `<option value="s${o.id}">copy of: ${esc(o.name)}</option>`).join("")}`;
       $("#spnh").textContent = FILE_GAMES.includes(game) ? (files.length ? `${files.length} saved setup file${files.length === 1 ? "" : "s"} found for this car and circuit.` : "Saved setup files show up here once you drove this car on this circuit with live tracking.") : "";
-    };
+    }
     $("#spnc").onchange = fill; $("#spnt").onchange = fill;
     fill();
   }
@@ -1611,6 +1637,7 @@
       last: lastGame === g && lastL ? lastL.timeInMs : 0, prevBest: prev ? prev.timeInMs : 0,
       setup: (setupById(activeId(g, car, track)) || {}).name || "",
       best: b ? b.timeInMs : 0, record: rec ? rec.timeInMs : 0, recordCar: rec && rec.car !== car ? rec.car : "", laps: added[g],
+      ...(() => { const se = sessions[g], ok = se && se.key === g + "|" + track + "|" + car ? se.laps : []; const v = ok.filter(l => l.valid).map(l => l.t); return { sessLaps: ok.length, sbest: v.length ? Math.min(...v) : 0 }; })(),
     });
   }
 
@@ -1624,17 +1651,31 @@
     ["minimal", "Minimal", "No panel, floating numbers"],
     ["strip", "Strip", "One thin row for a screen edge"],
     ["compact", "Compact", "Only lap time and delta"],
+    ["tower", "Tower", "Narrow and tall like a timing tower"],
+    ["neon", "Neon", "Dark with glowing edges"],
+    ["carbon", "Carbon", "Carbon weave, motorsport look"],
+    ["retro", "Retro", "LCD lap timer"],
+    ["pill", "Pill", "A small capsule: time and delta"],
+    ["dash", "Dash", "Steering wheel display, big delta"],
   ];
-  const OV_SHOW = [["head", "Circuit and car", "name of the circuit and your car"], ["position", "Race position", "P4/20 in races"], ["delta", "Delta", "live gap to your best lap"], ["sectors", "Sectors", "purple, green, yellow like on TV"], ["foot", "Best and last lap", "with the gap of the last lap"], ["setup", "Setup name", "the setup you drive with, next to the car"]];
+  const OV_SHOW = [["head", "Circuit and car", "name of the circuit and your car"], ["position", "Race position", "P4/20 in races"], ["delta", "Delta", "live gap to your best lap"], ["sectors", "Sectors", "purple, green, yellow like on TV"], ["foot", "Best and last lap", "with the gap of the last lap"], ["setup", "Setup name", "the setup you drive with, next to the car"],
+    ["predict", "Predicted lap", "your best lap plus the delta right now"], ["lapno", "Lap number", "lap of this session"], ["sbest", "Session best", "your best lap of this session"], ["record", "Record", "the best time here, with the predicted gap"], ["clock", "Clock", "the time of day"]];
+  const OV_BLOCKS = { head: "Circuit and car", main: "Lap time and delta", bar: "Delta bar", sectors: "Sectors", extra: "Extra values", foot: "Best and last lap" };
   const OV_ACCENTS = [["team", "Team", "conic-gradient(#ff8000 0 25%,#3671c6 0 50%,#e8002d 0 75%,#27f4d2 0)"], ["red", "Red", "#ff3030"], ["white", "White", "#f5f5f7"], ["blue", "Blue", "#3d8bff"], ["green", "Green", "#2fe07f"], ["yellow", "Yellow", "#ffd12a"], ["purple", "Purple", "#b45bff"], ["none", "None", "repeating-linear-gradient(135deg,#555 0 2px,transparent 2px 6px)"]];
+  const OV_COLORS = [["bg", "Background", "#0c0c0f"], ["fg", "Text", "#f5f5f7"], ["up", "Faster", "#2fe07f"], ["dn", "Slower", "#ff4b4b"], ["pu", "Purple sector / best", "#b45bff"], ["sg", "Green sector", "#2fe07f"], ["ye", "Yellow sector", "#ffd12a"], ["bd", "Frame", "#ffffff"]];
+  const OV_LOOK = { bg: "", fg: "", up: "", dn: "", pu: "", sg: "", ye: "", bd: "", textScale: 1, timeScale: 1, width: "normal", shadow: "off", frame: "off", glow: false, flashPb: true, flashSector: false, tint: "num", autoHide: 0, fade: true, decimals: 3, order: ["head", "main", "bar", "sectors", "extra", "foot"] };
+  const OV_TABS = [["pos", "Position"], ["style", "Style"], ["content", "Content"], ["colors", "Colours"], ["type", "Font & size"], ["fx", "Effects"]];
+  let OVTAB = "style";
   const OV_SAMPLE = {
-    d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250 },
+    d: { game: "F1 25", live: true, track: "Monza", car: "McLaren MCL40", best: 80123, last: 80456, prevBest: 80250, record: 79980, sessLaps: 6, sbest: 80301, setup: "Low DF" },
     live: { game: "F1 25", t: 41234, delta: -123, sectors: [{ t: 26123, c: "purple" }, { t: 15111, c: "green" }, { t: 0 }], position: 3, cars: 20 },
   };
-  const seg = (k, list, cur) => `<div class="oseg">${list.map(([v, n]) => `<button data-ov="${k}" data-v="${v}" class="${String(cur) === String(v) ? "on" : ""}">${n}</button>`).join("")}</div>`;
-  const ovShow = o => ({ head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false, ...(o.show || {}) });
-  function ovIsOn(k, v, o) {
-    const sh = ovShow(o);
+  const seg = (k, list, cur, sub) => `<div class="oseg">${list.map(([v, n]) => `<button data-ov="${k}" ${sub ? `data-k="${sub}"` : ""} data-v="${v}" class="${String(cur) === String(v) ? "on" : ""}">${n}</button>`).join("")}</div>`;
+  const ovShow = o => ({ head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false, predict: false, lapno: false, sbest: false, record: false, clock: false, ...(o.show || {}) });
+  const ovLook = o => ({ ...OV_LOOK, ...(o.look || {}) });
+  const OLDA = { tl: "0,0", tc: "2,0", tr: "4,0", ml: "0,2", mc: "2,2", mr: "4,2", bl: "0,4", bc: "2,4", br: "4,4" };
+  function ovIsOn(k, v, o, sub) {
+    const sh = ovShow(o), L = ovLook(o);
     if (k === "layout") return (o.layout || "clean") === v;
     if (k === "show") return !!sh[v];
     if (k === "dstyle") return (v === "bar") === !!sh.deltaBar;
@@ -1643,15 +1684,24 @@
     if (k === "opacity") return Math.abs((o.opacity || 0.86) - Number(v)) < 0.01;
     if (k === "corners") return (o.corners || "round") === v;
     if (k === "font") return (o.font || "saira") === v;
-    if (k === "anchor") return !o.bounds && o.anchor === v;
+    if (k === "anchor") return !o.bounds && (OLDA[o.anchor] || o.anchor) === v;
+    if (k === "look") return String(L[sub]) === String(v);
+    if (k === "lookt") return !!L[sub];
     if (k === "on") return !!o.on;
     return false;
   }
+  const sw = (k, v, on, sub) => `<span class="sw ${on ? "on" : ""}" data-ov="${k}" ${sub ? `data-k="${sub}"` : ""} data-v="${v}" role="switch"></span>`;
+  const orow = (n, dsc, ctl) => `<div class="otr"><span><b>${n}</b>${dsc ? `<small>${dsc}</small>` : ""}</span>${ctl}</div>`;
+  const orderHtml = o => ovLook(o).order.map((b, i, a) => `<div class="oord"><span>${OV_BLOCKS[b]}</span><span><button data-ov="order" data-v="${b},-1" ${i ? "" : "disabled"} title="Up">↑</button><button data-ov="order" data-v="${b},1" ${i < a.length - 1 ? "" : "disabled"} title="Down">↓</button></span></div>`).join("");
+  const presetHtml = o => (o.presets || []).length ? (o.presets || []).map((p, i) => `<span class="opre"><button data-ov="pload" data-v="${i}">${esc(p.name)}</button><button data-ov="pdel" data-v="${i}" title="Delete">✕</button></span>`).join("") : `<small class="mu">No templates yet.</small>`;
+  const colorVal = (o, k, def) => ovLook(o)[k] || def;
   async function openOverlayPanel() {
     const o = await B.getOverlay();
     st.settings.overlay = o;
     header();
-    const sh = ovShow(o), grid = ["tl", "tc", "tr", "ml", "mc", "mr", "bl", "bc", "br"];
+    const sh = ovShow(o), L = ovLook(o), cells = [];
+    for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) cells.push(`${x},${y}`);
+    const tab = (id, html) => `<div class="otab ${OVTAB === id ? "on" : ""}" data-tab="${id}">${html}</div>`;
     $("#modal").innerHTML = `<div class="ov"><div class="md" id="ovp">
       <header class="oph">
         <div><h3>In-game overlay</h3><p>Shows over the game in <b>borderless</b> or <b>windowed fullscreen</b></p></div>
@@ -1660,22 +1710,39 @@
       <div class="opg">
         <aside class="opl">
           <div class="ovstage" id="ovstage"><div class="ovwrap" id="ovwrap"><iframe id="ovpf" src="overlay.html" tabindex="-1"></iframe></div><span class="ovtag">Preview · example data</span></div>
-          <div class="opc"><h5>Position on screen</h5>
-            <div class="posrow"><div class="ovmon">${grid.map(g => `<button data-ov="anchor" data-v="${g}" class="c-${g} ${ovIsOn("anchor", g, o) ? "on" : ""}" title="${g}"><i></i></button>`).join("")}<span class="ovstand"></span></div>
-              <div class="posside"><div class="ovnudge"><span></span><button data-ov="nudge" data-v="0,-20" title="Up">↑</button><span></span><button data-ov="nudge" data-v="-20,0" title="Left">←</button><button data-ov="nudge" data-v="0,20" title="Down">↓</button><button data-ov="nudge" data-v="20,0" title="Right">→</button></div>
-              <small>Pick a spot on the screen, then fine-tune with the arrows.</small></div></div>
-            ${o.displays && o.displays.length > 1 ? `<label class="osel">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label>` : ""}</div>
-          <div class="opc"><h5>Move it while you drive</h5>
-            <ol class="okeys"><li><span class="kbd">Ctrl+Shift+L</span> unlocks it, it gets a red frame</li><li>drag it with the mouse or use <span class="kbd">Ctrl+Shift+arrows</span></li><li><span class="kbd">Ctrl+Shift+L</span> again locks it, clicks go to the game</li></ol>
-            <button class="b" data-ov="locked" id="ovlock">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></div>
+          <div class="opc"><h5>Templates</h5><div class="opres" id="ovpres">${presetHtml(o)}</div>
+            <div class="add" style="margin:10px 0 0"><input id="ovpn" placeholder="Name, for example Night race" maxlength="30"><button class="b sm" data-ov="psave">Save look</button><button class="b ghost sm" data-ov="preset-reset">Reset everything</button></div></div>
         </aside>
         <div class="opr">
-          <section class="ops"><h5>Style</h5><div class="ostg">${OV_STYLES.map(([v, n, dsc]) => `<button class="stc ${ovIsOn("layout", v, o) ? "on" : ""}" data-ov="layout" data-v="${v}"><span class="stt"><span class="stw" data-thumb="${v}"><iframe src="overlay.html" tabindex="-1" data-thumbf="${v}"></iframe></span></span><b>${n}</b><small>${dsc}</small></button>`).join("")}</div></section>
-          <section class="ops"><h5>What it shows</h5><div class="otl">${OV_SHOW.map(([k2, n, dsc]) => `<div class="otr" data-row="${k2}"><span><b>${n}</b><small>${dsc}</small></span><span class="sw ${sh[k2] ? "on" : ""}" data-ov="show" data-v="${k2}" role="switch"></span></div>`).join("")}</div></section>
-          <section class="ops two"><div><h5>Delta</h5>${seg("dstyle", [["num", "Number"], ["bar", "Number + bar"]], sh.deltaBar ? "bar" : "num")}</div><div><h5>Corners</h5>${seg("corners", [["round", "Rounded"], ["sharp", "Sharp"]], o.corners || "round")}</div></section>
-          <section class="ops"><h5>Accent colour</h5><div class="osw">${OV_ACCENTS.map(([v, n, c]) => `<button data-ov="accent" data-v="${v}" class="${ovIsOn("accent", v, o) ? "on" : ""}" title="${n}"><i style="background:${c}"></i><small>${n}</small></button>`).join("")}</div></section>
-          <section class="ops two"><div><h5>Size</h5>${seg("scale", [[0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"]], [0.9, 1.15, 1.4, 1.75].find(x => Math.abs((o.scale || 1) - x) < 0.01) || "")}</div><div><h5>Font</h5>${seg("font", [["saira", "Sport"], ["sans", "Clean"], ["mono", "Mono"]], o.font || "saira")}</div></section>
-          <section class="ops"><h5>Background</h5>${seg("opacity", [[0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]], [0.6, 0.86, 0.97].find(x => Math.abs((o.opacity || 0.86) - x) < 0.01) || "")}</section>
+          <nav class="otabs">${OV_TABS.map(([id, n]) => `<button data-ovt="${id}" class="${OVTAB === id ? "on" : ""}">${n}</button>`).join("")}</nav>
+          ${tab("pos", `<section class="ops"><h5>Position on screen</h5>
+            <div class="posrow"><div class="ovmon g5">${cells.map(g => `<button data-ov="anchor" data-v="${g}" class="${ovIsOn("anchor", g, o) ? "on" : ""}" style="justify-content:${["flex-start", "center", "center", "center", "flex-end"][g[0]]};align-items:${["flex-start", "center", "center", "center", "flex-end"][g[2]]}" title="${g}"><i></i></button>`).join("")}<span class="ovstand"></span></div>
+              <div class="posside"><div class="ovnudge"><span></span><button data-ov="nudge" data-v="0,-20" title="Up">↑</button><span></span><button data-ov="nudge" data-v="-20,0" title="Left">←</button><button data-ov="nudge" data-v="0,20" title="Down">↓</button><button data-ov="nudge" data-v="20,0" title="Right">→</button></div>
+              <small>25 places: edges, quarters and the middle. Fine-tune with the arrows.</small></div></div></section>
+            <section class="ops"><h5>Distance to the screen edge</h5><div class="orng"><input type="range" min="0" max="120" step="4" value="${o.margin ?? 24}" data-ovr="margin"><b id="ovmargin">${o.margin ?? 24} px</b></div></section>
+            ${o.displays && o.displays.length > 1 ? `<section class="ops"><label class="osel">Screen<select id="ovdisp">${o.displays.map(x => `<option value="${x.id}" ${x.id === o.display ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select></label></section>` : ""}
+            <section class="ops"><h5>Move it while you drive</h5>
+            <ol class="okeys"><li><span class="kbd">Ctrl+Shift+L</span> unlocks it, it gets a red frame</li><li>drag it with the mouse or use <span class="kbd">Ctrl+Shift+arrows</span></li><li><span class="kbd">Ctrl+Shift+L</span> again locks it, clicks go to the game</li></ol>
+            <button class="b" data-ov="locked" id="ovlock">${o.locked ? "Unlock to drag with the mouse" : "Lock it"}</button></section>`)}
+          ${tab("style", `<section class="ops"><h5>Style</h5><div class="ostg">${OV_STYLES.map(([v, n, dsc]) => `<button class="stc ${ovIsOn("layout", v, o) ? "on" : ""}" data-ov="layout" data-v="${v}"><span class="stt"><span class="stw" data-thumb="${v}"><iframe src="overlay.html" tabindex="-1" data-thumbf="${v}"></iframe></span></span><b>${n}</b><small>${dsc}</small></button>`).join("")}</div></section>`)}
+          ${tab("content", `<section class="ops"><h5>What it shows</h5><div class="otl">${OV_SHOW.map(([k2, n, dsc]) => `<div class="otr" data-row="${k2}"><span><b>${n}</b><small>${dsc}</small></span>${sw("show", k2, sh[k2])}</div>`).join("")}</div></section>
+            <section class="ops two"><div><h5>Delta</h5>${seg("dstyle", [["num", "Number"], ["bar", "Number + bar"]], sh.deltaBar ? "bar" : "num")}</div><div><h5>Decimals</h5>${seg("look", [[1, "1:23.4"], [2, "1:23.45"], [3, "1:23.456"]], L.decimals, "decimals")}</div></section>
+            <section class="ops"><h5>Order from top to bottom</h5><div class="otl" id="ovorder">${orderHtml(o)}</div></section>`)}
+          ${tab("colors", `<section class="ops"><h5>Accent colour</h5><div class="osw">${OV_ACCENTS.map(([v, n, c]) => `<button data-ov="accent" data-v="${v}" class="${ovIsOn("accent", v, o) ? "on" : ""}" title="${n}"><i style="background:${c}"></i><small>${n}</small></button>`).join("")}<label class="ocust" title="Own colour"><input type="color" data-ovc="accent" value="${/^#/.test(o.accent || "") ? o.accent : "#ff3030"}"><small>Own</small></label></div></section>
+            <section class="ops"><h5>Colours</h5><div class="otl">${OV_COLORS.map(([k2, n, def]) => orow(n, "", `<span class="ocol"><input type="color" data-ovc="${k2}" value="${colorVal(o, k2, def)}"><button class="b ghost sm" data-ov="look" data-k="${k2}" data-v="">Style's own</button></span>`)).join("")}</div></section>
+            <section class="ops"><h5>Background</h5>${seg("opacity", [[0.35, "Faint"], [0.6, "See-through"], [0.86, "Normal"], [0.97, "Solid"]], [0.35, 0.6, 0.86, 0.97].find(x => Math.abs((o.opacity || 0.86) - x) < 0.01) || "")}<small class="mu" style="display:block;margin-top:6px">Only the background, the numbers stay fully visible.</small></section>`)}
+          ${tab("type", `<section class="ops"><h5>Font</h5>${seg("font", [["saira", "Sport"], ["sans", "Clean"], ["mono", "Mono"], ["orbitron", "Orbitron"], ["rajdhani", "Rajdhani"], ["lcd", "LCD"]], o.font || "saira")}</section>
+            <section class="ops"><h5>Overall size</h5>${seg("scale", [[0.75, "XS"], [0.9, "S"], [1.15, "M"], [1.4, "L"], [1.75, "XL"], [2.1, "XXL"]], [0.75, 0.9, 1.15, 1.4, 1.75, 2.1].find(x => Math.abs((o.scale || 1) - x) < 0.01) || "")}</section>
+            <section class="ops two"><div><h5>Lap time and delta</h5><div class="orng"><input type="range" min="0.7" max="1.6" step="0.05" value="${L.timeScale}" data-ovr="timeScale"><b id="ovtimeScale">${Math.round(L.timeScale * 100)} %</b></div></div><div><h5>Small texts</h5><div class="orng"><input type="range" min="0.7" max="1.6" step="0.05" value="${L.textScale}" data-ovr="textScale"><b id="ovtextScale">${Math.round(L.textScale * 100)} %</b></div></div></section>
+            <section class="ops two"><div><h5>Width</h5>${seg("look", [["narrow", "Narrow"], ["normal", "Normal"], ["wide", "Wide"]], L.width, "width")}</div><div><h5>Corners</h5>${seg("corners", [["sharp", "Sharp"], ["round", "Rounded"], ["xround", "Very round"]], o.corners || "round")}</div></section>`)}
+          ${tab("fx", `<section class="ops two"><div><h5>Shadow</h5>${seg("look", [["off", "Off"], ["soft", "Soft"], ["strong", "Strong"]], L.shadow, "shadow")}</div><div><h5>Frame</h5>${seg("look", [["off", "Off"], ["thin", "Thin"], ["accent", "Accent colour"]], L.frame, "frame")}</div></section>
+            <section class="ops"><h5>Delta colour</h5>${seg("look", [["num", "Only the number"], ["box", "The whole box"]], L.tint, "tint")}</section>
+            <section class="ops"><div class="otl">
+              ${orow("Glow", "the lap time and delta glow", sw("lookt", 1, L.glow, "glow"))}
+              ${orow("Flash on a new best lap", "the overlay lights up purple", sw("lookt", 1, L.flashPb, "flashPb"))}
+              ${orow("Flash on a purple sector", "short flash for your best sector", sw("lookt", 1, L.flashSector, "flashSector"))}
+              ${orow("Fade in a new lap", "smooth instead of jumping", sw("lookt", 1, L.fade, "fade"))}</div></section>
+            <section class="ops"><h5>Hide when you are not driving</h5>${seg("look", [[0, "Never"], [10, "after 10 s"], [30, "after 30 s"], [60, "after 1 min"]], L.autoHide, "autoHide")}<small class="mu" style="display:block;margin-top:6px">It comes back by itself as soon as the game sends data again.</small></section>`)}
         </div>
       </div></div></div>`;
     document.querySelectorAll("#ovp iframe").forEach(f => (f.onload = () => feedPreviews(st.settings.overlay)));
@@ -1683,21 +1750,34 @@
     if (dsel) dsel.onchange = async () => { st.settings.overlay = await B.setOverlay({ on: true, display: Number(dsel.value) }); syncPanel(st.settings.overlay); };
     feedPreviews(o);
   }
+  // the previews measure themselves and tell their size
+  window.addEventListener("message", e => {
+    const m = e.data;
+    if (!m || !m.lbSize) return;
+    document.querySelectorAll("#ovp iframe").forEach(fr => { if (fr.contentWindow === e.source) { fr._sz = m.lbSize; fitPreview(fr); } });
+  });
+  function fitPreview(fr) {
+    const o = st.settings.overlay || {};
+    if (fr.id === "ovpf") {
+      const stage = $("#ovstage"), wrap = $("#ovwrap"), sz = fr._sz || o.size || { width: 440, height: 190 };
+      if (!stage || !wrap) return;
+      const f = Math.min(1, (stage.clientWidth - 32) / sz.width, (stage.clientHeight - 48) / sz.height);
+      Object.assign(fr.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
+      Object.assign(wrap.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
+      return;
+    }
+    const l = fr.dataset.thumbf, sz = fr._sz || (o.sizes && o.sizes[l]) || { width: 380, height: 190 }, box = fr.parentNode.parentNode;
+    const f = Math.min((box.clientWidth - 16) / sz.width, (box.clientHeight - 14) / sz.height, 0.9);
+    Object.assign(fr.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
+    Object.assign(fr.parentNode.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
+  }
   // size and data of the big preview and of the style thumbnails
   function feedPreviews(o) {
-    const pf = $("#ovpf"), stage = $("#ovstage"), wrap = $("#ovwrap");
-    if (pf && stage && wrap) {
-      const sz = o.size || { width: 440, height: 190 }, f = Math.min(1, (stage.clientWidth - 32) / sz.width, (stage.clientHeight - 48) / sz.height);
-      Object.assign(pf.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
-      Object.assign(wrap.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
-      if (pf.contentWindow) pf.contentWindow.postMessage({ cfg: { ...o, locked: true }, ...OV_SAMPLE }, "*");
-    }
+    const pf = $("#ovpf");
+    if (pf) { fitPreview(pf); if (pf.contentWindow) pf.contentWindow.postMessage({ cfg: { ...o, locked: true }, ...OV_SAMPLE }, "*"); }
     document.querySelectorAll("#ovp [data-thumbf]").forEach(fr => {
-      const l = fr.dataset.thumbf, sz = (o.sizes && o.sizes[l]) || { width: 380, height: 190 }, box = fr.parentNode.parentNode;
-      const f = Math.min((box.clientWidth - 16) / sz.width, (box.clientHeight - 14) / sz.height);
-      Object.assign(fr.style, { width: sz.width + "px", height: sz.height + "px", transform: `scale(${f})` });
-      Object.assign(fr.parentNode.style, { width: sz.width * f + "px", height: sz.height * f + "px" });
-      if (fr.contentWindow) fr.contentWindow.postMessage({ cfg: { ...o, layout: l, scale: 1, locked: true }, ...OV_SAMPLE }, "*");
+      fitPreview(fr);
+      if (fr.contentWindow) fr.contentWindow.postMessage({ cfg: { ...o, layout: fr.dataset.thumbf, scale: 1, locked: true }, ...OV_SAMPLE }, "*");
     });
   }
   // after a change: mark the chosen options, keep everything else in place
@@ -1705,20 +1785,37 @@
     if (!$("#ovp")) return;
     document.querySelectorAll("#ovp [data-ov]").forEach(el => {
       const k = el.dataset.ov;
-      if (["nudge", "locked"].includes(k)) return;
-      el.classList.toggle("on", ovIsOn(k, el.dataset.v, o));
+      if (["nudge", "locked", "order", "psave", "pload", "pdel", "preset-reset"].includes(k)) return;
+      el.classList.toggle("on", ovIsOn(k, el.dataset.v, o, el.dataset.k));
     });
-    const sh = ovShow(o), compact = o.layout === "compact";
-    // compact shows only the delta
-    document.querySelectorAll("#ovp .otr").forEach(r => r.classList.toggle("off", compact && r.dataset.row !== "delta"));
+    const compact = o.layout === "compact" || o.layout === "pill", L = ovLook(o);
+    // compact and pill show only time, delta (and the position)
+    document.querySelectorAll("#ovp .otr[data-row]").forEach(r => r.classList.toggle("off", compact && !["delta", "position"].includes(r.dataset.row)));
     $("#ovstate").textContent = o.on ? "On" : "Off";
     $("#ovlock").textContent = o.locked ? "Unlock to drag with the mouse" : "Lock it";
+    $("#ovorder").innerHTML = orderHtml(o);
+    $("#ovpres").innerHTML = presetHtml(o);
+    document.querySelectorAll("#ovp [data-ovc]").forEach(i => { const def = (OV_COLORS.find(c => c[0] === i.dataset.ovc) || [])[2]; if (document.activeElement !== i) i.value = i.dataset.ovc === "accent" ? (/^#/.test(o.accent || "") ? o.accent : i.value) : (L[i.dataset.ovc] || def); });
+    document.querySelectorAll("#ovp [data-ovr]").forEach(i => { const k = i.dataset.ovr, v = k === "margin" ? (o.margin ?? 24) : L[k]; if (document.activeElement !== i) i.value = v; const b = $("#ov" + k); if (b) b.textContent = k === "margin" ? v + " px" : Math.round(v * 100) + " %"; });
     feedPreviews(o);
     header();
   }
+  async function ovSet(next) {
+    if (next.on === undefined) next.on = true; // changing it shows it
+    st.settings.overlay = await B.setOverlay(next);
+    syncPanel(st.settings.overlay);
+  }
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-ovt]");
+    if (!t) return;
+    OVTAB = t.dataset.ovt;
+    document.querySelectorAll("#ovp [data-ovt]").forEach(b => b.classList.toggle("on", b === t));
+    document.querySelectorAll("#ovp .otab").forEach(x => x.classList.toggle("on", x.dataset.tab === OVTAB));
+    feedPreviews(st.settings.overlay || {});
+  });
   document.addEventListener("click", async e => {
     const t = e.target.closest("[data-ov]");
-    if (!t) return;
+    if (!t || t.tagName === "LABEL") return;
     e.stopPropagation();
     const k = t.dataset.ov, v = t.dataset.v, next = {}, cur = st.settings.overlay || {};
     if (k === "on") next.on = !cur.on;
@@ -1729,10 +1826,37 @@
     else if (k === "show") next.show = { [v]: !ovShow(cur)[v] };
     else if (k === "dstyle") next.show = { deltaBar: v === "bar" };
     else if (k === "nudge") next.nudge = v.split(",").map(Number);
-    if (k !== "on") next.on = true; // changing it shows it
-    st.settings.overlay = await B.setOverlay(next);
-    syncPanel(st.settings.overlay);
+    else if (k === "look") next.look = { [t.dataset.k]: /^\d+$/.test(v) && t.dataset.k !== "width" ? Number(v) : v };
+    else if (k === "lookt") next.look = { [t.dataset.k]: !ovLook(cur)[t.dataset.k] };
+    else if (k === "order") {
+      const [b, dir] = v.split(","), o2 = [...ovLook(cur).order], i = o2.indexOf(b), j = i + Number(dir);
+      if (i < 0 || j < 0 || j >= o2.length) return;
+      [o2[i], o2[j]] = [o2[j], o2[i]]; next.look = { order: o2 };
+    }
+    else if (k === "psave") { const n = ($("#ovpn").value || "").trim(); if (!n) return toast("Give the template a name first"); next.savePreset = n; $("#ovpn").value = ""; toast(tx(`Template "${n}" saved`, `Vorlage „${n}“ gespeichert`)); }
+    else if (k === "pload") next.loadPreset = Number(v);
+    else if (k === "pdel") next.delPreset = Number(v);
+    else if (k === "preset-reset") { if (!t.dataset.armed) { t.dataset.armed = "1"; t.textContent = "Really reset?"; return; } next.resetLook = true; delete t.dataset.armed; t.textContent = "Reset everything"; }
+    else return;
+    if (k === "on") st.settings.overlay = await B.setOverlay(next), syncPanel(st.settings.overlay);
+    else await ovSet(next);
   }, true);
+  // colour pickers and sliders: shown while you drag, saved a moment later
+  let ovTimer = 0;
+  document.addEventListener("input", e => {
+    const el = e.target;
+    if (!el.closest || !el.closest("#ovp")) return;
+    let next = null;
+    if (el.dataset.ovc) next = el.dataset.ovc === "accent" ? { accent: el.value } : { look: { [el.dataset.ovc]: el.value } };
+    else if (el.dataset.ovr) {
+      const k = el.dataset.ovr, v = Number(el.value), b = $("#ov" + k);
+      if (b) b.textContent = k === "margin" ? v + " px" : Math.round(v * 100) + " %";
+      next = k === "margin" ? { margin: v } : { look: { [k]: v } };
+    }
+    if (!next) return;
+    clearTimeout(ovTimer);
+    ovTimer = setTimeout(() => ovSet(next), 120);
+  });
 
   // ---------- updates ----------
   let ufile = "";

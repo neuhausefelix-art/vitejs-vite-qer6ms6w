@@ -19,9 +19,28 @@ const setupFiles = require("./setups.js");
 
 const META = global.LAPBOOK || { shellVersion: app.getVersion(), version: app.getVersion(), overlay: null, bootError: "" };
 // show: which parts of the overlay are visible; accent: colour of the side stripe
-const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false };
-const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team", corners: "round", font: "saira" };
-const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip"];
+const SHOW = { head: true, delta: true, sectors: true, foot: true, position: true, deltaBar: false, setup: false, predict: false, lapno: false, sbest: false, record: false, clock: false };
+// colours, sizes and effects of the overlay ("" = the style's own colour)
+const LOOK = { bg: "", fg: "", up: "", dn: "", pu: "", sg: "", ye: "", bd: "", textScale: 1, timeScale: 1, width: "normal", shadow: "off", frame: "off", glow: false, flashPb: true, flashSector: false, tint: "num", autoHide: 0, fade: true, decimals: 3, order: ["head", "main", "bar", "sectors", "extra", "foot"] };
+const FONTS = ["saira", "mono", "sans", "orbitron", "rajdhani", "lcd"];
+const OVERLAY = { on: false, locked: true, scale: 1.15, opacity: 0.86, bounds: null, v: 3, layout: "clean", display: null, anchor: "tr", show: { ...SHOW }, accent: "team", corners: "round", font: "saira", margin: 24, look: { ...LOOK }, presets: [] };
+const LAYOUTS = ["clean", "compact", "broadcast", "glass", "minimal", "strip", "tower", "neon", "carbon", "retro", "pill", "dash"];
+function cleanLook(prev, next) {
+  const L = { ...LOOK, ...(prev || {}) };
+  for (const [k, v] of Object.entries(next || {})) {
+    if (["bg", "fg", "up", "dn", "pu", "sg", "ye", "bd"].includes(k)) { if (v === "" || /^#[0-9a-f]{6}$/i.test(v)) L[k] = v; }
+    else if (k === "textScale" || k === "timeScale") L[k] = Math.max(0.7, Math.min(1.6, Number(v) || 1));
+    else if (k === "width" && ["narrow", "normal", "wide"].includes(v)) L[k] = v;
+    else if (k === "shadow" && ["off", "soft", "strong"].includes(v)) L[k] = v;
+    else if (k === "frame" && ["off", "thin", "accent"].includes(v)) L[k] = v;
+    else if (k === "tint" && ["num", "box"].includes(v)) L[k] = v;
+    else if (k === "autoHide" && [0, 10, 30, 60].includes(Number(v))) L[k] = Number(v);
+    else if (k === "decimals" && [1, 2, 3].includes(Number(v))) L[k] = Number(v);
+    else if (["glow", "flashPb", "flashSector", "fade"].includes(k)) L[k] = !!v;
+    else if (k === "order" && Array.isArray(v) && v.length === LOOK.order.length && LOOK.order.every(x => v.includes(x))) L[k] = [...v];
+  }
+  return L;
+}
 const DEFAULTS = { port: 20777, saveInvalid: false, network: false, carNames: {}, acPath: "", acOn: true, overlay: { ...OVERLAY }, forzaOn: true, forzaPort: 5300, forzaGame: "auto", forzaCars: {}, forzaRoutes: {}, forzaSegments: {}, forzaRaceLaps: false, accOn: true, lmuOn: true, lmuPort: 6397, pc2On: true, pc2Port: 5606 };
 const AUTO_PORTS = 5; // if the port is taken, try the next few by itself
 let win = null;
@@ -334,7 +353,10 @@ ac.on("error", () => {});
 let overlay = null, overlayData = {}, overlayTimer = null, placingAt = 0;
 const ov = () => settings.overlay;
 // the window size follows the style and the parts that are switched on
+// a first guess of the size: the overlay then measures itself and reports its real size
 function overlaySize(o = ov(), layout = o.layout, k = Math.max(0.6, Math.min(2.5, Number(o.scale) || 1))) {
+  if (layout === "pill") return { width: Math.round(300 * k), height: Math.round(56 * k) };
+  if (layout === "tower") return { width: Math.round(212 * k), height: Math.round(320 * k) };
   const sh = { ...SHOW, ...(o.show || {}) }, bar = sh.deltaBar && sh.delta;
   const W = (w, h) => ({ width: Math.round(w * k), height: Math.round(h * k) });
   if (layout === "compact") return W(sh.delta ? 330 : 230, bar ? 96 : 80);
@@ -349,19 +371,24 @@ function displayOf(o) {
   const all = displays();
   return all.find(x => x.id === o.display) || screen.getPrimaryDisplay();
 }
-// 9 places on the screen: t/m/b (top, middle, bottom) + l/c/r (left, centre, right)
-function anchored(anchor, sz, disp) {
-  const a = disp.workArea, m = 24;
-  const v = anchor[0], h = anchor[1];
-  const x = h === "l" ? a.x + m : h === "c" ? Math.round(a.x + (a.width - sz.width) / 2) : a.x + a.width - sz.width - m;
-  const y = v === "t" ? a.y + m : v === "m" ? Math.round(a.y + (a.height - sz.height) / 2) : a.y + a.height - sz.height - m;
-  return { x, y, ...sz };
+// 25 places on the screen: "x,y" with 0 = left/top edge, 2 = middle, 4 = right/bottom edge.
+// The older 9 places (tl ... br) are the same as the corners, edges and middle of it.
+const OLD_ANCHOR = { tl: "0,0", tc: "2,0", tr: "4,0", ml: "0,2", mc: "2,2", mr: "4,2", bl: "0,4", bc: "2,4", br: "4,4" };
+const gridOf = a => { const m = /^([0-4]),([0-4])$/.exec(OLD_ANCHOR[a] || a || ""); return m ? [Number(m[1]), Number(m[2])] : [4, 0]; };
+function anchored(anchor, sz, disp, margin = 24) {
+  const a = disp.workArea, [gx, gy] = gridOf(anchor), m = Math.max(0, Math.min(120, Number(margin) || 0));
+  const at = (start, len, size, g) => {
+    const p = g === 0 ? start + m : g === 4 ? start + len - size - m : Math.round(start + (len * g) / 4 - size / 2);
+    return Math.max(start, Math.min(start + len - size, p));
+  };
+  return { x: at(a.x, a.width, sz.width, gx), y: at(a.y, a.height, sz.height, gy), ...sz };
 }
+let autoSize = null;
 function placeOverlay() {
-  const o = ov(), b = o.bounds, sz = overlaySize();
+  const o = ov(), b = o.bounds, sz = autoSize || overlaySize();
   if (b && displays().some(x => b.x >= x.bounds.x - 50 && b.y >= x.bounds.y - 50 && b.x < x.bounds.x + x.bounds.width && b.y < x.bounds.y + x.bounds.height))
-    return { x: b.x, y: b.y, width: b.width || sz.width, height: b.height || sz.height };
-  return anchored(o.anchor || "tr", sz, displayOf(o));
+    return { x: b.x, y: b.y, ...sz };
+  return anchored(o.anchor || "4,0", sz, displayOf(o), o.margin ?? 24);
 }
 // Ctrl+Shift+arrows move the overlay, but only while it is unlocked, so the game keeps those keys otherwise
 const NUDGE = { Up: [0, -1], Down: [0, 1], Left: [-1, 0], Right: [1, 0] };
@@ -386,9 +413,9 @@ function pushOverlayConfig() {
   if (!overlay || overlay.isDestroyed()) return;
   overlay.setIgnoreMouseEvents(!!ov().locked);
   overlay.setFocusable(!ov().locked);
-  overlay.setResizable(!ov().locked);
+  overlay.setResizable(false); // the size follows the content
   nudgeShortcuts(!ov().locked);
-  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout, show: { ...SHOW, ...(ov().show || {}) }, accent: ov().accent || "team", corners: ov().corners || "round", font: ov().font || "saira" });
+  overlay.webContents.send("overlay:config", { locked: ov().locked, scale: ov().scale, opacity: ov().opacity, layout: ov().layout, show: { ...SHOW, ...(ov().show || {}) }, accent: ov().accent || "team", corners: ov().corners || "round", font: ov().font || "saira", look: cleanLook(ov().look) });
 }
 function openOverlay() {
   if (overlay && !overlay.isDestroyed()) return pushOverlayConfig();
@@ -400,7 +427,7 @@ function openOverlay() {
     hasShadow: false,
     alwaysOnTop: true,
     skipTaskbar: true,
-    resizable: !ov().locked,
+    resizable: false,
     focusable: !ov().locked,
     show: false,
     title: "Lapbook overlay",
@@ -484,9 +511,26 @@ function closeOverlay() {
 }
 function setOverlay(next) {
   const o = ov();
+  if (OLD_ANCHOR[o.anchor]) o.anchor = OLD_ANCHOR[o.anchor];
   const sizeChange = (next.scale !== undefined && Number(next.scale) !== o.scale) || (next.layout && next.layout !== o.layout) || !!next.show;
-  if (next.corners === "round" || next.corners === "sharp") o.corners = next.corners;
-  if (["saira", "mono", "sans"].includes(next.font)) o.font = next.font;
+  // templates: everything about the look, saved under a name
+  const LOOKKEYS = ["layout", "accent", "corners", "font", "scale", "opacity", "show", "look"];
+  if (!Array.isArray(o.presets)) o.presets = [];
+  if (typeof next.savePreset === "string" && next.savePreset.trim()) {
+    const name = next.savePreset.trim().slice(0, 30), p = { name, cfg: JSON.parse(JSON.stringify(Object.fromEntries(LOOKKEYS.map(k => [k, o[k]])))) };
+    o.presets = [p, ...o.presets.filter(x => x.name !== name)].slice(0, 12);
+  }
+  if (next.delPreset !== undefined) o.presets = o.presets.filter((x, i) => i !== Number(next.delPreset));
+  if (next.loadPreset !== undefined && o.presets[Number(next.loadPreset)]) {
+    const c = o.presets[Number(next.loadPreset)].cfg || {};
+    next = { ...c, show: { ...SHOW, ...(c.show || {}) }, look: { ...LOOK, ...(c.look || {}) }, scale: c.scale ?? o.scale, opacity: c.opacity ?? o.opacity, on: true };
+  }
+  if (next.resetLook) next = { ...next, layout: OVERLAY.layout, accent: OVERLAY.accent, corners: OVERLAY.corners, font: OVERLAY.font, scale: OVERLAY.scale, opacity: OVERLAY.opacity, show: { ...SHOW }, look: { ...LOOK }, margin: 24 };
+  if (["round", "sharp", "xround"].includes(next.corners)) o.corners = next.corners;
+  if (FONTS.includes(next.font)) o.font = next.font;
+  if (next.look && typeof next.look === "object") o.look = cleanLook(o.look, next.look);
+  else o.look = cleanLook(o.look);
+  if (next.margin !== undefined) o.margin = Math.max(0, Math.min(120, Math.round(Number(next.margin) || 0)));
   if (next.show && typeof next.show === "object") o.show = { ...SHOW, ...(o.show || {}), ...Object.fromEntries(Object.entries(next.show).filter(([k]) => k in SHOW).map(([k, v]) => [k, !!v])) };
   if (next.accent && /^(team|red|white|none|blue|green|yellow|purple|#[0-9a-f]{6})$/i.test(next.accent)) o.accent = next.accent;
   Object.assign(o, {
@@ -498,14 +542,15 @@ function setOverlay(next) {
   });
   if (next.display !== undefined) o.display = next.display;
   // a place from the grid (or another screen) replaces the dragged position
-  if (next.anchor && /^[tmb][lcr]$/.test(next.anchor)) { o.anchor = next.anchor; o.bounds = null; }
+  if (next.anchor && (OLD_ANCHOR[next.anchor] || /^[0-4],[0-4]$/.test(next.anchor))) { o.anchor = OLD_ANCHOR[next.anchor] || next.anchor; o.bounds = null; }
+  else if (next.margin !== undefined) o.bounds = null;
   else if (next.display !== undefined || next.reset) o.bounds = null;
   else if (sizeChange && o.bounds) o.bounds = { x: o.bounds.x, y: o.bounds.y };
   if (next.nudge && overlay && !overlay.isDestroyed()) nudge(Number(next.nudge[0]) || 0, Number(next.nudge[1]) || 0);
   saveSettings();
   if (o.on) {
     openOverlay();
-    if (sizeChange || next.anchor || next.display !== undefined || next.reset) { placingAt = Date.now(); overlay.setBounds(placeOverlay()); }
+    if (sizeChange || next.anchor || next.margin !== undefined || next.display !== undefined || next.reset) { placingAt = Date.now(); overlay.setBounds(placeOverlay()); }
   } else {
     closeOverlay();
     nudgeShortcuts(false);
@@ -514,6 +559,15 @@ function setOverlay(next) {
   return { ...o, size: overlaySize(), sizes: Object.fromEntries(LAYOUTS.map(l => [l, overlaySize(o, l, 1)])), displays: displays().map((x, i) => ({ id: x.id, label: `Screen ${i + 1} (${x.size.width}×${x.size.height})${x.id === screen.getPrimaryDisplay().id ? ", main" : ""}` })) };
 }
 ipcMain.handle("overlay:set", (e, next) => setOverlay(next || {}));
+// the overlay measured itself: the window follows, from the chosen place on the screen
+ipcMain.on("overlay:size", (e, s) => {
+  if (!overlay || overlay.isDestroyed() || e.sender !== overlay.webContents || !s) return;
+  const w = Math.round(Math.max(40, Math.min(3000, Number(s.width) || 0))), h = Math.round(Math.max(24, Math.min(2000, Number(s.height) || 0)));
+  if (autoSize && autoSize.width === w && autoSize.height === h) return;
+  autoSize = { width: w, height: h };
+  placingAt = Date.now();
+  overlay.setBounds(placeOverlay());
+});
 ipcMain.handle("overlay:get", () => setOverlay({}));
 ipcMain.on("overlay:data", (e, d) => {
   overlayData = d && typeof d === "object" ? d : {};
