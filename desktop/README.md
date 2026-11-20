@@ -1,4 +1,4 @@
-# Lapbook für Windows – Anleitung (Version 2.4.0)
+# Lapbook für Windows – Anleitung (Version 2.5.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
@@ -15,9 +15,9 @@ Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten
 
 ---
 
-## 0. Update auf 2.4.0
+## 0. Update auf 2.5.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.4.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.5.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
 3. Klicke auf **„Installieren und neu starten“**. Fertig, deine Runden bleiben erhalten.
@@ -360,60 +360,37 @@ In der **Karriere** (Driver Career und My Team) baut Lapbook die ganze Saison se
 
 ## 2l. Setups vergleichen
 
-Lapbook merkt sich, mit welchem **Setup** du jede Runde fährst. Danach zeigt es, welches Setup schneller war und was du geändert hast.
+Du musst nichts einstellen, einfach fahren. Lapbook merkt sich bei jeder Runde das **Setup**. Fährst du das gleiche Auto auf der gleichen Strecke ein anderes Mal mit einem anderen Setup, zeigt Lapbook, **wie viel schneller oder langsamer** du warst und **was du geändert hast**.
+
+**Beispiel:**
+1. Montag fährst du den Porsche in Monza mit dem Setup `high_df`, das du im Spiel gespeichert hast.
+2. Mittwoch speicherst du ein geändertes Setup `low_df` und fährst wieder.
+3. Lapbook zeigt: **„Mit low_df warst du 0.650 s schneller als mit high_df.“** Darunter steht, was geändert wurde, z. B. „Flügel 2 9 → 3“ oder „Druck alle 4 26 → 27“.
 
 **Woher das Setup kommt:**
 
 | Spiel | So geht's |
 |---|---|
-| **Assetto Corsa** | Lapbook liest deine gespeicherten Setups aus `Dokumente\Assetto Corsa\setups\<Auto>\<Strecke>` (und `generic`). Beim Fahren nimmt es automatisch das **zuletzt gespeicherte**. AC meldet nicht, welches Setup gerade geladen ist. Fährst du ein anderes, wähle es in der Live-Karte bei **„Setup · Ändern“**. |
-| **ACC** | genauso, aus `Dokumente\Assetto Corsa Competizione\Setups` |
-| **F1 25** | ganz automatisch: Das Spiel schickt sein Setup mit. Änderst du etwas, entsteht ein neues Setup („Monza setup 2“). |
-| **LMU, Project CARS 2, Forza** | Lege es in Lapbook an: Live-Karte → **Setup wählen** → **+ Neues Setup** |
+| **Assetto Corsa** | automatisch aus deinen gespeicherten Setups (`Dokumente\Assetto Corsa\setups\<Auto>\<Strecke>`, auch `generic`) |
+| **ACC** | automatisch aus `Dokumente\Assetto Corsa Competizione\Setups` |
+| **F1 25** | ganz automatisch, das Spiel schickt sein Setup mit |
+| **LMU, Project CARS 2, Forza** | Diese Spiele melden ihr Setup nicht. Klick in der Live-Karte einmal auf **„Setup benennen“** und gib einen Namen ein, z. B. „wenig Abtrieb“. |
 
-**Alle Optionen:** Es werden alle Werte übernommen, die in der Setup-Datei stehen, nicht nur ein paar. Lapbook ordnet sie nach Bereichen:
-- Tyres
-- Alignment
-- Aero
-- Suspension
-- Dampers
-- Drivetrain mit allen Gängen
-- Brakes
-- Electronics
-- Fuel
+**Wichtig bei AC und ACC:** Das Spiel meldet nicht, welches Setup gerade geladen ist.
+- Lapbook nimmt deshalb das Setup, das du **zuletzt gespeichert** hast.
+- Speicherst du ein Setup neu, auch während der Session, zählen die Runden ab dann dafür.
+- Gleiche Werte ergeben dasselbe Setup, auch wenn die Datei anders heißt.
+- Lädst du ein älteres Setup, ohne es zu speichern, liegt Lapbook falsch. Dann klickst du in der Live-Karte auf **„Falsch?“** und wählst das richtige. Noch einfacher: Setup vor dem Fahren kurz speichern.
 
-Optionen von Mod-Autos, die Lapbook nicht kennt, landen unter „Sonstiges“ und gehen nicht verloren. Assetto Corsa speichert die meisten Werte als **Klicks**, genau so zeigt Lapbook sie an.
+**Wo du den Vergleich siehst:**
+- **Live-Karte:** Bestzeit mit diesem Setup und der Abstand zum vorherigen Setup, z. B. „−0.650 s ggü. high_df“.
+- **Session-Rückblick:** Setup der Session und der Abstand zum Setup davor.
+- **Seite „Setups“** (Seitenleiste): eine Karte pro Auto und Strecke. Oben steht das Ergebnis „dieses Mal gegen letztes Mal“, darunter alle Setups nach Bestzeit sortiert. Ein Klick auf ein Setup zeigt, was im Vergleich zum schnellsten anders war, die Sektoren und den Knopf **„Alle Werte“**.
+- **Seite der Strecke:** derselbe Vergleich im Abschnitt „Setups“.
 
-**Die Seite „Setups“** (Seitenleiste, unter Overlay) ist der Ort für alles rund ums Setup:
-- **Links** stehen deine Setups nach Auto sortiert, mit Bestzeit, Rundenzahl und „aktiv“ für das Setup, mit dem du gerade fährst.
-- **Rechts** siehst du das gewählte Setup:
-  - **Reiter wie im Spiel:** Reifen, Fahrwerksgeometrie, Aerodynamik, Federung, Dämpfer, Antrieb, Bremsen, Elektronik, Sprit & Strategie. Die Zahl am Reiter sagt, wie viele Werte dort eingetragen sind.
-  - **Jede Option** mit Feld und **− / +**. Werte pro Rad stehen auf einem kleinen Auto (FL/FR vorne, RL/RR hinten).
-  - Alles wird **sofort gespeichert**, während du tippst.
-  - **„Alle Optionen von … zeigen“** blendet auch die Optionen ein, die das Setup noch nicht hat.
-  - **„Für die nächste Session verwenden“**, **Duplizieren** (Kopie zum Ausprobieren) und **Löschen**
-  - Darüber stehen die **Zeiten mit diesem Setup**, darunter der **Vergleich** mit einem anderen Setup.
-- **„+ Neues Setup“:** Spiel, Auto und Strecke wählen. Danach beginnst du leer (alle Optionen des Spiels), mit einer gespeicherten Setup-Datei oder als Kopie eines vorhandenen Setups.
-- In der Live-Karte öffnet **„Anzeigen“** das aktive Setup direkt.
+**Alle Werte:** Lapbook übernimmt jeden Wert aus der Setup-Datei, auch von Mod-Autos. Unter „Alle Werte“ stehen sie nach Bereichen wie im Spiel, und dort kannst du sie auch ändern. **„+ Setup eintragen“** oben auf der Seite legt ein Setup komplett von Hand an. Das brauchst du normalerweise nicht.
 
-Lapbook ändert oder speichert nie etwas in den Setup-Ordnern der Spiele. Es liest nur.
-
-**Wenn du während der Session etwas änderst:**
-- Speicherst du in AC oder ACC ein Setup mit anderen Werten, merkt Lapbook das. Ab dann zählen die Runden für die neue Version („low_df v2“).
-- Lädst du ein anderes Setup, ohne zu speichern, stell es in der Live-Karte um.
-
-**Auswerten:** Auf der Seite der Strecke gibt es den Abschnitt **„Setups“**:
-- **Pro Setup:** Runden, Bestzeit, Schnitt, Streuung und ein Balken mit dem Abstand zum schnellsten Setup.
-- **A und B** wählen zwei Setups für den Vergleich aus:
-  - ein Satz wie „low_df was 0.650 s faster on the best lap and 0.850 s faster on average than high_df“
-  - die **Sektoren** beider Setups und der Unterschied
-  - **„Options“:** die geänderten Werte mit Pfeil, z. B. „Wing 2 3 → 9“. „Alle Optionen zeigen“ zeigt alle.
-- **„Runden ein Setup geben“** gibt älteren Runden nachträglich ein Setup, pro Session (Tag und Auto).
-- **„Bearbeiten“** benennt ein Setup um, ändert Werte oder Notizen und löscht es.
-
-Außerdem:
-- Der **Session-Rückblick** zeigt das Setup der Session und den Abstand zum besten anderen Setup.
-- Im **Overlay** kannst du den Setup-Namen neben dem Auto einblenden (Overlay → „Setup-Name“).
+Lapbook liest die Setup-Ordner der Spiele nur. Es ändert oder speichert dort nie etwas.
 
 ---
 
@@ -434,7 +411,7 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-2.4.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.5.0.lapbook-update`**.
 
 1. Starte Lapbook.
 2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Datei wählen“**.
