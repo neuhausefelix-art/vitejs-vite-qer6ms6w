@@ -1,9 +1,10 @@
-# Lapbook für Windows – Anleitung (Version 2.3.0)
+# Lapbook für Windows – Anleitung (Version 2.4.0)
 
 Lapbook als eigene Windows-App, im gleichen Design wie im Browser. Neu gegenüber dem Browser:
 - **Live-Tracking für 7 Spiele:** F1 25, Assetto Corsa, Assetto Corsa Competizione, Le Mans Ultimate, Project CARS 2, Forza Horizon 5 und 6. Jede gefahrene Runde wird automatisch gespeichert.
 - **Overlay im Spiel im TV-Stil:** laufende Runde, Live-Delta zur Bestzeit, Sektoren in Lila/Grün/Gelb, Position im Rennen. Mit einem Schalter in der Seitenleiste an und aus.
 - **Sektorzeiten, Rennen automatisch, Session-Rückblick.**
+- **Auf Deutsch:** Die ganze App ist übersetzt. Umschalten unten in der Seitenleiste: **Deutsch / English**.
 - **Setups vergleichen:** Mit welchem Setup warst du schneller, in welchem Sektor, und was hast du geändert? Alle Setup-Optionen, bei AC und ACC direkt aus deinen gespeicherten Setups.
 - **F1 25 Karriere-WM automatisch:** Training, Qualifying, Sprint und Rennen aller Fahrer, WM-Stand für Fahrer und Teams mit den Punkten aus dem Spiel.
 - **Aufgeräumtes Layout mit Seitenleiste**, ausgelegt für große und Ultra-Wide-Monitore.
@@ -14,12 +15,12 @@ Die App liest nur die offiziellen Schnittstellen, die die Spiele selbst anbieten
 
 ---
 
-## 0. Update auf 2.3.0
+## 0. Update auf 2.4.0
 
-Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.3.0.lapbook-update`**:
+Du hast Lapbook 1.1.0 oder neuer schon installiert? Dann brauchst du nur die Datei **`Lapbook-Update-2.4.0.lapbook-update`**:
 1. Starte Lapbook.
 2. Ziehe die Datei ins Lapbook-Fenster.
-3. Klicke auf **„Install and restart“**. Fertig, deine Runden bleiben erhalten.
+3. Klicke auf **„Installieren und neu starten“**. Fertig, deine Runden bleiben erhalten.
 
 ---
 
@@ -29,24 +30,25 @@ Links steht die **Seitenleiste**. Von dort erreichst du alles mit einem Klick:
 
 | Bereich | Was du dort findest |
 |---|---|
-| **Overview** | Startseite: Live-Status, deine zuletzt gefahrenen Strecken, deine Spiele, Kennzahlen (Runden, Strecken, Autos, Fahrerwertung) und die letzten Runden |
-| **Live tracking** | oben eine Leiste mit allen Spielen und ihrem Status (live, Spiel gefunden, wartet, 1 Schritt offen, aus). Klick auf ein Spiel zeigt seine Einrichtung Schritt für Schritt. Daneben die Tabelle **„What Lapbook reads“** und darunter alle **Session-Rückblicke** |
+| **Übersicht** | Startseite: Live-Status, deine zuletzt gefahrenen Strecken, deine Spiele, Kennzahlen (Runden, Strecken, Autos, Fahrerwertung) und die letzten Runden |
+| **Live-Tracking** | oben eine Leiste mit allen Spielen und ihrem Status (live, Spiel gefunden, wartet, 1 Schritt offen, aus). Klick auf ein Spiel zeigt seine Einrichtung Schritt für Schritt. Daneben die Tabelle **„Was Lapbook liest“** und darunter alle **Session-Rückblicke** |
+| **Setups** | alle deine Setups an einem Ort: links nach Auto sortiert, rechts das gewählte Setup mit **allen Optionen**, aufgeteilt in Reiter wie im Setup-Menü des Spiels (siehe 2l) |
 | **Overlay** | der **Schalter** rechts daneben macht das Overlay sofort an oder aus. Ein Klick auf „Overlay“ öffnet die Einstellungen mit **Vorschau** |
-| **Games** | deine Spiele mit Rundenzahl. Darunter liegen Strecken, Autos, Rennen und Meisterschaften. Weitere Spiele klappst du mit „… more games“ auf. |
-| **Analyse** | **Progress** (Verbesserung über die Zeit), **Duel** (Auto gegen Auto), **Strategy** (Boxenstopp-Rechner) |
-| **Career** | **Driver & races** (Fahrerwertung, Rennen), **Achievements** (Meilensteine und Rang, siehe 2g) |
-| **Data & backup** | Sicherung herunterladen, Sicherung laden, Backup-Ordner öffnen, als Text kopieren, Rückgängig |
+| **Spiele** | deine Spiele mit Rundenzahl. Darunter liegen Strecken, Autos, Rennen und Meisterschaften. Weitere Spiele klappst du mit „… more games“ auf. |
+| **Analyse** | **Fortschritt** (Verbesserung über die Zeit), **Duell** (Auto gegen Auto), **Strategie** (Boxenstopp-Rechner) |
+| **Karriere** | **Fahrer & Rennen** (Fahrerwertung, Rennen), **Erfolge** (Meilensteine und Rang, siehe 2g) |
+| **Daten & Sicherung** | Sicherung herunterladen, Sicherung laden, Backup-Ordner öffnen, als Text kopieren, Rückgängig |
 | **Update** | Update-Datei installieren oder zur vorherigen Version zurück |
 
-Unten in der Seitenleiste stehen die Versionsnummer und „Saved on this PC“. Ist das Fenster schmal, zeigt die Seitenleiste nur noch Symbole. Fährst du mit der Maus darüber, siehst du den Namen.
+Unten in der Seitenleiste stehen die Versionsnummer und „Auf diesem PC gespeichert“. Ist das Fenster schmal, zeigt die Seitenleiste nur noch Symbole. Fährst du mit der Maus darüber, siehst du den Namen.
 
-Auf jeder Strecke findest du: Rekord, „Add lap“, Sektoren, Rangliste, Vergleich zweier Autos, Fortschrittskurve und den Verlauf aller Runden. Auf breiten Bildschirmen ist das in zwei Spalten aufgeteilt.
+Auf jeder Strecke findest du: Rekord, „Runde eintragen“, Sektoren, Rangliste, Vergleich zweier Autos, Fortschrittskurve und den Verlauf aller Runden. Auf breiten Bildschirmen ist das in zwei Spalten aufgeteilt.
 
 ---
 
 ## Was kann welches Spiel?
 
-Für ACC, Le Mans Ultimate und Project CARS 2 gilt: Runden, Auto, Strecke, Sektoren, Live-Delta und Position werden automatisch gelesen (Details in 2h bis 2j). Die Tabelle zeigt die drei ersten Spiele ausführlich. Eine Kurzfassung für alle Spiele steht in der App unter **Live tracking → „What Lapbook reads“**.
+Für ACC, Le Mans Ultimate und Project CARS 2 gilt: Runden, Auto, Strecke, Sektoren, Live-Delta und Position werden automatisch gelesen (Details in 2h bis 2j). Die Tabelle zeigt die drei ersten Spiele ausführlich. Eine Kurzfassung für alle Spiele steht in der App unter **Live tracking → „Was Lapbook liest“**.
 
 | | F1 25 | Assetto Corsa | Forza Horizon 5 / 6 |
 |---|---|---|---|
@@ -82,15 +84,15 @@ Deine Runden liegen nicht im App-Ordner, sondern in deinem Windows-Profil. Eine 
 
 ## 2. Live-Tracking einrichten (einmalig, ca. 2 Minuten)
 
-Klicke in der Seitenleiste auf **„Live tracking“**. Dort hat jedes Spiel eine eigene Karte mit drei Schritten, die sich von selbst abhaken. Für F1 25:
+Klicke in der Seitenleiste auf **„Live-Tracking“**. Dort hat jedes Spiel eine eigene Karte mit drei Schritten, die sich von selbst abhaken. Für F1 25:
 
 1. ✓ **Lapbook is ready on port 20777.** Das passiert automatisch.
 2. **In F1 25 einstellen:** Einstellungen → Telemetrie-Einstellungen (Settings → Telemetry Settings). Nimm die Werte genau so, wie Lapbook sie anzeigt:
 
    | Einstellung | Wert |
    |---|---|
-   | UDP Telemetry | **On** |
-   | UDP Broadcast Mode | **Off** |
+   | UDP Telemetry | **An** |
+   | UDP Broadcast Mode | **Aus** |
    | UDP IP Address | **127.0.0.1** |
    | UDP Port | **20777** (oder die Zahl, die Lapbook anzeigt) |
    | UDP Send Rate | **20Hz** |
@@ -99,8 +101,8 @@ Klicke in der Seitenleiste auf **„Live tracking“**. Dort hat jedes Spiel ein
 3. **Eine Runde fahren.** Sie erscheint von selbst in Lapbook.
 
 Danach:
-- Während du fährst, zeigt die Live-Karte in der Übersicht **„● Live · F1 25“** mit Strecke, Auto, Session und deiner letzten Rundenzeit. Mit **„Open Monza“** (bzw. der aktuellen Strecke) springst du direkt zur Strecke.
-- In der Seitenleiste zeigt ein **grüner Punkt** neben „Live tracking“, dass Daten ankommen.
+- Während du fährst, zeigt die Live-Karte in der Übersicht **„● Live · F1 25“** mit Strecke, Auto, Session und deiner letzten Rundenzeit. Mit **„Monza öffnen“** (bzw. der aktuellen Strecke) springst du direkt zur Strecke.
+- In der Seitenleiste zeigt ein **grüner Punkt** neben „Live-Tracking“, dass Daten ankommen.
 - Ungültige Runden werden übersprungen. In den Einstellungen kannst du das ändern.
 
 **Port belegt?** Nutzt ein anderes Programm wie SimHub schon Port 20777, wechselt Lapbook **automatisch** auf den nächsten freien Port, z. B. 20778. Die Karte sagt dir dann, welchen Port du im Spiel eintragen musst.
@@ -118,7 +120,7 @@ Im Spiel musst du **nichts einstellen**. Assetto Corsa hat eine eingebaute Telem
 3. Sobald du auf der Strecke bist, zeigt Lapbook **„● Live · Assetto Corsa“** mit Strecke und Auto.
 4. Jede fertige Runde wird automatisch gespeichert.
 
-**Echte Namen für Autos und Strecken:** Lapbook sucht deinen Assetto-Corsa-Ordner von selbst, z. B. `C:\Program Files (x86)\Steam\steamapps\common\assettocorsa`, und liest dort die Namen, also „Ferrari 488 GT3“ statt `ks_ferrari_488_gt3`. Findet es den Ordner nicht, klicke in der Live-Karte oder in den Einstellungen auf **„Choose folder“** und wähle den Ordner `assettocorsa`.
+**Echte Namen für Autos und Strecken:** Lapbook sucht deinen Assetto-Corsa-Ordner von selbst, z. B. `C:\Program Files (x86)\Steam\steamapps\common\assettocorsa`, und liest dort die Namen, also „Ferrari 488 GT3“ statt `ks_ferrari_488_gt3`. Findet es den Ordner nicht, klicke in der Live-Karte oder in den Einstellungen auf **„Ordner wählen“** und wähle den Ordner `assettocorsa`.
 
 **Gut zu wissen:**
 - Assetto Corsa sendet nicht mit, ob eine Runde ungültig war, z. B. wegen Abkürzen. Lapbook speichert deshalb alle Runden.
@@ -180,7 +182,7 @@ Best 1:21.000                   Last 1:21.150 +0.150
 - **Position** (P4/20) in F1-25- und Forza-Rennen.
 - Der farbige Strich am linken Rand ist die **Teamfarbe** deines Autos.
 
-**An und aus:** In der Seitenleiste steht neben „Overlay“ ein **Schalter**. Ein Klick darauf macht das Overlay sofort an oder aus, ohne Menü. Den gleichen Schalter gibt es auf der Startseite in der Live-Karte und oben auf der Seite „Live tracking“. Im Spiel geht es weiter mit **Strg+Umschalt+O**.
+**An und aus:** In der Seitenleiste steht neben „Overlay“ ein **Schalter**. Ein Klick darauf macht das Overlay sofort an oder aus, ohne Menü. Den gleichen Schalter gibt es auf der Startseite in der Live-Karte und oben auf der Seite „Live-Tracking“. Im Spiel geht es weiter mit **Strg+Umschalt+O**.
 
 **Vorschau:** Oben in den Overlay-Einstellungen siehst du das Overlay mit Beispieldaten. Jede Änderung (Stil, Anzeige, Farbe, Größe, Hintergrund) siehst du dort sofort.
 
@@ -214,23 +216,23 @@ Das Overlay ist ein normales Fenster, das über dem Spiel liegt. Es greift nicht
 
 ## 2f. Sektoren, Rennen und Session-Rückblick
 
-**Sektoren auf der Streckenseite:** Über der Rangliste steht der Block **„Sectors“** (bei AC „Splits“). Er zeigt die Sektoren deiner Bestzeit, deine besten Sektoren und die **theoretische Bestzeit**. Das ist die Zeit, die du mit allen besten Sektoren zusammen fahren würdest.
+**Sektoren auf der Streckenseite:** Über der Rangliste steht der Block **„Sektoren“** (bei AC „Abschnitte“). Er zeigt die Sektoren deiner Bestzeit, deine besten Sektoren und die **theoretische Bestzeit**. Das ist die Zeit, die du mit allen besten Sektoren zusammen fahren würdest.
 
-**Rennen automatisch (F1 25):** Wenn ein F1-25-Rennen zu Ende ist, speichert Lapbook es im Reiter **„Races“** mit Startplatz, Endplatz, Gegnerzahl, Runden und Boxenstopps. Deine **Fahrerwertung** wird automatisch berechnet. Die Gegnerstärke steht auf „Even“, das kannst du beim Rennen über „Edit“ ändern.
+**Rennen automatisch (F1 25):** Wenn ein F1-25-Rennen zu Ende ist, speichert Lapbook es im Reiter **„Rennen“** mit Startplatz, Endplatz, Gegnerzahl, Runden und Boxenstopps. Deine **Fahrerwertung** wird automatisch berechnet. Die Gegnerstärke steht auf „Gleich stark“, das kannst du beim Rennen über „Bearbeiten“ ändern.
 
 **Session-Rückblick:** Hast du 45 Sekunden lang nicht mehr gefahren oder wechselst du Strecke oder Auto, zeigt Lapbook eine Zusammenfassung:
-- Bestzeit (mit „new personal best“, falls es eine ist) und Vergleich mit der Bestzeit davor
+- Bestzeit (mit „neue persönliche Bestzeit“, falls es eine ist) und Vergleich mit der Bestzeit davor
 - Durchschnitt und **Konstanz**, also die Streuung deiner Runden (Ausrutscher über 107 % werden ignoriert)
 - alle Runden als Balken, die beste in Lila, ungültige in Rot
 - beste Sektoren und theoretische Bestzeit
 
-Alle Rückblicke findest du auf der Seite **„Live tracking“** unten unter **„Session recaps“**.
+Alle Rückblicke findest du auf der Seite **„Live-Tracking“** unten unter **„Session-Rückblicke“**.
 
 ---
 
-## 2g. Achievements und Fahrerwertung
+## 2g. Erfolge und Fahrerwertung
 
-**Achievements** sind **13 Meilensteine**, die mit deinem Fahren zu tun haben. Jeder hat vier Stufen: **Bronze, Silber, Gold, Platin**.
+**Erfolge** sind **13 Meilensteine**, die mit deinem Fahren zu tun haben. Jeder hat vier Stufen: **Bronze, Silber, Gold, Platin**.
 
 | Bereich | Meilenstein | Was zählt |
 |---|---|---|
@@ -244,10 +246,10 @@ Alle Rückblicke findest du auf der Seite **„Live tracking“** unten unter **
 | Explorer | Circuits / Garage / Multi-sim | verschiedene Strecken, Autos und Spiele |
 
 - Aus allen erreichten Stufen ergibt sich dein **Rang**: Rookie → Club racer → Semi-pro → Pro → Elite → Legend.
-- **„Up next“** zeigt die drei Meilensteine, die du als Nächstes am ehesten schaffst.
+- **„Als Nächstes“** zeigt die drei Meilensteine, die du als Nächstes am ehesten schaffst.
 - Alles wird aus deinen gespeicherten Runden und Rennen berechnet, also auch aus älteren.
 
-**Fahrerwertung (Driver & races):** Sie funktioniert wie eine Elo-Wertung. Jedes Rennen vergleicht dein Ergebnis mit dem Feld. Siege, Podien und gutgemachte Plätze bringen Punkte, ein Ausfall kostet Punkte. F1-25-Rennen werden automatisch eingetragen, andere Rennen trägst du im Spiel unter „Races“ selbst ein.
+**Fahrerwertung (Fahrer & Rennen):** Sie funktioniert wie eine Elo-Wertung. Jedes Rennen vergleicht dein Ergebnis mit dem Feld. Siege, Podien und gutgemachte Plätze bringen Punkte, ein Ausfall kostet Punkte. F1-25-Rennen werden automatisch eingetragen, andere Rennen trägst du im Spiel unter „Rennen“ selbst ein.
 
 ---
 
@@ -263,7 +265,7 @@ Beide Teile funktionieren gleich. Lapbook erkennt am laufenden Programm, ob FH5 
 | Data Out IP Address | **127.0.0.1** |
 | Data Out IP Port | **5300** (oder die Zahl, die Lapbook anzeigt) |
 
-**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke auf der Seite **„Live tracking“** in der Forza-Karte einmal auf **„Allow Forza“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte Forza neu. Die **Steam-Version** braucht das nicht.
+**Microsoft Store / Game Pass:** Bei dieser Version blockiert Windows anfangs die Daten an Lapbook. Klicke auf der Seite **„Live-Tracking“** in der Forza-Karte einmal auf **„Forza erlauben“**. Windows fragt nach Administratorrechten, klicke auf **„Ja“** und starte Forza neu. Die **Steam-Version** braucht das nicht.
 
 ### Warum eigene Zeitfahren?
 Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Trailblazer, Drag-Strip und freies Fahren gleich aus. Deshalb legst du deine Zeitfahren **einmal selbst an**. Danach misst Lapbook sie automatisch, ähnlich wie Segmente bei Strava.
@@ -284,13 +286,13 @@ Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Tra
 **Ab jetzt:** Jedes Mal, wenn du an diesem Start **stehen bleibst und losfährst**, wird die Zeit bis zum Ziel gemessen.
 
 ### Gut zu wissen
-- **Normale Rennen werden nicht gespeichert.** Wenn du das doch willst: **Settings → Forza Horizon → Normal races → „Save every lap of every race“**.
+- **Normale Rennen werden nicht gespeichert.** Wenn du das doch willst: **Live-Tracking → Einstellungen → Forza Horizon → Normale Rennen → „Jede Runde jedes Rennens speichern“**.
 - Pausierst du während eines Zeitfahrens, zählt die Fahrt nicht.
 - Kürzer als 2 Sekunden oder 50 Meter wird nicht gespeichert.
-- Statt Strg+Umschalt+T kannst du in der Live-Karte auch auf **„Start here“** klicken, wenn Lapbook sichtbar ist.
+- Statt Strg+Umschalt+T kannst du in der Live-Karte auch auf **„Hier starten“** klicken, wenn Lapbook sichtbar ist.
 - Speed Traps, Speed Zones, Danger Signs und Drift Zones messen Geschwindigkeit, Weite oder Punkte, aber keine Zeit. Diese Werte sendet Forza nicht, deshalb kann Lapbook sie nicht übernehmen.
 - Autos benennst du einmal: Lapbook fragt **„Which car is this?“**.
-- Namen ändern oder ein Zeitfahren löschen (Namen leeren): **Live → Settings → Forza Horizon**.
+- Namen ändern oder ein Zeitfahren löschen (Namen leeren): **Live-Tracking → Einstellungen → Forza Horizon**.
 
 ---
 
@@ -298,8 +300,8 @@ Forza sendet **nicht mit, was du gerade machst**. Für Lapbook sehen Rennen, Tra
 
 ACC hat eine offizielle **Broadcasting-Schnittstelle** (die nutzen TV-Overlays und Rennleitungen). Lapbook meldet sich dort als Zuschauer an, nur lesend.
 
-1. In Lapbook auf **Live tracking → ACC** klicken.
-2. Steht dort „1 step to do“: auf **„Switch on“** klicken. Lapbook trägt Port 9000 in `Dokumente\Assetto Corsa Competizione\Config\broadcasting.json` ein. Die alte Datei bleibt als `broadcasting.json.lapbook-backup` erhalten. Gibt es die Datei noch nicht, starte ACC einmal und schließe es wieder.
+1. In Lapbook auf **Live-Tracking → ACC** klicken.
+2. Steht dort „1 Schritt offen“: auf **„Einschalten“** klicken. Lapbook trägt Port 9000 in `Dokumente\Assetto Corsa Competizione\Config\broadcasting.json` ein. Die alte Datei bleibt als `broadcasting.json.lapbook-backup` erhalten. Gibt es die Datei noch nicht, starte ACC einmal und schließe es wieder.
 3. **ACC neu starten** (die Datei wird nur beim Start gelesen) und auf die Strecke fahren. Die Kachel zeigt dann „live“.
 
 Gelesen werden: Rundenzeit, **echte Sektoren**, ungültige Runden, Auto (z. B. Ferrari 296 GT3), Strecke, Session-Art und Position. Lapbook nimmt das Auto, auf das die Kamera zeigt. Beim Fahren ist das immer dein Auto, in Wiederholungen speichert Lapbook nichts.
@@ -338,21 +340,21 @@ In der **Karriere** (Driver Career und My Team) baut Lapbook die ganze Saison se
 - Deine Rennen und Sprints kommen ins Rennprotokoll und in die **Fahrerwertung**, gegen die echten Gegner des Rennens.
 
 **So sieht es aus:**
-- **Overview:** rechts die Karte **„F1 25 Career“** mit deiner WM-Position, deinen Punkten und dem Abstand zum Führenden.
-- **F1 25 → Championships → deine Saison:**
-  - **Standings:** die Tabelle der Fahrer und Teams.
-  - **Calendar:** jede Runde. Jede Session lässt sich aufklappen und zeigt die ganze Ergebnisliste. Ein Sprint ist eine eigene Runde vor seinem Grand Prix.
+- **Übersicht:** rechts die Karte **„F1 25 Karriere“** mit deiner WM-Position, deinen Punkten und dem Abstand zum Führenden.
+- **F1 25 → Meisterschaften → deine Saison:**
+  - **Wertung:** die Tabelle der Fahrer und Teams.
+  - **Kalender:** jede Runde. Jede Session lässt sich aufklappen und zeigt die ganze Ergebnisliste. Ein Sprint ist eine eigene Runde vor seinem Grand Prix.
 
 **Eine Saison läuft schon?** F1 25 schickt keine fertige WM-Tabelle, nur die Ergebnisse der Sessions, die du mit Lapbook fährst. Bei der ersten Session einer neuen Saison fragt Lapbook deshalb nach:
-- **„Yes, start at zero“:** Die Saison beginnt gerade.
-- **„No, the season is running“:** Trag einmal die aktuellen Punkte aus dem Spiel ein (Karriere → Wertung), dazu die Zahl der schon gefahrenen Rennen. Danach zählt Lapbook automatisch weiter.
+- **„Ja, bei null anfangen“:** Die Saison beginnt gerade.
+- **„Nein, die Saison läuft schon“:** Trag einmal die aktuellen Punkte aus dem Spiel ein (Karriere → Wertung), dazu die Zahl der schon gefahrenen Rennen. Danach zählt Lapbook automatisch weiter.
 
-Ändern kannst du das später mit **„Edit starting standings“** auf der Seite der Saison.
+Ändern kannst du das später mit **„Startstand bearbeiten“** auf der Seite der Saison.
 
 **Gut zu wissen:**
 - Eine **Session musst du zu Ende fahren** (oder vorspulen lassen), damit das Spiel das Ergebnis schickt.
 - Fehlt beim Training einmal das Endergebnis, nimmt Lapbook die letzte Reihenfolge auf der Strecke.
-- Fährst du ein Rennen ohne Lapbook, fehlt es in der Tabelle. Dann gleichst du den Stand mit „Edit starting standings“ wieder an.
+- Fährst du ein Rennen ohne Lapbook, fehlt es in der Tabelle. Dann gleichst du den Stand mit „Startstand bearbeiten“ wieder an.
 
 ---
 
@@ -364,10 +366,10 @@ Lapbook merkt sich, mit welchem **Setup** du jede Runde fährst. Danach zeigt es
 
 | Spiel | So geht's |
 |---|---|
-| **Assetto Corsa** | Lapbook liest deine gespeicherten Setups aus `Dokumente\Assetto Corsa\setups\<Auto>\<Strecke>` (und `generic`). Beim Fahren nimmt es automatisch das **zuletzt gespeicherte**. AC meldet nicht, welches Setup gerade geladen ist. Fährst du ein anderes, wähle es in der Live-Karte bei **„Setup · Change“**. |
+| **Assetto Corsa** | Lapbook liest deine gespeicherten Setups aus `Dokumente\Assetto Corsa\setups\<Auto>\<Strecke>` (und `generic`). Beim Fahren nimmt es automatisch das **zuletzt gespeicherte**. AC meldet nicht, welches Setup gerade geladen ist. Fährst du ein anderes, wähle es in der Live-Karte bei **„Setup · Ändern“**. |
 | **ACC** | genauso, aus `Dokumente\Assetto Corsa Competizione\Setups` |
 | **F1 25** | ganz automatisch: Das Spiel schickt sein Setup mit. Änderst du etwas, entsteht ein neues Setup („Monza setup 2“). |
-| **LMU, Project CARS 2, Forza** | Lege es in Lapbook an: Live-Karte → **Choose setup** → **+ New setup** |
+| **LMU, Project CARS 2, Forza** | Lege es in Lapbook an: Live-Karte → **Setup wählen** → **+ Neues Setup** |
 
 **Alle Optionen:** Es werden alle Werte übernommen, die in der Setup-Datei stehen, nicht nur ein paar. Lapbook ordnet sie nach Bereichen:
 - Tyres
@@ -380,9 +382,19 @@ Lapbook merkt sich, mit welchem **Setup** du jede Runde fährst. Danach zeigt es
 - Electronics
 - Fuel
 
-Optionen von Mod-Autos, die Lapbook nicht kennt, landen unter „Other“ und gehen nicht verloren. Assetto Corsa speichert die meisten Werte als **Klicks**, genau so zeigt Lapbook sie an.
+Optionen von Mod-Autos, die Lapbook nicht kennt, landen unter „Sonstiges“ und gehen nicht verloren. Assetto Corsa speichert die meisten Werte als **Klicks**, genau so zeigt Lapbook sie an.
 
-**Setup per Hand eingeben:** Das Formular hat alle Optionen des Spiels, nach Bereichen aufklappbar, mit vier Feldern pro Rad. Über **„Copy from“** übernimmst du ein vorhandenes Setup und änderst nur, was anders ist. Bei AC kannst du eigene Optionen hinzufügen.
+**Die Seite „Setups“** (Seitenleiste, unter Overlay) ist der Ort für alles rund ums Setup:
+- **Links** stehen deine Setups nach Auto sortiert, mit Bestzeit, Rundenzahl und „aktiv“ für das Setup, mit dem du gerade fährst.
+- **Rechts** siehst du das gewählte Setup:
+  - **Reiter wie im Spiel:** Reifen, Fahrwerksgeometrie, Aerodynamik, Federung, Dämpfer, Antrieb, Bremsen, Elektronik, Sprit & Strategie. Die Zahl am Reiter sagt, wie viele Werte dort eingetragen sind.
+  - **Jede Option** mit Feld und **− / +**. Werte pro Rad stehen auf einem kleinen Auto (FL/FR vorne, RL/RR hinten).
+  - Alles wird **sofort gespeichert**, während du tippst.
+  - **„Alle Optionen von … zeigen“** blendet auch die Optionen ein, die das Setup noch nicht hat.
+  - **„Für die nächste Session verwenden“**, **Duplizieren** (Kopie zum Ausprobieren) und **Löschen**
+  - Darüber stehen die **Zeiten mit diesem Setup**, darunter der **Vergleich** mit einem anderen Setup.
+- **„+ Neues Setup“:** Spiel, Auto und Strecke wählen. Danach beginnst du leer (alle Optionen des Spiels), mit einer gespeicherten Setup-Datei oder als Kopie eines vorhandenen Setups.
+- In der Live-Karte öffnet **„Anzeigen“** das aktive Setup direkt.
 
 Lapbook ändert oder speichert nie etwas in den Setup-Ordnern der Spiele. Es liest nur.
 
@@ -395,19 +407,19 @@ Lapbook ändert oder speichert nie etwas in den Setup-Ordnern der Spiele. Es lie
 - **A und B** wählen zwei Setups für den Vergleich aus:
   - ein Satz wie „low_df was 0.650 s faster on the best lap and 0.850 s faster on average than high_df“
   - die **Sektoren** beider Setups und der Unterschied
-  - **„Options“:** die geänderten Werte mit Pfeil, z. B. „Wing 2 3 → 9“. „Show all options“ zeigt alle.
-- **„Give laps a setup“** gibt älteren Runden nachträglich ein Setup, pro Session (Tag und Auto).
-- **„Edit“** benennt ein Setup um, ändert Werte oder Notizen und löscht es.
+  - **„Options“:** die geänderten Werte mit Pfeil, z. B. „Wing 2 3 → 9“. „Alle Optionen zeigen“ zeigt alle.
+- **„Runden ein Setup geben“** gibt älteren Runden nachträglich ein Setup, pro Session (Tag und Auto).
+- **„Bearbeiten“** benennt ein Setup um, ändert Werte oder Notizen und löscht es.
 
 Außerdem:
 - Der **Session-Rückblick** zeigt das Setup der Session und den Abstand zum besten anderen Setup.
-- Im **Overlay** kannst du den Setup-Namen neben dem Auto einblenden (Overlay → „Setup name“).
+- Im **Overlay** kannst du den Setup-Namen neben dem Auto einblenden (Overlay → „Setup-Name“).
 
 ---
 
 ## 3. Einstellungen
 
-Klicke auf der Seite **„Live tracking“** oben rechts auf **„Settings“**. Dort kannst du:
+Klicke auf der Seite **„Live-Tracking“** oben rechts auf **„Einstellungen“**. Dort kannst du:
 - den **Port** ändern,
 - **ungültige Runden** mitspeichern,
 - einstellen, ob F1 25 auf **einem anderen Gerät** läuft (PlayStation, Xbox oder ein zweiter PC). Dann trägst du im Spiel statt 127.0.0.1 die IP-Adresse deines PCs ein.
@@ -422,16 +434,16 @@ Das **Overlay** stellst du in der Seitenleiste unter **„Overlay“** ein (sieh
 
 ## 4. Updates installieren
 
-Von mir bekommst du Dateien wie **`Lapbook-Update-2.3.0.lapbook-update`**.
+Von mir bekommst du Dateien wie **`Lapbook-Update-2.4.0.lapbook-update`**.
 
 1. Starte Lapbook.
-2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Choose file“**.
-3. Lapbook zeigt die Version und was neu ist. Klicke auf **„Install and restart“**.
+2. **Ziehe die Datei einfach ins Lapbook-Fenster.** Alternativ klickst du in der Seitenleiste unten auf **„Update“** und dann auf **„Datei wählen“**.
+3. Lapbook zeigt die Version und was neu ist. Klicke auf **„Installieren und neu starten“**.
 4. Lapbook startet neu, fertig. **Deine Runden bleiben erhalten.**
 
 Sicherheit:
 - Lapbook prüft jede Datei mit Prüfsummen. Beschädigte oder fremde Dateien werden abgelehnt.
-- **Zurück zur vorherigen Version:** in der Seitenleiste auf **„Update“** klicken, dann **„Back to version …“** (zum Bestätigen zweimal klicken).
+- **Zurück zur vorherigen Version:** in der Seitenleiste auf **„Update“** klicken, dann **„Zurück zu Version …“** (zum Bestätigen zweimal klicken).
 - Startet ein Update nicht richtig, geht Lapbook von selbst zur eingebauten Version zurück und sagt dir Bescheid.
 - Installiere nur Update-Dateien, die du von mir bekommen hast.
 
@@ -441,7 +453,7 @@ Sicherheit:
 
 Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 1. Öffne dort Lapbook → **Data → Download**. Du bekommst eine Datei `lapbook-JJJJ-MM-TT.json`.
-2. Öffne in der Windows-App in der Seitenleiste **Data & backup → Load a backup** und wähle diese Datei.
+2. Öffne in der Windows-App in der Seitenleiste **Daten & Sicherung → Sicherung laden** und wähle diese Datei.
 
 **Achtung:** Upload **ersetzt** die Daten in der App. Mach das also direkt am Anfang, bevor du die ersten Runden live aufzeichnest.
 
@@ -450,7 +462,7 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 ## 6. Sicherung
 
 - Lapbook speichert automatisch nach **`Dokumente\Lapbook`**: `lapbook-autosave.json` und eine Kopie pro Tag (die letzten 14 Tage).
-- Wiederherstellen: **Data & backup → Load a backup** und eine dieser Dateien wählen.
+- Wiederherstellen: **Daten & Sicherung → Sicherung laden** und eine dieser Dateien wählen.
 - Neuer PC oder Windows neu installiert? Kopiere vorher den Ordner `Dokumente\Lapbook` weg, oder nutze OneDrive.
 
 ---
@@ -459,18 +471,18 @@ Wenn du Lapbook schon im Browser bzw. auf claude.ai benutzt hast:
 
 | Problem | Lösung |
 |---|---|
-| Karte bleibt bei Schritt 2 | Prüfe die Werte im Spiel: Telemetry **On**, IP **127.0.0.1**, **derselbe Port**, den Lapbook anzeigt. |
-| „Live tracking needs attention“ | Die Karte nennt den Grund. Meistens hilft „Settings“ → anderen Port wählen, z. B. 20790, und denselben im Spiel eintragen. |
-| Eine Runde fehlt | Sie war wahrscheinlich ungültig. In den Einstellungen auf „Save them too“ stellen. |
+| Karte bleibt bei Schritt 2 | Prüfe die Werte im Spiel: Telemetry **An**, IP **127.0.0.1**, **derselbe Port**, den Lapbook anzeigt. |
+| „Live-Tracking braucht Aufmerksamkeit“ | Die Karte nennt den Grund. Meistens hilft „Einstellungen“ → anderen Port wählen, z. B. 20790, und denselben im Spiel eintragen. |
+| Eine Runde fehlt | Sie war wahrscheinlich ungültig. In den Einstellungen auf „Auch speichern“ stellen. |
 | Windows blockiert den Start | „Weitere Informationen“ → „Trotzdem ausführen“. |
-| Assetto Corsa: „Live“ erscheint nicht | Du musst auf der Strecke sein, im Menü sendet AC nichts. Prüfe in den Einstellungen, ob Assetto Corsa auf „On“ steht. |
-| AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Choose folder“ und den `assettocorsa`-Ordner wählen. |
+| Assetto Corsa: „Live“ erscheint nicht | Du musst auf der Strecke sein, im Menü sendet AC nichts. Prüfe in den Einstellungen, ob Assetto Corsa auf „An“ steht. |
+| AC zeigt Ordnernamen wie „Ks Ferrari 488 GT3“ | „Ordner wählen“ und den `assettocorsa`-Ordner wählen. |
 | Overlay nicht zu sehen | Spiel auf „Randlos“ / „Borderless“ stellen. Mit Strg+Umschalt+O prüfen, ob es an ist. In Lapbook unter „Overlay“ eine Ecke im Raster anklicken. |
 | Klicks im Spiel landen im Overlay | Strg+Umschalt+L drücken, um es wieder festzustellen. |
 | Forza: Zeitfahren startet nicht | Durch den Startpunkt in **derselben Richtung** fahren wie beim Anlegen (ca. 20 m Toleranz). Beim Drag-Run vorher am Start **stehen bleiben**. |
-| Forza: nichts kommt an | Data Out **An**, IP **127.0.0.1**, Port wie in Lapbook. Bei Game Pass: „Allow Forza“ klicken und Forza neu starten. |
+| Forza: nichts kommt an | Data Out **An**, IP **127.0.0.1**, Port wie in Lapbook. Bei Game Pass: „Forza erlauben“ klicken und Forza neu starten. |
 | Forza: „packets of … bytes“ | Diese Forza-Version sendet ein anderes Format. Sag mir die Zahl, dann passe ich es an. |
-| ACC: Kachel bleibt bei „waiting for the game“ | Hast du ACC nach „Switch on“ neu gestartet? Du musst auf der Strecke sein. Steht ein Fehler wie „Wrong password“ da, stimmt das Passwort in broadcasting.json nicht mehr: noch einmal „Switch on“ klicken. |
+| ACC: Kachel bleibt bei „wartet auf das Spiel“ | Hast du ACC nach „Einschalten“ neu gestartet? Du musst auf der Strecke sein. Steht ein Fehler wie „Wrong password“ da, stimmt das Passwort in broadcasting.json nicht mehr: noch einmal „Einschalten“ klicken. |
 | LMU: nichts kommt an | LMU muss laufen und du musst auf der Strecke sein. Andere Tools (z. B. TinyPedal) stören nicht. |
 | Project CARS 2: nichts kommt an | UDP Frequency nicht auf 0, Protocol Version „Project CARS 2“. Firewall-Abfrage erlauben. |
 | Update wird abgelehnt | Die Meldung sagt warum, z. B. „damaged“: Datei neu herunterladen. |
